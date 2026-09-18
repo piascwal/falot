@@ -237,9 +237,10 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
         (a.emotion === EMOTIONS.COLERE ? 1 : 0) - (b.emotion === EMOTIONS.COLERE ? 1 : 0),
     );
   for (const p of ordre) {
-    // Une âme qui a soufflé sa lumière redevient sombre : c'est le signal que
-    // le convoi se cache, et il se lit d'un coup d'œil sur toute la file.
-    const couleur = p.calme && !p.eteint ? RALLUME : COULEURS[p.emotion];
+    // Une âme qui a soufflé sa lumière GARDE SA COULEUR : elle est toujours
+    // rallumée, elle cache seulement sa lueur. Ce qui disparaît, c'est le halo
+    // et le trou qu'il faisait dans la nuit — pas elle.
+    const couleur = p.calme ? RALLUME : COULEURS[p.emotion];
     const repere = p.emotion === EMOTIONS.COLERE && (p.alerte > 0 || p.charge > 0.04);
     // une âme en train d'être rallumée : on voit le niveau monter en elle
     const recharge =
@@ -253,7 +254,7 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
       p,
       couleur,
       D.taille,
-      p.eclaire || (p.calme && !p.eteint) || repere,
+      p.eclaire || p.calme || repere,
       1,
       p.humeur,
       temps,
@@ -457,7 +458,9 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
     percerDisque(lctx, t.x - cam.x, t.y - cam.y, CASE * (0.45 + k * 0.65), 0.45 + k * 0.45);
   }
   // Un calmé n'est pas qu'un faisceau : son corps et un petit halo restent
-  // éclairés, sinon on ne voit qu'un cône sortir du néant.
+  // éclairés, sinon on ne voit qu'un cône sortir du néant. Sauf s'il a soufflé
+  // sa lumière : là il ne perce plus la nuit, et on ne le voit plus que dans
+  // la lumière du joueur — coloré, mais découvert par nous.
   for (const p of zone.persos) {
     if (p.calme && !p.eteint)
       percerDisque(lctx, p.x - cam.x, p.y - cam.y, D.taille * 2.1, 0.95);

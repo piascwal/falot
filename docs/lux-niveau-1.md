@@ -813,8 +813,10 @@ arrive après la mort n'est pas une réponse.
 ### Le convoi souffle sa lumière
 
 Quand une sentinelle est en alerte ou charge, **les âmes déjà rallumées
-s'éteignent** : corps sombre, plus de halo, plus de trou dans la nuit. Elles
-redeviennent visibles dès que la menace retombe.
+soufflent leur lumière** : plus de halo, plus de faisceau, plus de trou dans la
+nuit. **Elles gardent leur couleur** — elles sont toujours rallumées, elles se
+cachent seulement ; on les voit donc encore, mais dans NOTRE lumière. Elles
+rallument la leur dès que la menace retombe.
 
 C'est de la fiction autant que de la règle : une âme qui a peur cache sa
 lumière. Et surtout, **seule la lumière du joueur le trahit encore** — être
