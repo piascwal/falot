@@ -33,6 +33,7 @@ import { emettre, onde } from '../particules.js';
 import { ETEINTS, REPLIQUES } from '../textes.js';
 import type { Partie, Perso, Point, Zone } from '../types.js';
 import { montrerToast, murmurer } from '../voix.js';
+import { majFanal } from './fanal.js';
 import { lancerLaFin } from './fin.js';
 import { aLAbri, estEclaire, prochedUneBraise } from './lumiere.js';
 import { eteindre, gagnerEclat, paniquer, ramasser } from './progression.js';
@@ -96,6 +97,9 @@ function craquer(partie: Partie): void {
 function toucheParLaLumiere(partie: Partie, p: Perso): boolean {
   const { joueur, zone } = partie;
   const d = Math.hypot(p.x - joueur.x, p.y - joueur.y);
+  // Le fanal est de la lumière PORTÉE, et la plus grande de toutes : il
+  // baigne tout ce qui passe à sa portée. C'est le prix du passage en force.
+  if (joueur.fanal && joueur.fanal.reste > 0 && d < joueur.fanal.r) return true;
   if (d < rayonHalo(partie) && vueLibre(zone, joueur.x, joueur.y, p.x, p.y)) return true;
   const portee = porteeFaisceau(joueur);
   return (
@@ -146,6 +150,9 @@ export function majRegles(partie: Partie, dt: number): void {
     // Une case et demie, pas trois quarts de case : la torche est décalée vers
     // sa paroi, et à 0,75 il fallait lui rentrer dedans au pixel près. On
     // passait à côté d'un abri sans le reprendre, sans jamais savoir pourquoi.
+    // celle qu'on tient ne se reprend pas et ne se souffle pas : elle brûle
+    // dans la main jusqu'au bout, et c'est tout le marché
+    if (t === joueur.fanal) continue;
     const dt2 = Math.hypot(t.x - joueur.x, t.y - joueur.y);
     // ET IL SOUFFLE AUSSI CELLES-LÀ. Se couvrir, c'est éteindre ce qu'on
     // porte — et ce qu'on touche. C'est ce qui permet de faire le noir dans
@@ -259,7 +266,9 @@ export function majRegles(partie: Partie, dt: number): void {
   // sortir. S'il t'atteint — ou si tu la touches — c'est fini. La distance
   // fait donc le délai toute seule, sans aucune formule.
   if (joueur.repit > 0) joueur.repit -= dt;
-  const abri = aLAbri(zone, joueur.x, joueur.y);
+  // Celle qu'il porte ne le couvre pas : ce qui est posé efface, ce qu'on
+  // porte trahit. Le fanal éloigne les Guets, il ne le cache d'aucun.
+  const abri = aLAbri(zone, joueur.x, joueur.y, joueur.fanal);
   joueur.abri = abri; // lu par le visage : voir `humeurDuJoueur`
   // Calculé UNE fois par image et non par sentinelle : la question ne dépend
   // que de la position de l'âme, pas de qui la regarde.
@@ -478,6 +487,8 @@ export function majRegles(partie: Partie, dt: number): void {
     }
     if (joueur.bonusT <= 0) joueur.bonus = null; // sa jauge se vide, c'est assez
   }
+
+  majFanal(partie, dt);
 
   // Les pierres reviennent un par un, au rythme du palier atteint.
   const rang = rangPierre(joueur);

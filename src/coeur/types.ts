@@ -150,6 +150,14 @@ export interface Joueur extends Corps {
    */
   air: number;
   /**
+   * LE FANAL (étage 5) : la torche qu'il porte, s'il en a décroché une. Elle
+   * tient les Guets à distance — ils n'approchent pas d'une flamme plus
+   * grande qu'eux — et elle le désigne de partout. Elle n'est PAS un abri :
+   * ce qui est posé efface, ce qu'on porte trahit, et une torche à la main
+   * est portée.
+   */
+  fanal: Torche | null;
+  /**
    * IL A SOUFFLÉ SA PROPRE LUMIÈRE (pouvoir acquis à l'étage 3). Il garde sa
    * couleur — il ne s'éteint pas, il se couvre — mais il n'éclaire plus, il
    * ne rallume plus personne, et un Guet n'a plus rien à voir de lui. Le prix

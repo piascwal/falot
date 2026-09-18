@@ -10,7 +10,7 @@ import { D } from '../dimensions.js';
 import { EMOTIONS } from '../formes.js';
 import { coneFaisceau, porteeFaisceau, rayonHalo } from '../lectures.js';
 import { dansLeCone, vueLibre } from '../monde/grille.js';
-import type { Partie, Perso, Zone } from '../types.js';
+import type { Partie, Perso, Torche, Zone } from '../types.js';
 
 /**
  * LE CONVOI SOUFFLE SA LUMIÈRE. Dès qu'un Guet se doute de quelque chose, les
@@ -75,16 +75,26 @@ export function propager(partie: Partie): Set<Perso> {
 export const prochedUneBraise = (z: Zone, x: number, y: number, marge = 1): boolean =>
   z.braises.some((b) => Math.hypot(b.x - x, b.y - y) < b.r * marge);
 
-export const procheDuneTorche = (z: Zone, x: number, y: number): boolean =>
-  z.torches.some((t) => t.reste > 0 && Math.hypot(t.x - x, t.y - y) < t.r);
+/**
+ * Une torche POSÉE met à l'abri ; celle qu'on porte, non. C'est toute la
+ * règle des deux lumières, et c'est ce qui empêche le fanal d'être gratuit :
+ * il éloigne les Guets, il ne te cache pas d'eux.
+ */
+export const procheDuneTorche = (
+  z: Zone,
+  x: number,
+  y: number,
+  portee?: Torche | null,
+): boolean =>
+  z.torches.some((t) => t !== portee && t.reste > 0 && Math.hypot(t.x - x, t.y - y) < t.r);
 
 /**
  * L'abri protège QUI S'Y TIENT, pas un statut. Le joueur et chaque suiveur
  * posent donc la même question depuis leur propre position : celui qui est dans
  * la lumière est couvert, celui qui traîne dehors reste attrapable.
  */
-export const aLAbri = (z: Zone, x: number, y: number): boolean =>
-  prochedUneBraise(z, x, y) || procheDuneTorche(z, x, y);
+export const aLAbri = (z: Zone, x: number, y: number, portee?: Torche | null): boolean =>
+  prochedUneBraise(z, x, y) || procheDuneTorche(z, x, y, portee);
 
 /** « Est-ce que ce point est actuellement éclairé » — sert à la mémoire des objets. */
 export function estEclaire(partie: Partie, x: number, y: number): boolean {

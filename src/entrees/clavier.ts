@@ -5,6 +5,7 @@
  * sait pas.
  */
 
+import { prendreOuLacherLeFanal } from '../coeur/regles/fanal.js';
 import { lancerPierre } from '../coeur/regles/pierre.js';
 import type { Partie, Touches } from '../coeur/types.js';
 
@@ -33,6 +34,8 @@ export function brancherClavier(partie: Partie): void {
     // Maj tenue : il souffle sa lumière. Une touche tenue, pas une bascule —
     // se cacher doit rester un geste qu'on fait, pas un état qu'on oublie.
     if (e.key === 'Shift') partie.entrees.souffle = true;
+    // « f » comme fanal : prendre la torche qui est là, ou la reposer
+    if ((e.key === 'f' || e.key === 'F') && !e.repeat) prendreOuLacherLeFanal(partie);
   });
 
   window.addEventListener('keyup', (e) => {

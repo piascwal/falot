@@ -311,6 +311,22 @@ canvas {
   transform: scale(0.94);
 }
 
+/* Le fanal : la couleur d'une flamme, et enfoncé tant qu'on la tient. */
+#fanal {
+  border-color: rgba(255, 180, 92, 0.5);
+  color: #ffb45c;
+  width: 60px;
+  height: 60px;
+  touch-action: none;
+}
+#fanal:not([hidden]) {
+  display: block;
+}
+#fanal.tenu {
+  background: rgba(255, 180, 92, 0.12);
+  border-color: rgba(255, 180, 92, 0.85);
+}
+
 /* La pierre vient d'apprendre quelque chose. Une modale coupait le jeu pour
      le dire ; le bouton le dit tout seul, en prenant la couleur de la forme et
      en pulsant deux fois. On ne lit pas, on voit. */

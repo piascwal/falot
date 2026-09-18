@@ -20,6 +20,7 @@ import {
   traitsEtage,
 } from '../src/coeur/monde/paliers.js';
 import { avancer, creerPartie, PAS } from '../src/coeur/partie.js';
+import { prendreOuLacherLeFanal } from '../src/coeur/regles/fanal.js';
 import { DUREE_FIN } from '../src/coeur/regles/fin.js';
 import type { Partie, Perso, PointRonde } from '../src/coeur/types.js';
 
@@ -476,5 +477,71 @@ describe('les farouches (étage 7)', () => {
       avancer(p, PAS);
     }
     expect(q.calme).toBe(true);
+  });
+});
+
+describe('le fanal (étage 5)', () => {
+  /** Une torche allumée posée à portée de main, et rien d'autre dans la salle. */
+  function scene(etage: number) {
+    const p = creerPartie({ grain: 'FANAL', etage });
+    p.zone.torches.length = 0;
+    p.zone.braises.length = 0;
+    const t = {
+      x: p.joueur.x + CASE * 0.9,
+      y: p.joueur.y,
+      r: CASE * 2.1,
+      duree: 26,
+      reste: 26,
+      phase: 0,
+      ox: 0,
+      oy: 0,
+    };
+    p.zone.torches.push(t);
+    return { p, t };
+  }
+
+  it('ne se décroche qu’une fois que Falot s’en est souvenu', () => {
+    const avant = scene(4);
+    prendreOuLacherLeFanal(avant.p);
+    expect(avant.p.joueur.fanal).toBe(null);
+
+    const apres = scene(5);
+    prendreOuLacherLeFanal(apres.p);
+    expect(apres.p.joueur.fanal).toBe(apres.t);
+  });
+
+  it('suit la main, et se repose où l’on est', () => {
+    const { p, t } = scene(5);
+    prendreOuLacherLeFanal(p);
+    p.joueur.x += CASE * 4;
+    avancer(p, PAS);
+    expect(Math.hypot(t.x - p.joueur.x, t.y - p.joueur.y)).toBeLessThan(CASE);
+    prendreOuLacherLeFanal(p);
+    expect(p.joueur.fanal).toBe(null);
+    const ou = { x: t.x, y: t.y };
+    p.joueur.x += CASE * 4;
+    avancer(p, PAS);
+    expect(t.x).toBe(ou.x); // elle reste où on l'a posée
+  });
+
+  it('ne met pas à l’abri : ce qu’on porte trahit, ce qui est posé efface', () => {
+    const { p, t } = scene(5);
+    // posée : elle couvre
+    avancer(p, PAS);
+    expect(p.joueur.abri).toBe(true);
+    // portée : elle ne couvre plus
+    prendreOuLacherLeFanal(p);
+    avancer(p, PAS);
+    expect(p.joueur.abri).toBe(false);
+    expect(t.reste).toBeGreaterThan(0);
+  });
+
+  it('baigne de lumière tout ce qui passe à sa portée', () => {
+    const { p } = scene(5);
+    const g = guets(p)[0];
+    poser(g, p.joueur.x + CASE * 1.8, p.joueur.y, 0); // dos tourné
+    prendreOuLacherLeFanal(p);
+    for (let i = 0; i < 40; i++) avancer(p, PAS);
+    expect(g.bain).toBeGreaterThan(0);
   });
 });

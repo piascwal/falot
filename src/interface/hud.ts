@@ -12,6 +12,7 @@ import { rgba } from '../coeur/couleurs.js';
 import { BONUS, FORMES } from '../coeur/formes.js';
 import { clamp } from '../coeur/geometrie.js';
 import { forme, rangPierre } from '../coeur/lectures.js';
+import { torcheSousLaMain } from '../coeur/regles/fanal.js';
 import type { Partie } from '../coeur/types.js';
 
 const el = <T extends HTMLElement>(id: string): T => {
@@ -33,6 +34,8 @@ export interface Hud {
   pierre: HTMLButtonElement;
   /** Le bouton souffle, tenu tant qu'on veut rester couvert. */
   souffle: HTMLButtonElement;
+  /** Le bouton fanal : décrocher une torche, ou la reposer. */
+  fanal: HTMLButtonElement;
 }
 
 export function creerHud(): Hud {
@@ -46,6 +49,7 @@ export function creerHud(): Hud {
   const elToast = el('toast');
   const elPierre = el<HTMLButtonElement>('pierre');
   const elSouffle = el<HTMLButtonElement>('souffle');
+  const elFanal = el<HTMLButtonElement>('fanal');
   const elActions = el('actions');
   const elHud = el('hud');
   const elPierreN = el('pierre-n');
@@ -59,6 +63,7 @@ export function creerHud(): Hud {
   return {
     pierre: elPierre,
     souffle: elSouffle,
+    fanal: elFanal,
     maj(partie: Partie): void {
       const { joueur, zone } = partie;
       const f = forme(joueur);
@@ -88,6 +93,11 @@ export function creerHud(): Hud {
       // grisé aurait promis quelque chose sans le donner : il n'est pas là.
       elSouffle.hidden = !partie.pouvoirs.souffle;
       elSouffle.classList.toggle('tenu', joueur.eteint);
+
+      // Le fanal n'apparaît que s'il y a quelque chose à décrocher, ou qu'on
+      // tient déjà une torche.
+      elFanal.hidden = !joueur.fanal && !torcheSousLaMain(partie);
+      elFanal.classList.toggle('tenu', joueur.fanal !== null);
 
       // --- les pastilles d'âmes : on ne les reconstruit que si le compte bouge ---
       const etat = `${zone.sortie.ames}/${zone.requis}`;

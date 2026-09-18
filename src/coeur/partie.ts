@@ -60,6 +60,7 @@ const nouveauJoueur = (): Joueur => ({
   repit: 0,
   eteint: false,
   air: 1,
+  fanal: null,
   vu: 0,
   // Sans lui, `sin(temps + undefined)` valait NaN et la bouche du joueur ne se
   // dessinait pas du tout.

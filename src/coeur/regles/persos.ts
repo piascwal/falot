@@ -292,7 +292,14 @@ export function majPersos(partie: Partie, dt: number, eclaires: Set<Perso>): voi
         // balaye autour de sa direction de marche
         // elle recule jusqu'à être NETTEMENT hors de la braise : s'arrêter à
         // sa frontière la faisait osciller entre gênée et pas gênée
-        const b = zone.braises.find((q) => Math.hypot(q.x - p.x, q.y - p.y) < q.r * 1.3);
+        // Une braise au sol, ou le fanal que Falot tient à bout de bras : un
+        // Guet n'approche jamais d'une flamme plus grande que lui.
+        const fanal = joueur.fanal;
+        const b =
+          zone.braises.find((q) => Math.hypot(q.x - p.x, q.y - p.y) < q.r * 1.3) ??
+          (fanal && fanal.reste > 0 && Math.hypot(fanal.x - p.x, fanal.y - p.y) < fanal.r
+            ? fanal
+            : undefined);
         if (b) {
           const bx = p.x - b.x,
             by = p.y - b.y,
