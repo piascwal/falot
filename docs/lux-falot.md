@@ -235,6 +235,16 @@ peut pas ouvrir un mur avec de la lumière.
 | Une carte verticale entre deux zones | Les Dessous sont un bâtiment. Chaque Seuil est un étage de plus vers la surface |
 | Une âme rallumée dit une phrase | Ce sont des gens. On ne l'entend que si on a sauvé quelqu'un, et le jeu ne s'arrête pas pour autant |
 | Des phrases pâles posées dans le décor | D'autres sont passés ici. Ce qu'ils ont compris est resté sur place, comme le reste |
+| Falot peut souffler sa propre lumière | Il ne s'éteint pas, il se couvre : il garde sa couleur, mais il n'éclaire plus rien et un Guet n'a plus de lampe à regarder. Le prix est immédiat — on n'y voit soi-même presque plus rien |
+| Un Falot soufflé ne laisse pas de fil | Il n'y a pas de trace sans lumière. C'est ce qui sème un traqueur |
+| Souffler éteint aussi les torches qu'on frôle | Se couvrir, c'est éteindre ce qu'on porte et ce qu'on touche |
+| Une torche PORTÉE ne met pas à l'abri | Ce qui est posé efface, ce qu'on porte trahit. Le fanal éloigne les Guets sans cacher personne |
+| Les Guets se passent ce qu'ils voient | Ils n'ont qu'un seul regard, et il se transmet |
+| Du sol qui craque sous qui se presse | Les Dessous ont brûlé par endroits. Un bruit ne demande pas de ligne de vue |
+| Un Guet qui refait ton chemin | Une lumière laisse une trace, et il a compris qu'il suffisait de la remonter |
+| Un Guet qui n'a pas de dos | Il ne cherche pas une direction, il regarde ce qui est éclairé. Une torche te dénonce au lieu de te couvrir |
+| Des âmes qui reculent devant ta lumière | Elles en ont trop vu de près. Il faut venir les chercher dans le noir |
+| Une porte qui tient tant qu'on pèse dessus | Les Dessous ne sont pas bâtis, ils sont entassés : ce qui tient, tient par le poids |
 | Un premier étage écrit à la main, les suivants tirés au sort | Le bas du puits a une forme ; au-dessus, plus personne ne sait |
 
 ## Ce qui est arrêté (les quatre questions)

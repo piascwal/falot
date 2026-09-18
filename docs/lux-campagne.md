@@ -117,18 +117,52 @@ compteur d'étages ne s'arrête plus, et la cage garde la trace de tout.
 C'est le mode qui existe déjà. Il ne devient intéressant qu'une fois qu'on a
 douze éléments à mélanger — c'est tout le propos de ce document.
 
+## Où ça en est (et comment c'est réglé)
+
+Les douze étages sont en place, avec leur nouveauté. Les valeurs ci-dessous
+sont celles du code, pas des intentions.
+
+| # | Nouveauté | Comment c'est réglé |
+|---|---|---|
+| 1 | Le réveil | L'étage écrit à la main, inchangé (`lux-niveau-1.md`) |
+| 2 | L'appel | Un Guet qui repère prévient ses voisins à **5 cases**, à travers la pierre. Ils n'ont rien vu : ils se doutent, et ils viennent |
+| 3 | Le souffle | Geste **tenu** (Maj, ou un bouton maintenu). Halo réduit à une mèche (0,22), plus de faisceau, plus de fil, invisible pour un Guet. Le contact tue toujours |
+| 4 | La cendre | Au-dessus de **165 px/s** (environ la moitié de la vitesse de pointe), le sol craque toutes les 0,4 s et s'entend à **6 cases**. Ça attire, ça n'efface rien — l'inverse d'une pierre |
+| 5 | Le fanal | Torche décrochée à **1,3 case**, portée jusqu'à ce qu'elle meure. Elle éloigne les Guets et **n'est pas un abri** : elle baigne de lumière tout ce qui passe à sa portée |
+| 6 | Le traqueur | Il remonte le fil du plus ancien au plus récent, à **330** (contre 430 en ronde), et il accroche la trace la plus récente à **2,5 cases**. Un fil coupé l'arrête là |
+| 7 | Les farouches | Toutes les âmes de l'étage. Elles reculent tant qu'on brille à moins de **3,4 cases** ; elles se rallument si l'on vient à **1,15 case**, éteint |
+| 8 | Le voile | Halo et faisceau à **0,55**. Ce que voient les Guets ne change pas |
+| 9 | La pesée | Une porte scellée et sa dalle. La porte retombe en **~4 s** une fois lâchée. Jamais un passage obligé : vérifié plan par plan |
+| 10 | L'œil | Pas de cône, pas de dos : il voit à **5 cases** tout ce qui est **éclairé**. Une torche allumée le dénonce au lieu de le cacher — il faut souffler la salle |
+| 11 | La meute | Deux Guets sur la même ronde, décalés d'une étape |
+| 12 | Le dernier Seuil | La fin, en quatre temps, et le Puits sans fin ensuite |
+
+**Chaque étage ne s'ouvre qu'avec ce que le précédent a appris**, et c'est
+vérifié par les tests :
+
+- le **traqueur** (6) ne se sème qu'en **soufflant** (3), parce qu'un Falot
+  éteint ne laisse pas de fil ;
+- les **farouches** (7) ne se reprennent qu'en **soufflant** (3) ;
+- l'**œil** (10) ne se passe qu'en soufflant **et** en éteignant les torches —
+  or souffler éteint aussi les torches qu'on frôle ;
+- la **pesée** (9) casse le convoi appris à l'étage 1.
+
 ## Ce que ça impose au code
 
 Dans l'ordre où ça sera fait :
 
-1. **Un deck d'étages** (`coeur/monde/paliers.ts`) : un numéro, un nom, un
-   élément, et les murmures qui vont avec. Le générateur le lit ; les règles
-   demandent « cet étage a-t-il la cendre ? » au lieu de tester un numéro.
-2. **Les éléments eux-mêmes**, un par un, chacun avec ses tests.
-3. **La cage jouée** : l'ascension se passe sur le canvas, dans la langue du
-   jeu, sans écran par-dessus (voir plus bas).
-4. **La fin** : la douzième salle, l'image unique, et le Puits sans fin qui
-   s'ouvre.
+1. ~~**Un deck d'étages** (`coeur/monde/paliers.ts`)~~ — fait. Un numéro, un
+   nom, un élément, et le murmure qui va avec. Le générateur le lit ; les
+   règles demandent « cet étage a-t-il la cendre ? » et jamais un numéro.
+2. ~~**Les éléments eux-mêmes**~~ — faits, un par un, chacun avec ses tests et
+   son témoin.
+3. ~~**La cage jouée**~~ — faite (`coeur/regles/puits.ts`, `rendu/puits.ts`).
+4. ~~**La fin**~~ — faite (`coeur/regles/fin.ts`, `rendu/fin.ts`).
+
+Ce qui reste : **rejouer l'équilibrage** étage par étage comme on l'a fait pour
+le prologue (des pilotes sans tête, vingt essais par passage), et **écrire à la
+main les étages qui le méritent** — le 12 en particulier, qui est encore tiré
+au sort alors que c'est la fin.
 
 ### La cage d'escalier — ce qui change
 

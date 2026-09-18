@@ -110,3 +110,6 @@ a changé — parce qu'un port silencieux est un port qu'on ne peut pas vérifie
   lumière pendant une alerte, les torches reviennent à des formes simples et
   les portes tournent sur un gond scellé dans la pierre. Détail dans
   [`lux-niveau-1.md`](lux-niveau-1.md).
+- **Le jeu a un arc.** Douze étages écrits, un par nouveauté, une fin, puis le
+  Puits sans fin ; la cage d'escalier se joue au lieu de s'ouvrir. Tout est
+  dans [`lux-campagne.md`](lux-campagne.md).
