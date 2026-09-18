@@ -37,3 +37,11 @@ export const PORTEE_VUE = CASE * 3.6;
 
 /** Demi-angle du cône de vue d'un Guet. */
 export const CONE_VUE = 0.42;
+
+/**
+ * L'ŒIL (étage 10) voit plus loin qu'une sentinelle, mais seulement ce qui est
+ * éclairé, et dans toutes les directions : c'est une lampe qui regarde les
+ * autres lampes. Il n'a pas de cône, donc pas de dos — on ne le contourne pas,
+ * on éteint la pièce.
+ */
+export const PORTEE_OEIL = CASE * 5;

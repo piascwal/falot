@@ -112,6 +112,18 @@ export interface Perso extends Corps {
    */
   traqueur: boolean;
   piste: number;
+  /**
+   * L'ŒIL (étage 10). Il ne balaye rien : il voit tout ce qui est ÉCLAIRÉ
+   * autour de lui, dans toutes les directions. Une torche allumée cesse
+   * d'être un abri et devient une dénonciation — il faut la souffler.
+   */
+  oeil: boolean;
+  /**
+   * LES FAROUCHES (étage 7). Elles ont trop vu de lumière : un faisceau les
+   * fait reculer au lieu de les rallumer. Il faut venir les chercher dans le
+   * noir, éteint.
+   */
+  farouche: boolean;
   prochainCligne: number;
   ronde: PointRonde[];
   /** Combien de corps elle voit à cet instant. Exposé pour les mesures. */
@@ -131,6 +143,12 @@ export interface Joueur extends Corps {
   souffle: number;
   /** Invulnérabilité courte après une mort. */
   repit: number;
+  /**
+   * LE VOILE (étage 8) : l'épaisseur de l'air. 1 partout ailleurs ; en dessous,
+   * le halo et le faisceau portent d'autant moins loin. Ça ne change rien à ce
+   * que les Guets voient, eux : c'est NOTRE lumière qui s'étouffe.
+   */
+  air: number;
   /**
    * IL A SOUFFLÉ SA PROPRE LUMIÈRE (pouvoir acquis à l'étage 3). Il garde sa
    * couleur — il ne s'éteint pas, il se couvre — mais il n'éclaire plus, il

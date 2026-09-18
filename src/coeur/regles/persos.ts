@@ -135,6 +135,24 @@ export function majPersos(partie: Partie, dt: number, eclaires: Set<Perso>): voi
         p.phase += p.balayage * (p.eclaire ? 0.18 : 1) * dt;
         p.regard = p.regardRepos + Math.sin(p.phase) * p.amplitude;
       }
+    } else if (p.farouche && !p.calme) {
+      // LA FAROUCHE. Ce n'est pas de toi qu'elle a peur, c'est de ta lumière :
+      // tant que tu brilles, elle recule d'autant que tu avances. Éteins-toi
+      // et elle te laisse approcher — c'est la seule façon de la reprendre.
+      const trop = !partie.joueur.eteint && voit && d < CASE * 3.4;
+      if (trop) {
+        p.vx -= (dx / d) * 340 * dt;
+        p.vy -= (dy / d) * 340 * dt;
+        p.regard = Math.atan2(-dy, -dx);
+        p.fuit = 0.5;
+        if (partie.hasard() < dt * 3)
+          emettre(partie, p.x, p.y - D.taille * 0.7, '#8fd0ff', 1, 24);
+      } else {
+        p.vx += (p.baseX - p.x) * 1.1 * dt;
+        p.vy += (p.baseY - p.y) * 1.1 * dt;
+        p.phase += p.balayage * 0.5 * dt;
+        p.regard = p.regardRepos + Math.sin(p.phase) * 0.5;
+      }
     } else if (p.emotion === EMOTIONS.PEUR) {
       if (p.calme) {
         suivre(partie, p, dt);

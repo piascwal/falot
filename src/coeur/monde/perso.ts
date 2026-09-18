@@ -50,6 +50,8 @@ export function nouveauPerso(
     alerte: 0,
     traqueur: false,
     piste: -1,
+    oeil: false,
+    farouche: false,
     etape: 0,
     charge: 0,
     route: null,

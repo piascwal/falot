@@ -17,7 +17,7 @@
  * à traîner des projecteurs.
  */
 
-import { CASE, D, PORTEE_VUE } from '../dimensions.js';
+import { CASE, D, PORTEE_OEIL, PORTEE_VUE } from '../dimensions.js';
 import { BONUS, DUREE_CALME, EMOTIONS } from '../formes.js';
 import {
   aBonus,
@@ -146,10 +146,16 @@ export function majRegles(partie: Partie, dt: number): void {
     // Une case et demie, pas trois quarts de case : la torche est décalée vers
     // sa paroi, et à 0,75 il fallait lui rentrer dedans au pixel près. On
     // passait à côté d'un abri sans le reprendre, sans jamais savoir pourquoi.
-    if (
-      Math.hypot(t.x - joueur.x, t.y - joueur.y) < CASE * 1.15 &&
-      t.reste < t.duree * 0.6
-    ) {
+    const dt2 = Math.hypot(t.x - joueur.x, t.y - joueur.y);
+    // ET IL SOUFFLE AUSSI CELLES-LÀ. Se couvrir, c'est éteindre ce qu'on
+    // porte — et ce qu'on touche. C'est ce qui permet de faire le noir dans
+    // une salle entière, et c'est tout ce que l'étage de l'œil demande.
+    if (joueur.eteint) {
+      if (dt2 < CASE * 1.15 && t.reste > 0) {
+        t.reste = 0;
+        emettre(partie, t.x, t.y, '#6b7183', 7, 40);
+      }
+    } else if (dt2 < CASE * 1.15 && t.reste < t.duree * 0.6) {
       if (t.reste <= 0) emettre(partie, t.x, t.y, '#ffb45c', 8, 55);
       t.reste = t.duree;
     }
@@ -199,7 +205,14 @@ export function majRegles(partie: Partie, dt: number): void {
   // PERMANENT : c'est ce qui donne enfin un rôle aux personnages non joués.
   // Une lampe qu'on gagne en la regardant, et qu'on choisit où allumer.
   for (const p of zone.persos) {
-    if (p.emotion === EMOTIONS.COLERE || p.calme || p.livre || !p.eclaire) continue;
+    if (p.emotion === EMOTIONS.COLERE || p.calme || p.livre) continue;
+    // Une FAROUCHE a trop vu de lumière : le faisceau la fait reculer au lieu
+    // de la rallumer (voir `majPersos`). On ne la reprend qu'en venant tout
+    // près, éteint — c'est-à-dire avec ce que l'étage 3 a appris.
+    const gagne = p.farouche
+      ? joueur.eteint && Math.hypot(p.x - joueur.x, p.y - joueur.y) < CASE * 1.15
+      : p.eclaire;
+    if (!gagne) continue;
     p.compteCalme += dt;
     if (p.compteCalme > DUREE_CALME) {
       p.calme = true;
@@ -309,12 +322,29 @@ export function majRegles(partie: Partie, dt: number): void {
     // Ce que la sentinelle peut voir : toi ET ton convoi. C'est le cœur de
     // l'arbitrage — chaque âme que tu escortes est une silhouette de plus
     // dans le faisceau, et la jauge monte d'autant plus vite.
-    const exposable = (q: { x: number; y: number }) =>
-      !p.gene &&
-      p.cligne <= 0 &&
-      Math.hypot(q.x - p.x, q.y - p.y) <= PORTEE_VUE &&
-      dansLeCone(p.x, p.y, p.regard, q.x, q.y, PORTEE_VUE, 0.42) &&
-      vueLibre(zone, p.x, p.y, q.x, q.y);
+    const exposable = (q: { x: number; y: number }) => {
+      if (p.gene || p.cligne > 0) return false;
+      const dq = Math.hypot(q.x - p.x, q.y - p.y);
+      // L'ŒIL ne balaye pas : il regarde tout autour de lui, à la ronde. Ce
+      // n'est plus une question d'angle, c'est une question de lumière.
+      if (p.oeil) return dq <= PORTEE_OEIL && vueLibre(zone, p.x, p.y, q.x, q.y);
+      return (
+        dq <= PORTEE_VUE &&
+        dansLeCone(p.x, p.y, p.regard, q.x, q.y, PORTEE_VUE, 0.42) &&
+        vueLibre(zone, p.x, p.y, q.x, q.y)
+      );
+    };
+
+    /**
+     * EST-CE QUE CE CORPS LUI APPARAÎT ?
+     *
+     * Pour une sentinelle ordinaire : une lumière POSÉE efface (c'est l'abri),
+     * une lumière soufflée aussi. Pour un œil, c'est l'inverse exact — il
+     * cherche ce qui est éclairé, donc la torche qui te protégeait partout
+     * ailleurs te dénonce ici. Il faut la souffler, et te souffler avec.
+     */
+    const apparait = (eteintCorps: boolean, abriCorps: boolean) =>
+      p.oeil ? !eteintCorps || abriCorps : !eteintCorps && !abriCorps;
 
     // Voilé couvre le convoi autant que le joueur : c'est ce qui en fait un
     // bonus d'escorte, et c'est le seul moment du jeu où l'on peut traverser
@@ -324,13 +354,13 @@ export function majRegles(partie: Partie, dt: number): void {
     // n'est plus rien pour lui. Le contact, lui, tue toujours — se cacher
     // n'est pas traverser.
     const joueurVu =
-      !voile && !abri && !joueur.eteint && joueur.repit <= 0 && exposable(joueur);
+      !voile && apparait(joueur.eteint, abri) && joueur.repit <= 0 && exposable(joueur);
     // Une âme qui a soufflé sa lumière n'est plus un corps à voir : seul ce que
     // Falot porte le désigne encore (voir `souffler`).
     const convoi = voile
       ? []
       : zone.persos.filter(
-          (q) => q.suit && !q.livre && !q.abri && !q.eteint && exposable(q),
+          (q) => q.suit && !q.livre && apparait(q.eteint, q.abri) && exposable(q),
         );
     const corps = (joueurVu ? 1 : 0) + convoi.length;
     p.corpsVus = corps; // exposé pour les mesures

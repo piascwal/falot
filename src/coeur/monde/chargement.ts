@@ -53,6 +53,9 @@ export function chargerZone(partie: Partie, numero: number): void {
   joueur.bonus = null;
   joueur.bonusT = 0;
   joueur.souffle = 1;
+  // L'air s'épaissit à l'étage du voile : la lumière y porte deux fois moins
+  // loin, et les torches cessent d'être un confort pour devenir la carte.
+  joueur.air = zone.traits.includes('voile') ? 0.55 : 1;
   joueur.repit = 0;
   joueur.pierres = PIERRE[0].reserve;
   joueur.pierreDispo = 0;

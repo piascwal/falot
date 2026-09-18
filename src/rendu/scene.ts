@@ -14,7 +14,7 @@
  */
 
 import { rgba } from '../coeur/couleurs.js';
-import { CASE, D, PORTEE_VUE } from '../coeur/dimensions.js';
+import { CASE, D, PORTEE_OEIL, PORTEE_VUE } from '../coeur/dimensions.js';
 import { BONUS, COULEURS, DUREE_CALME, EMOTIONS, RALLUME } from '../coeur/formes.js';
 import { clamp, TAU } from '../coeur/geometrie.js';
 import {
@@ -74,7 +74,11 @@ function preparerRayons(
       ey = p.y - cam.y,
       marge = PORTEE_VUE;
     if (ex < -marge || ey < -marge || ex > W + marge || ey > H + marge) continue;
-    p.rayonsVue = portéesCone(zone, p.x, p.y, p.regard, PORTEE_VUE, 0.42);
+    // Un œil ne balaye pas : son regard fait le tour. Un rond, donc, et pas
+    // un cône — c'est la seule chose qui prévienne qu'il n'a pas de dos.
+    p.rayonsVue = p.oeil
+      ? portéesRond(zone, p.x, p.y, PORTEE_OEIL)
+      : portéesCone(zone, p.x, p.y, p.regard, PORTEE_VUE, 0.42);
   }
 }
 
@@ -518,7 +522,20 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
     if (!p.rayonsVue) continue;
     const proximite = clamp(1 - (dj - CASE * 2.6) / (CASE * 1.6), 0, 1);
     const force = traque ? 0.72 : 0.14 + proximite * 0.2;
-    percerCone(ecran, lctx, zone, p.x, p.y, p.regard, PORTEE_VUE, 0.42, force, p.rayonsVue);
+    if (p.oeil) percerRond(lctx, p.x - cam.x, p.y - cam.y, PORTEE_OEIL, force, p.rayonsVue);
+    else
+      percerCone(
+        ecran,
+        lctx,
+        zone,
+        p.x,
+        p.y,
+        p.regard,
+        PORTEE_VUE,
+        0.42,
+        force,
+        p.rayonsVue,
+      );
   }
   lctx.globalCompositeOperation = 'source-over';
 
@@ -743,7 +760,7 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
     if (p.emotion !== EMOTIONS.COLERE || p.aveugle > 0 || p.cligne > 0) continue;
     if (!p.rayonsVue) continue;
     const traque = p.alerte > 0 || p.charge > 0.04;
-    const pr = PORTEE_VUE;
+    const pr = p.oeil ? PORTEE_OEIL : PORTEE_VUE;
     const gr = ctx.createRadialGradient(
       p.x - cam.x,
       p.y - cam.y,
@@ -759,7 +776,8 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
     // peindre un second, c'est un polygone dégradé plein écran de gagné
     if (!traque) {
       ctx.fillStyle = gr;
-      tracerCone(ctx, p.x - cam.x, p.y - cam.y, p.regard, 0.42, portees);
+      if (p.oeil) tracerRond(ctx, p.x - cam.x, p.y - cam.y, portees, pr);
+      else tracerCone(ctx, p.x - cam.x, p.y - cam.y, p.regard, 0.42, portees);
       ctx.fill();
     }
     // Pas de contour : tout doit rester du faisceau. Traquée, le cône est
@@ -776,7 +794,8 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
       g2.addColorStop(0, 'rgba(255,96,78,0.17)');
       g2.addColorStop(1, 'rgba(255,96,78,0)');
       ctx.fillStyle = g2;
-      tracerCone(ctx, p.x - cam.x, p.y - cam.y, p.regard, 0.42, portees);
+      if (p.oeil) tracerRond(ctx, p.x - cam.x, p.y - cam.y, portees, pr);
+      else tracerCone(ctx, p.x - cam.x, p.y - cam.y, p.regard, 0.42, portees);
       ctx.fill();
     }
   }

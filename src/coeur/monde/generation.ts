@@ -403,6 +403,37 @@ export function genererZone(
       t.ronde = [];
     }
 
+    // L'ŒIL. Un Guet qui ne balaye pas : il n'a pas de ronde et il regarde
+    // tout ce qui est éclairé autour de lui.
+    if (traits.includes('oeil')) {
+      const rouges = persos.filter((q) => q.emotion === EMOTIONS.COLERE && !q.traqueur);
+      const o = rouges[Math.floor(rnd() * rouges.length)];
+      if (o) {
+        o.oeil = true;
+        o.ronde = [];
+      }
+    }
+
+    // LA MEUTE. Ils ne se quittent plus : le second reprend la ronde du
+    // premier, décalée d'une étape — donc ils tournent ensemble sans jamais
+    // se superposer, et on ne peut plus en contourner un seul.
+    if (traits.includes('meute')) {
+      const enRonde = persos.filter(
+        (q) => q.emotion === EMOTIONS.COLERE && !q.traqueur && !q.oeil && q.ronde.length,
+      );
+      for (let i = 0; i + 1 < enRonde.length; i += 2) {
+        enRonde[i + 1].ronde = enRonde[i].ronde;
+        enRonde[i + 1].etape = 1;
+      }
+    }
+
+    // LES FAROUCHES. Toutes les âmes de cet étage ont trop vu de lumière :
+    // aucune ne se laisse rallumer au faisceau. C'est la salle entière qui
+    // enseigne, pas une exception cachée dans un coin.
+    if (traits.includes('farouches')) {
+      for (const q of persos) if (q.emotion !== EMOTIONS.COLERE) q.farouche = true;
+    }
+
     // LA CENDRE. Une ou deux salles entières où le sol a brûlé : il faut les
     // traverser lentement. Posée en DERNIER, et seulement si l'étage porte le
     // trait : les tirages du générateur sont un contrat, et un étage sans

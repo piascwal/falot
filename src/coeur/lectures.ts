@@ -46,6 +46,7 @@ export const rayonHalo = (partie: Partie): number =>
   D.halo *
   forme(partie.joueur).halo *
   (partie.joueur.eteint ? MECHE : 1) *
+  partie.joueur.air *
   (0.68 + partie.joueur.souffle * 0.32) *
   (partie.vidange ? Math.max(0.04, 1 - partie.vidange.t / partie.vidange.duree) : 1) *
   partie.eclosion;
@@ -54,7 +55,7 @@ export const rayonHalo = (partie: Partie): number =>
 // rallumer quoi que ce soit pendant qu'il se cache, et ce qui rend le geste
 // coûteux au lieu d'être gratuit.
 export const porteeFaisceau = (j: Joueur): number =>
-  j.eteint ? 0 : forme(j).portee * CASE;
+  j.eteint ? 0 : forme(j).portee * CASE * j.air;
 export const coneFaisceau = (j: Joueur): number => forme(j).cone;
 
 /**

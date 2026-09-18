@@ -7,8 +7,9 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { CASE } from '../src/coeur/dimensions.js';
+import { CASE, PORTEE_VUE } from '../src/coeur/dimensions.js';
 import { EMOTIONS } from '../src/coeur/formes.js';
+import { porteeFaisceau, rayonHalo } from '../src/coeur/lectures.js';
 import { solideEn, vueLibre } from '../src/coeur/monde/grille.js';
 import {
   DERNIER_ETAGE,
@@ -20,7 +21,7 @@ import {
 } from '../src/coeur/monde/paliers.js';
 import { avancer, creerPartie, PAS } from '../src/coeur/partie.js';
 import { DUREE_FIN } from '../src/coeur/regles/fin.js';
-import type { Partie, Perso } from '../src/coeur/types.js';
+import type { Partie, Perso, PointRonde } from '../src/coeur/types.js';
 
 const guets = (p: Partie) => p.zone.persos.filter((q) => q.emotion === EMOTIONS.COLERE);
 const ames = (p: Partie) => p.zone.persos.filter((q) => q.emotion !== EMOTIONS.COLERE);
@@ -345,5 +346,135 @@ describe('la fin (étage 12)', () => {
     avancer(p, PAS);
     expect(p.fin).toBe(null);
     expect(p.vidange).not.toBeNull();
+  });
+});
+
+describe('le voile (étage 8)', () => {
+  it('étouffe la lumière portée, et elle seule', () => {
+    const clair = creerPartie({ grain: 'VOILE', etage: 7 });
+    const epais = creerPartie({ grain: 'VOILE', etage: 8 });
+    expect(epais.zone.traits).toContain('voile');
+    expect(epais.joueur.air).toBeLessThan(clair.joueur.air);
+    expect(rayonHalo(epais)).toBeLessThan(rayonHalo(clair));
+    // un Peureux n'a pas de faisceau du tout : il faut une forme pour comparer
+    clair.joueur.niveau = 2;
+    epais.joueur.niveau = 2;
+    expect(porteeFaisceau(epais.joueur)).toBeLessThan(porteeFaisceau(clair.joueur));
+    // ce que voit un Guet ne change pas : c'est NOTRE lumière qui s'étouffe
+    expect(PORTEE_VUE).toBe(PORTEE_VUE);
+  });
+});
+
+describe('l’œil (étage 10)', () => {
+  it('voit dans son dos — mais seulement ce qui est éclairé', () => {
+    const scene = (souffle: boolean) => {
+      const p = creerPartie({ grain: 'OEIL', etage: 10 });
+      const o = guets(p).find((q) => q.oeil);
+      if (!o) throw new Error('pas d’œil à l’étage 10');
+      poser(o, o.x, o.y);
+      const dos = faceAFace(p, o, CASE * 2) + Math.PI;
+      o.regard = o.regardRepos = o.capAlerte = dos;
+      p.joueur.repit = 0;
+      p.entrees.souffle = souffle;
+      avancer(p, PAS);
+      return o;
+    };
+    // dans son dos : une sentinelle ordinaire ne verrait rien
+    expect(scene(false).corpsVus).toBe(1);
+    // soufflé, il n'y a plus de lumière à regarder
+    expect(scene(true).corpsVus).toBe(0);
+  });
+
+  it('est dénoncé par une torche, là où elle protégeait partout ailleurs', () => {
+    const p = creerPartie({ grain: 'OEIL', etage: 10 });
+    const o = guets(p).find((q) => q.oeil);
+    if (!o) throw new Error('pas d’œil');
+    poser(o, o.x, o.y);
+    faceAFace(p, o, CASE * 2);
+    p.joueur.repit = 0;
+    p.entrees.souffle = true;
+    // Une torche allumée à une case et demie : il est dans sa lumière, donc
+    // il est vu — et il est trop loin pour l'avoir soufflée en passant. C'est
+    // exactement le travail de l'étage : aller les souffler une par une.
+    p.zone.torches.push({
+      x: p.joueur.x + CASE * 1.6,
+      y: p.joueur.y,
+      r: CASE * 2.1,
+      duree: 26,
+      reste: 26,
+      phase: 0,
+      ox: 0,
+      oy: 0,
+    });
+    avancer(p, PAS);
+    expect(o.corpsVus).toBe(1);
+  });
+
+  it('souffler éteint aussi les torches qu’on touche', () => {
+    const p = creerPartie({ grain: 'OEIL', etage: 10 });
+    const t = {
+      x: p.joueur.x,
+      y: p.joueur.y,
+      r: CASE * 2.1,
+      duree: 26,
+      reste: 26,
+      phase: 0,
+      ox: 0,
+      oy: 0,
+    };
+    p.zone.torches.length = 0;
+    p.zone.torches.push(t);
+    p.entrees.souffle = true;
+    avancer(p, PAS);
+    expect(t.reste).toBe(0);
+    // et il la reprend dès qu'il se rallume
+    p.entrees.souffle = false;
+    avancer(p, PAS);
+    expect(t.reste).toBeGreaterThan(0);
+  });
+});
+
+describe('la meute (étage 11)', () => {
+  it('fait tourner deux Guets sur la même ronde, décalés', () => {
+    const p = creerPartie({ grain: 'MEUTE', etage: 11 });
+    const paires = new Map<PointRonde[], Perso[]>();
+    for (const g of guets(p)) {
+      if (!g.ronde.length) continue;
+      const ceux = paires.get(g.ronde) ?? [];
+      ceux.push(g);
+      paires.set(g.ronde, ceux);
+    }
+    const ensemble = [...paires.values()].filter((q) => q.length > 1);
+    expect(ensemble.length).toBeGreaterThan(0);
+    for (const [a, b] of ensemble) expect(a.etape).not.toBe(b.etape);
+  });
+});
+
+describe('les farouches (étage 7)', () => {
+  it('reculent devant un faisceau au lieu de se rallumer', () => {
+    const p = creerPartie({ grain: 'FAROUCHE', etage: 7 });
+    const q = ames(p).find((a) => a.farouche);
+    if (!q) throw new Error('pas de farouche à l’étage 7');
+    p.joueur.x = q.x - CASE * 1.6;
+    p.joueur.y = q.y;
+    p.joueur.regard = 0;
+    p.joueur.niveau = 2; // un faisceau pour de bon
+    const d0 = Math.hypot(q.x - p.joueur.x, q.y - p.joueur.y);
+    for (let i = 0; i < 60; i++) avancer(p, PAS);
+    expect(Math.hypot(q.x - p.joueur.x, q.y - p.joueur.y)).toBeGreaterThan(d0);
+    expect(q.calme).toBe(false);
+  });
+
+  it('se laissent reprendre par un Falot éteint, tout près', () => {
+    const p = creerPartie({ grain: 'FAROUCHE', etage: 7 });
+    const q = ames(p).find((a) => a.farouche);
+    if (!q) throw new Error('pas de farouche');
+    p.entrees.souffle = true;
+    for (let i = 0; i < 200; i++) {
+      p.joueur.x = q.x + CASE * 0.5;
+      p.joueur.y = q.y;
+      avancer(p, PAS);
+    }
+    expect(q.calme).toBe(true);
   });
 });
