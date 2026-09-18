@@ -394,6 +394,38 @@ export function genererZone(
       }
     }
 
+    // LE TRAQUEUR. Un des Guets n'a plus de ronde : il refait le chemin du
+    // joueur. Un seul suffit — deux, et l'étage devient une chasse à courre.
+    if (traits.includes('traqueur')) {
+      const rouges = persos.filter((q) => q.emotion === EMOTIONS.COLERE);
+      const t = rouges[Math.floor(rnd() * rouges.length)];
+      t.traqueur = true;
+      t.ronde = [];
+    }
+
+    // LA CENDRE. Une ou deux salles entières où le sol a brûlé : il faut les
+    // traverser lentement. Posée en DERNIER, et seulement si l'étage porte le
+    // trait : les tirages du générateur sont un contrat, et un étage sans
+    // cendre ne doit pas en consommer un seul.
+    const cendre: number[][] = [];
+    for (let cy = 0; cy < z.lignes; cy++) cendre.push(new Array<number>(z.cols).fill(0));
+    const cendres: Case[] = [];
+    if (traits.includes('cendre')) {
+      const candidates = z.salles.filter((s) => s !== depart);
+      for (let k = candidates.length - 1; k > 0; k--) {
+        const j = Math.floor(rnd() * (k + 1));
+        [candidates[k], candidates[j]] = [candidates[j], candidates[k]];
+      }
+      for (const sl of candidates.slice(0, 2)) {
+        for (let cy = sl.y; cy < sl.y + sl.h; cy++)
+          for (let cx = sl.x; cx < sl.x + sl.w; cx++) {
+            if (z.mur[cy][cx] || cendre[cy][cx]) continue;
+            cendre[cy][cx] = 1;
+            cendres.push({ cx, cy });
+          }
+      }
+    }
+
     const fissureDe: (Fissure | null)[][] = [];
     for (let cy = 0; cy < z.lignes; cy++)
       fissureDe.push(new Array<Fissure | null>(z.cols).fill(null));
@@ -430,6 +462,8 @@ export function genererZone(
         : [],
       nom: pal?.nom ?? `Puits — ${numero}`,
       traits,
+      cendre,
+      cendres,
       depart: { x: (depart.cx + 0.5) * CASE, y: (depart.cy + 0.5) * CASE },
       // Le portail ne compte plus des lueurs mais des ÂMES : il faut lui
       // amener des bonhommes calmés. Les lueurs redeviennent ce qu'elles

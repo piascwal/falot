@@ -30,7 +30,7 @@ import {
 import { dansLeCone, vueLibre } from '../monde/grille.js';
 import { emettre, onde } from '../particules.js';
 import { ETEINTS, REPLIQUES } from '../textes.js';
-import type { Partie, Perso, Point } from '../types.js';
+import type { Partie, Perso, Point, Zone } from '../types.js';
 import { montrerToast, murmurer } from '../voix.js';
 import { aLAbri, estEclaire, prochedUneBraise } from './lumiere.js';
 import { eteindre, gagnerEclat, paniquer, ramasser } from './progression.js';
@@ -49,6 +49,42 @@ const BAIN_TRAQUE = 1.6;
 
 /** Jusqu'où un Guet passe le mot à un autre (étage 2, « l'appel »). */
 const PORTEE_APPEL = CASE * 5;
+
+/**
+ * LA CENDRE (étage 4). Au-dessus de cette vitesse, le sol brûlé croque sous le
+ * pied. Le seuil est à peu près la moitié de la vitesse de pointe : marcher est
+ * silencieux, courir s'entend. Et ça s'entend à travers la pierre — un bruit ne
+ * demande pas de ligne de vue.
+ */
+const VITESSE_CRAQUE = 165;
+const DELAI_CRAQUE = 0.4;
+const PORTEE_CRAQUE = CASE * 6;
+
+/** Le sol a-t-il brûlé ici ? */
+function surCendre(zone: Zone, x: number, y: number): boolean {
+  const cx = Math.floor(x / CASE);
+  const cy = Math.floor(y / CASE);
+  return !!zone.cendre[cy]?.[cx];
+}
+
+/**
+ * Le craquement. Il ATTIRE, il n'efface rien : c'est le contraire d'une pierre,
+ * qui fait lâcher à un Guet ce qu'il tenait. Là, on donne un indice de plus à
+ * quelqu'un qui cherchait déjà.
+ */
+function craquer(partie: Partie): void {
+  const { joueur, zone } = partie;
+  emettre(partie, joueur.x, joueur.y + D.taille * 0.4, '#b2bacc', 5, 34);
+  onde(partie, joueur.x, joueur.y, CASE * 1.2, '#b2bacc');
+  for (const p of zone.persos) {
+    if (p.emotion !== EMOTIONS.COLERE || p.livre || p.aveugle > 0) continue;
+    if (Math.hypot(p.x - joueur.x, p.y - joueur.y) > PORTEE_CRAQUE) continue;
+    if (p.charge > 0.05) continue; // il te tient déjà : le bruit n'apprend rien
+    p.curiosite = { x: joueur.x, y: joueur.y };
+    p.curieuxT = Math.max(p.curieuxT, 2.4);
+    p.alerte = Math.max(p.alerte, 1.6);
+  }
+}
 
 /**
  * La lumière que le joueur PORTE touche-t-elle ce Guet ? Le halo, ou le
@@ -226,6 +262,18 @@ export function majRegles(partie: Partie, dt: number): void {
       30,
     );
   }
+  // Le sol brûlé croque sous qui se presse. Marcher ne coûte rien ; courir
+  // dans la cendre revient à lancer une pierre sur soi-même.
+  if (aTrait(zone, 'cendre') && surCendre(zone, joueur.x, joueur.y)) {
+    if (Math.hypot(joueur.vx, joueur.vy) > VITESSE_CRAQUE) {
+      partie.craque -= dt;
+      if (partie.craque <= 0) {
+        partie.craque = DELAI_CRAQUE;
+        craquer(partie);
+      }
+    }
+  } else partie.craque = 0;
+
   let pire = 0,
     traque = false;
   // L'APPEL (étage 2). Ils n'ont qu'un seul regard, et ils se le passent :

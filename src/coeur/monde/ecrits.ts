@@ -305,6 +305,8 @@ export function zoneEcrite(numero: number): Zone | null {
     nom: palier(numero)?.nom ?? `Étage ${numero}`,
     // Un étage écrit porte sa leçon dans son plan, pas dans un trait de règle.
     traits: [],
+    cendre: mur.map((rang) => rang.map(() => 0)),
+    cendres: [],
     depart: { x: (leDepart.cx + 0.5) * CASE, y: (leDepart.cy + 0.5) * CASE },
     sortie: {
       x: (leSeuil.cx + 0.5) * CASE,

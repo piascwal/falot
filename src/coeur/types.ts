@@ -104,6 +104,14 @@ export interface Perso extends Corps {
   /** Depuis combien de temps la lumière du joueur le baigne. Un faisceau qui
    *  balaye ne suffit pas : il faut s'attarder. */
   bain: number;
+  /**
+   * LE TRAQUEUR (étage 6). Celui-là ne fait pas de ronde : il refait ton
+   * chemin. `piste` est son index dans le fil du joueur, −1 quand il l'a
+   * perdu. Un Falot qui a soufflé sa lumière ne laisse pas de fil : c'est la
+   * réponse, et elle s'apprend à l'étage 3.
+   */
+  traqueur: boolean;
+  piste: number;
   prochainCligne: number;
   ronde: PointRonde[];
   /** Combien de corps elle voit à cet instant. Exposé pour les mesures. */
@@ -240,6 +248,13 @@ export interface Zone {
   braises: Braise[];
   reprises: Reprise[];
   murmures: MurmurePose[];
+  /**
+   * LA CENDRE (étage 4). Les cases où le sol a brûlé : il croque sous qui se
+   * presse. La table sert au rendu et aux règles ; la liste sert à dessiner
+   * sans parcourir toute la grille.
+   */
+  cendre: number[][];
+  cendres: Case[];
   /** Le nom de l'étage — « La cendre », « Le voile ». Dit par la cage. */
   nom: string;
   /** Ce que cet étage porte de neuf, ou de recombiné (voir `paliers.ts`). */
@@ -434,6 +449,8 @@ export interface Partie {
   montee: Etage[];
   /** Un rouge cherche, ou un faisceau nous tient. Ce que TOUT LE MONDE sent. */
   menace: boolean;
+  /** Compte à rebours avant le prochain craquement de cendre. */
+  craque: number;
 
   /** Un écran plein arrête le monde. */
   gele: boolean;

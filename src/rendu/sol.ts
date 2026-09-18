@@ -30,6 +30,30 @@ export function dessinerSol(
       if (!zone.mur[cy][cx])
         ctx.fillRect(cx * CASE - cam.x, cy * CASE - cam.y, CASE + 1, CASE + 1);
 
+  // LA CENDRE. Le sol brûlé est un peu plus clair, et grumeleux : quatre
+  // grains par case, toujours aux mêmes endroits — la case est sa propre
+  // graine, sinon la cendre grouillerait d'une image à l'autre. On la voit
+  // d'un coup d'œil, et on comprend pourquoi ça craque avant d'avoir couru.
+  if (zone.cendres.length) {
+    for (let cy = c0y; cy <= c1y; cy++)
+      for (let cx = c0x; cx <= c1x; cx++) {
+        if (!zone.cendre[cy][cx]) continue;
+        const x = cx * CASE - cam.x,
+          y = cy * CASE - cam.y;
+        ctx.fillStyle = '#242430';
+        ctx.fillRect(x, y, CASE + 1, CASE + 1);
+        ctx.fillStyle = 'rgba(178,186,204,0.16)';
+        for (let i = 0; i < 4; i++) {
+          const u = ((cx * 7919 + cy * 104729 + i * 6151) % 97) / 97;
+          const v = ((cx * 104729 + cy * 7919 + i * 3571) % 89) / 89;
+          const r = 1.2 + ((cx + cy + i) % 3) * 0.7;
+          ctx.beginPath();
+          ctx.arc(x + u * CASE, y + v * CASE, r, 0, TAU);
+          ctx.fill();
+        }
+      }
+  }
+
   // Ces traits soulignent l'ARCHITECTURE, donc ils lisent la pierre seule et
   // pas `solide` : une porte fermée y devenait un mur, et sa case se
   // retrouvait cernée d'un rectangle qui clignotait à chaque ouverture.

@@ -12,9 +12,82 @@ import { EMOTIONS, HUMEURS, humeurSelon } from '../formes.js';
 import { clamp, ecartAngle } from '../geometrie.js';
 import { dansLeCone, degager, routeVers, vueLibre } from '../monde/grille.js';
 import { emettre } from '../particules.js';
-import type { Partie, Perso } from '../types.js';
+import type { Partie, Perso, Point } from '../types.js';
 import { suivre } from './convoi.js';
 import { majJelly } from './joueur.js';
+
+/**
+ * LE TRAQUEUR SUIT LE FIL. Il ne cherche pas le joueur : il cherche sa trace,
+ * et il la remonte du plus ancien vers le plus récent — donc il finit là où on
+ * vient de passer. Il accroche la trace la plus RÉCENTE à sa portée : sinon il
+ * repartait au début du fil et refaisait tout l'étage.
+ *
+ * Quand le fil se coupe — le joueur a soufflé sa lumière — il ne reste rien à
+ * suivre : il va voir l'endroit de la coupure, et c'est tout ce qu'il saura.
+ */
+const PORTEE_PISTE = CASE * 2.5;
+
+function suivrePiste(partie: Partie, p: Perso, dt: number): void {
+  const fil = partie.fil;
+  let vise: Point | null | undefined = fil[p.piste];
+  if (p.piste < 0 || vise === undefined) {
+    p.piste = -1;
+    for (let i = fil.length - 1; i >= 0; i--) {
+      const q = fil[i];
+      if (!q) continue;
+      if (Math.hypot(q.x - p.x, q.y - p.y) > PORTEE_PISTE) continue;
+      p.piste = i;
+      break;
+    }
+    vise = p.piste < 0 ? undefined : fil[p.piste];
+  }
+  if (!vise) {
+    // plus rien à suivre : il tient sa place et balaye large
+    p.route = null;
+    p.phase += 1.1 * dt;
+    p.regard += ecartAngle(p.regard, p.regardRepos + Math.sin(p.phase) * 1.1) * 2.6 * dt;
+    p.humeur = HUMEURS.INTRIGUE;
+    return;
+  }
+  const dx = vise.x - p.x,
+    dy = vise.y - p.y;
+  const d = Math.hypot(dx, dy) || 1;
+  if (d < CASE * 0.5) {
+    // point suivant ; une coupure veut dire que la trace s'arrête là
+    const apres = fil[p.piste + 1];
+    if (apres === null) {
+      p.curiosite = { x: vise.x, y: vise.y };
+      p.curieuxT = 2.6;
+      p.piste = -1;
+      p.route = null;
+      return;
+    }
+    p.piste++;
+    return;
+  }
+  if (!p.route?.length) p.route = routeVers(partie.zone, p.x, p.y, vise.x, vise.y, true);
+  let rx = dx,
+    ry = dy;
+  if (p.route?.length) {
+    const w = p.route[0];
+    const wx = w.x - p.x,
+      wy = w.y - p.y;
+    if (Math.hypot(wx, wy) < CASE * 0.45) p.route.shift();
+    else {
+      rx = wx;
+      ry = wy;
+    }
+  }
+  const rd = Math.hypot(rx, ry) || 1;
+  // plus lent qu'une ronde : il est patient, pas rapide. On doit pouvoir le
+  // distancer — ce qu'on ne peut pas faire, c'est le semer sans s'éteindre.
+  p.vx += (rx / rd) * 330 * dt;
+  p.vy += (ry / rd) * 330 * dt;
+  p.phase += 1.4 * dt;
+  const cap = Math.atan2(ry, rx) + Math.sin(p.phase) * 0.35;
+  p.regard += ecartAngle(p.regard, cap) * Math.min(1, 6 * dt);
+  p.humeur = HUMEURS.ACHARNE;
+}
 
 export function majPersos(partie: Partie, dt: number, eclaires: Set<Perso>): void {
   const { joueur, zone } = partie;
@@ -84,7 +157,10 @@ export function majPersos(partie: Partie, dt: number, eclaires: Set<Perso>): voi
       // passer dans son dos, attendre que son balayage s'éloigne. La laisse
       // reste : sans elle, un seul rouge suivait le joueur à travers toute la
       // zone et le revidait à chaque réapparition.
-      const loin = Math.hypot(p.x - p.baseX, p.y - p.baseY) > CASE * 5.5;
+      // La laisse : sans elle, un seul rouge suivait le joueur à travers toute
+      // la zone. Un traqueur n'en a pas — c'est précisément son métier de
+      // quitter son poste, et il est assez lent pour qu'on le distance.
+      const loin = !p.traqueur && Math.hypot(p.x - p.baseX, p.y - p.baseY) > CASE * 5.5;
       if (p.alerte > 0) p.alerte -= dt; // l'alerte est posée par majRegles
       if (p.gene) p.alerte = 0;
 
@@ -206,6 +282,8 @@ export function majPersos(partie: Partie, dt: number, eclaires: Set<Perso>): voi
           p.vx += (bx / bd) * 300 * dt;
           p.vy += (by / bd) * 300 * dt;
           p.humeur = HUMEURS.INTRIGUE;
+        } else if (p.traqueur) {
+          suivrePiste(partie, p, dt);
         } else if (p.ronde?.length) {
           const c = p.ronde[p.etape % p.ronde.length];
 

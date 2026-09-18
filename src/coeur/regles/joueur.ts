@@ -78,8 +78,16 @@ export function majJoueur(partie: Partie, dt: number): void {
     joueur.regard +=
       ecartAngle(joueur.regard, Math.atan2(joueur.vy, joueur.vx)) * Math.min(1, 12 * dt);
 
-  // le fil : un point tous les vingt pixels parcourus
-  if (Math.hypot(joueur.x - partie.filDernier.x, joueur.y - partie.filDernier.y) > 20) {
+  // LE FIL : un point tous les vingt pixels parcourus. Soufflé, il n'en laisse
+  // AUCUN — il ne brille pas, il n'y a rien à suivre — et le fil se coupe net
+  // à l'endroit où il s'est éteint. C'est ce qui permet de semer un traqueur,
+  // et c'est la seule réponse que l'étage 6 attend.
+  if (joueur.eteint) {
+    const dernier = partie.fil[partie.fil.length - 1];
+    if (dernier) partie.fil.push(null);
+  } else if (
+    Math.hypot(joueur.x - partie.filDernier.x, joueur.y - partie.filDernier.y) > 20
+  ) {
     partie.fil.push({ x: joueur.x, y: joueur.y });
     partie.filDernier = { x: joueur.x, y: joueur.y };
     if (partie.fil.length > 900) partie.fil.shift();

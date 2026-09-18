@@ -228,3 +228,84 @@ describe('le souffle (étage 3)', () => {
     expect(g.alerte).toBe(0);
   });
 });
+
+describe('la cendre (étage 4)', () => {
+  /** Falot posé en pleine cendre, un Guet à trois cases, et rien d'autre. */
+  function scene(vite: boolean) {
+    const p = creerPartie({ grain: 'CENDRE', etage: 4 });
+    expect(p.zone.cendres.length, 'l’étage 4 est cendré').toBeGreaterThan(0);
+    // une case cendrée qui a de la cendre à l'est : il doit courir DEDANS
+    const c =
+      p.zone.cendres.find((q) => p.zone.cendre[q.cy]?.[q.cx + 2] === 1) ??
+      p.zone.cendres[0];
+    p.joueur.x = (c.cx + 0.5) * CASE;
+    p.joueur.y = (c.cy + 0.5) * CASE;
+    // Le Guet est à trois cases et il regarde AILLEURS : ce qu'on teste, c'est
+    // ce qu'il entend. S'il voyait déjà le joueur, le bruit ne lui apprendrait
+    // rien — et c'est la règle.
+    const g = guets(p)[0];
+    poser(g, p.joueur.x + CASE * 3, p.joueur.y, 0);
+    g.curieuxT = 0;
+    g.curiosite = null;
+    // il court, ou il marche : c'est toute la différence
+    p.entrees.manche.actif = true;
+    p.entrees.manche.dx = 1;
+    p.entrees.manche.dy = 0;
+    p.entrees.manche.force = vite ? 1 : 0.12;
+    for (let i = 0; i < 40; i++) avancer(p, PAS);
+    return g;
+  }
+
+  it('croque sous qui se presse, et s’entend à trois cases', () => {
+    expect(scene(true).curieuxT).toBeGreaterThan(0);
+  });
+
+  it('ne dit rien à qui marche', () => {
+    expect(scene(false).curieuxT).toBe(0);
+  });
+
+  it('ne s’invite pas aux étages qui ne la portent pas', () => {
+    expect(creerPartie({ grain: 'CENDRE', etage: 2 }).zone.cendres).toHaveLength(0);
+  });
+});
+
+describe('le traqueur (étage 6)', () => {
+  it('refait le chemin du joueur au lieu de faire une ronde', () => {
+    const p = creerPartie({ grain: 'TRAQUE', etage: 6 });
+    const t = guets(p).find((q) => q.traqueur);
+    expect(t, 'l’étage 6 pose un traqueur').toBeDefined();
+    if (!t) return;
+    // un fil qui passe à côté de lui et file vers l'est
+    p.fil.length = 0;
+    const bout = { x: t.x + CASE * 3.7, y: t.y };
+    for (let i = 0; i < 12; i++) p.fil.push({ x: t.x + CASE * (0.4 + i * 0.3), y: t.y });
+    const d0 = Math.hypot(bout.x - t.x, bout.y - t.y);
+    for (let i = 0; i < 90; i++) avancer(p, PAS);
+    expect(Math.hypot(bout.x - t.x, bout.y - t.y)).toBeLessThan(d0);
+  });
+
+  it('perd la trace là où Falot a soufflé sa lumière', () => {
+    const p = creerPartie({ grain: 'TRAQUE', etage: 6 });
+    const t = guets(p).find((q) => q.traqueur);
+    if (!t) throw new Error('pas de traqueur');
+    const coupure = { x: t.x + CASE * 0.4, y: t.y };
+    p.fil.length = 0;
+    p.fil.push({ ...coupure });
+    p.fil.push(null); // la coupure : il s'est éteint ici
+    for (let i = 0; i < 120; i++) avancer(p, PAS);
+    // il n'a rien d'autre à suivre : il reste autour de la coupure
+    expect(Math.hypot(t.x - coupure.x, t.y - coupure.y)).toBeLessThan(CASE * 2.5);
+  });
+
+  it('ne laisse aucun fil derrière un Falot soufflé', () => {
+    const p = creerPartie({ grain: 'TRAQUE', etage: 6 });
+    p.entrees.manche.actif = true;
+    p.entrees.manche.dx = 1;
+    p.entrees.manche.dy = 0;
+    p.entrees.manche.force = 1;
+    p.entrees.souffle = true;
+    for (let i = 0; i < 60; i++) avancer(p, PAS);
+    // aucun point posé pendant qu'il était soufflé : il n'y a rien à suivre
+    expect(p.fil.filter((q) => q !== null)).toHaveLength(0);
+  });
+});

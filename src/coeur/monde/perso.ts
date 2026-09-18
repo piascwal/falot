@@ -48,6 +48,8 @@ export function nouveauPerso(
     fuit: 0,
     eteint: false,
     alerte: 0,
+    traqueur: false,
+    piste: -1,
     etape: 0,
     charge: 0,
     route: null,

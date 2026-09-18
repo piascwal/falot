@@ -59,6 +59,8 @@ function plan(dessin: string[]): Zone {
     grain: 'PLAN',
     nom: '',
     traits: [],
+    cendre: mur.map((r) => r.map(() => 0)),
+    cendres: [],
     lueurs: [],
     persos: [],
     torches: [],
