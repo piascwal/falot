@@ -126,9 +126,10 @@ même graine, même étage, même pilotage.
 ## Mise en ligne
 
 `.github/workflows/ci.yml` vérifie types, lint, tests et build à chaque push.
-`.github/workflows/pages.yml` publie le jeu sur GitHub Pages — il faut
-l'autoriser une fois dans **Settings → Pages → Source : GitHub Actions**. Tant
-que ce n'est pas fait, ce second workflow échoue, et seulement lui.
+`.github/workflows/pages.yml` publie le jeu sur GitHub Pages, avec le POC gelé
+et la bible. Il faut l'autoriser une fois dans **Settings → Pages → Source :
+GitHub Actions** ; tant que ce n'est pas fait, le workflow le constate et
+s'arrête sans échouer.
 
 ## D'où ça vient
 

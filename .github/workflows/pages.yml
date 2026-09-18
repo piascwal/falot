@@ -1,8 +1,8 @@
 # Déploiement du jeu sur GitHub Pages.
 #
-# À activer une fois dans les réglages du dépôt : Settings → Pages → Source =
-# « GitHub Actions ». Tant que ce n'est pas fait, ce workflow échoue et c'est
-# normal — la CI (`ci.yml`), elle, tourne sans rien demander.
+# Rien à faire pour que ce workflow reste vert : tant que Pages n'est pas activé
+# sur le dépôt, il le constate et s'arrête là. Pour publier pour de bon :
+# Settings → Pages → Source = « GitHub Actions ». Le prochain push déploie.
 name: Pages
 
 on:
@@ -20,7 +20,31 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Un workflow qui échoue à chaque push pour un réglage non coché, c'est du
+  # bruit : on pose la question à l'API plutôt que de laisser l'étape planter.
+  verifier:
+    runs-on: ubuntu-latest
+    outputs:
+      actif: ${{ steps.pages.outputs.actif }}
+    steps:
+      - id: pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/pages")
+          if [ "$code" = "200" ]; then
+            echo "actif=oui" >> "$GITHUB_OUTPUT"
+          else
+            echo "actif=non" >> "$GITHUB_OUTPUT"
+            echo "::notice::Pages n'est pas activé (HTTP $code). Settings → Pages → Source : GitHub Actions."
+          fi
+
   construire:
+    needs: verifier
+    if: needs.verifier.outputs.actif == 'oui'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
