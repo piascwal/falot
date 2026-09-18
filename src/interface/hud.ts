@@ -79,7 +79,7 @@ export function creerHud(): Hud {
       // d'un étage qu'on vient de quitter ne veut plus rien dire : l'écran se
       // vide, il ne reste que la cage. C'est le contraire exact de l'ancienne
       // modale — on ne montre pas un bilan, on monte.
-      const enMontee = partie.puits !== null;
+      const enMontee = partie.puits !== null || partie.fin !== null;
       elActions.hidden = enMontee;
       elHud.hidden = enMontee;
       if (enMontee) return;

@@ -14,6 +14,7 @@ import { grainDepuisTexte, mulberry32 } from './alea.js';
 import { PIERRE } from './formes.js';
 import { chargerZone } from './monde/chargement.js';
 import { majFlottants, majParticules } from './particules.js';
+import { majFin } from './regles/fin.js';
 import { majJoueur } from './regles/joueur.js';
 import { propager, souffler } from './regles/lumiere.js';
 import { majRegles } from './regles/monde.js';
@@ -117,6 +118,8 @@ export function creerPartie(reglages: Reglages = {}): Partie {
     craque: 0,
     gele: false,
     puits: null,
+    fin: null,
+    finVue: false,
     prologueFait: false,
     pouvoirs: { souffle: false, fanal: false },
     recadrer: false,
@@ -187,6 +190,14 @@ export function avancer(partie: Partie, dt: number = PAS): void {
     majParticules(partie, dt);
     majFlottants(partie, dt);
     partie.eclaires = propager(partie);
+    return;
+  }
+
+  if (partie.fin) {
+    // Le dernier Seuil. Rien d'autre ne tourne : c'est tout ce qu'il y a à voir.
+    majFin(partie, dt);
+    majParticules(partie, dt);
+    partie.eclaires = new Set();
     return;
   }
 

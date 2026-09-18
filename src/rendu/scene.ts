@@ -30,6 +30,7 @@ import { estEclaire } from '../coeur/regles/lumiere.js';
 import { decouper } from '../coeur/texte.js';
 import type { Partie, Perso } from '../coeur/types.js';
 import { type Ecran, QLUM } from './ecran.js';
+import { dessinerFin } from './fin.js';
 import { dessinerManche, dessinerVisee } from './gestes.js';
 import {
   percerCone,
@@ -78,6 +79,12 @@ function preparerRayons(
 }
 
 export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
+  // La fin : il n'y a plus de monde à dessiner, il n'y a plus que ce qu'il
+  // devient.
+  if (partie.fin) {
+    dessinerFin(ecran, partie, temps);
+    return;
+  }
   // Entre deux étages, il n'y a plus de zone à dessiner : il n'y a que la cage
   // d'escalier, et lui qui monte dedans.
   if (partie.puits) {

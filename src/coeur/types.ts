@@ -474,6 +474,10 @@ export interface Partie {
   gele: boolean;
   /** L'ascension en cours entre deux étages, ou `null`. */
   puits: Puits | null;
+  /** La fin, si elle est en train d'arriver. */
+  fin: { t: number } | null;
+  /** La fin a été vue : le Puits sans fin est ouvert. */
+  finVue: boolean;
   /** Le prologue a été franchi au moins une fois (l'interface le persiste). */
   prologueFait: boolean;
   /**

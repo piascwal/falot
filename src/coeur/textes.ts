@@ -97,3 +97,20 @@ export const RECIT_PLUS_HAUT: readonly string[] = [
   'Tu recommences petit à chaque fois, et tu ne te souviens pas assez pour ' +
     "t'en lasser.",
 ];
+
+/**
+ * LA FIN. Falot ne sort pas : il reste, et il devient la lampe du Seuil.
+ *
+ * Tout le jeu répète qu'il donne ce qu'il vient de retrouver ; la dernière
+ * fois, il n'a plus que lui-même à donner. La lampe qu'il cherchait depuis le
+ * premier étage, c'était lui — et la première salle du jeu était éclairée
+ * parce qu'un autre avant lui tenait déjà cette porte-là.
+ */
+export const FIN = {
+  refus: 'Il en faut plus. Il ne reste que toi.',
+  don: 'Il pousse les siens dedans, et il entre à leur suite.',
+  lampe: 'La lampe qu’il cherchait, c’était lui.',
+  avant: 'La première salle, tout en bas, était éclairée. Quelqu’un tenait déjà la porte.',
+  dehors: 'En haut, c’est le soir. Quelqu’un allume les lampes, une par une.',
+  puits: 'Le Puits sans fin s’ouvre. Redescends, si tu veux.',
+} as const;

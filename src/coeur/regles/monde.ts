@@ -28,10 +28,12 @@ import {
   rayonHalo,
 } from '../lectures.js';
 import { dansLeCone, vueLibre } from '../monde/grille.js';
+import { DERNIER_ETAGE } from '../monde/paliers.js';
 import { emettre, onde } from '../particules.js';
 import { ETEINTS, REPLIQUES } from '../textes.js';
 import type { Partie, Perso, Point, Zone } from '../types.js';
 import { montrerToast, murmurer } from '../voix.js';
+import { lancerLaFin } from './fin.js';
 import { aLAbri, estEclaire, prochedUneBraise } from './lumiere.js';
 import { eteindre, gagnerEclat, paniquer, ramasser } from './progression.js';
 import { ouvrirLeSeuil } from './seuil.js';
@@ -489,6 +491,11 @@ export function majRegles(partie: Partie, dt: number): void {
     !enAspiration &&
     Math.hypot(zone.sortie.x - joueur.x, zone.sortie.y - joueur.y) < zone.sortie.r
   ) {
-    ouvrirLeSeuil(partie);
+    // LE DERNIER SEUIL. Il a livré tout ce qu'il devait, il entre comme onze
+    // fois avant — et cette fois le portail en demande plus. Il ne reste que
+    // lui. (Une fois la fin vue, le Puits sans fin recommence à s'ouvrir
+    // normalement : on redescend pour jouer, plus pour finir.)
+    if (partie.numeroZone === DERNIER_ETAGE && !partie.finVue) lancerLaFin(partie);
+    else ouvrirLeSeuil(partie);
   }
 }

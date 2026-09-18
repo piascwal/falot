@@ -19,6 +19,7 @@ import {
   traitsEtage,
 } from '../src/coeur/monde/paliers.js';
 import { avancer, creerPartie, PAS } from '../src/coeur/partie.js';
+import { DUREE_FIN } from '../src/coeur/regles/fin.js';
 import type { Partie, Perso } from '../src/coeur/types.js';
 
 const guets = (p: Partie) => p.zone.persos.filter((q) => q.emotion === EMOTIONS.COLERE);
@@ -307,5 +308,42 @@ describe('le traqueur (étage 6)', () => {
     for (let i = 0; i < 60; i++) avancer(p, PAS);
     // aucun point posé pendant qu'il était soufflé : il n'y a rien à suivre
     expect(p.fil.filter((q) => q !== null)).toHaveLength(0);
+  });
+});
+
+describe('la fin (étage 12)', () => {
+  it('ne laisse pas passer : le dernier Seuil demande plus que ce qu’on a', () => {
+    const p = creerPartie({ grain: 'FIN', etage: DERNIER_ETAGE });
+    // on lui livre ses âmes, et on entre comme onze fois avant
+    p.zone.sortie.ames = p.zone.requis;
+    p.joueur.x = p.zone.sortie.x;
+    p.joueur.y = p.zone.sortie.y;
+    avancer(p, PAS);
+    expect(p.fin, 'il reste').not.toBe(null);
+    expect(p.vidange, 'il ne franchit pas').toBe(null);
+  });
+
+  it('s’achève sur le Puits sans fin, tous pouvoirs gardés', () => {
+    const p = creerPartie({ grain: 'FIN', etage: DERNIER_ETAGE });
+    p.zone.sortie.ames = p.zone.requis;
+    p.joueur.x = p.zone.sortie.x;
+    p.joueur.y = p.zone.sortie.y;
+    avancer(p, PAS);
+    for (let i = 0; i < Math.round((DUREE_FIN + 1) / PAS); i++) avancer(p, PAS);
+    expect(p.fin).toBe(null);
+    expect(p.finVue).toBe(true);
+    expect(p.puits?.arrivee).toBe(DERNIER_ETAGE + 1);
+    expect(pouvoirs(DERNIER_ETAGE + 1)).toEqual({ souffle: true, fanal: true });
+  });
+
+  it('ne se rejoue pas : une fois vue, le douzième se franchit comme les autres', () => {
+    const p = creerPartie({ grain: 'FIN', etage: DERNIER_ETAGE });
+    p.finVue = true;
+    p.zone.sortie.ames = p.zone.requis;
+    p.joueur.x = p.zone.sortie.x;
+    p.joueur.y = p.zone.sortie.y;
+    avancer(p, PAS);
+    expect(p.fin).toBe(null);
+    expect(p.vidange).not.toBeNull();
   });
 });
