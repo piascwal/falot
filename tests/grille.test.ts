@@ -42,6 +42,7 @@ function plan(dessin: string[]): Zone {
           verticale: true,
           ouverte: 0,
           sens: 1,
+          gond: 1,
           phase: 0,
         };
         portes.push(pt);

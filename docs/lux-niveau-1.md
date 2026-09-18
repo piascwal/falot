@@ -786,3 +786,61 @@ Les deux se ressemblent désormais, parce que c'est la même chose qui se passe 
   plus vite et ne s'attarde pas.
 
 Le monde est figé pendant ces passages : ni Guets, ni règles. C'est vérifié.
+
+## Troisième tour : rendre les Guets jouables
+
+Les deux premiers tours avaient corrigé le prologue ; celui-ci corrige la
+règle. Le reproche était simple et juste : **c'était trop punitif.** Une
+lumière qui effleurait un Guet le retournait, et on mourait sans avoir eu le
+temps de comprendre qu'on avait été vu.
+
+### L'alerte se fait en deux temps
+
+| Seuil | Ce qui se passe | Pourquoi |
+|---|---|---|
+| **0,35 s** de lumière sur lui | Il devient rouge **plein** (plus de simple contour), un « ? » s'allume au-dessus de lui, il **s'arrête et balaye à gauche et à droite là où il était** | On sait qu'on a été remarqué, et on a le temps de s'écarter ou de lancer une pierre. Il ne se retourne pas vers nous |
+| **1,6 s** sans s'écarter | Il quitte son poste et vient au point où la lumière l'a touché | Rester dans sa lueur doit coûter. C'est un choix du joueur, pas une sanction |
+
+Le cône, lui, n'a pas changé de rôle : être vu **dans** le cône donne toujours
+au Guet le point de détection, et c'est au joueur de s'en échapper.
+
+**Une pierre annule tout** : en touchant le sol elle efface le point de
+détection et remet le bain de lumière à zéro. Sans cette ligne, le Guet
+repartait vers nous sitôt sa curiosité finie — « il est trop obnubilé par le
+player ». Et elle vole plus vite (0,28 s + la distance) : une réponse qui
+arrive après la mort n'est pas une réponse.
+
+### Le convoi souffle sa lumière
+
+Quand une sentinelle est en alerte ou charge, **les âmes déjà rallumées
+s'éteignent** : corps sombre, plus de halo, plus de trou dans la nuit. Elles
+redeviennent visibles dès que la menace retombe.
+
+C'est de la fiction autant que de la règle : une âme qui a peur cache sa
+lumière. Et surtout, **seule la lumière du joueur le trahit encore** — être
+détecté parce qu'un PNJ qu'on escorte brille dans notre dos était incompréhensible.
+En échange, escorter ne coûte plus rien en discrétion : c'est assumé, la
+difficulté de l'escorte est le chemin, pas la lueur.
+
+### Les torches, en plus simple
+
+Les torches dessinées du tour précédent étaient « très jolies mais pas du tout
+adaptées au design », qui ne vit que de formes suggérées. Elles sont
+maintenant à la manière de Minecraft : **un manche rectangulaire, une tête
+carrée** — gris quand elle est morte, orange à cœur blanc quand elle brûle.
+Pas un dégradé, pas une flamme.
+
+**La lenteur a été mesurée, pas devinée** : le corps d'une image coûte 0,9 ms au
+repos et 2,1 ms avec huit torches allumées et un joueur Solaire — c'est-à-dire
+exactement ce que coûte le POC gelé (2,1 ms en médiane lui aussi). Cinq Guets
+lancés à nos trousses : 2,2 ms. Le dessin des torches ne coûtait donc rien de
+mesurable ; elles ont été simplifiées pour le style, pas pour la vitesse.
+
+### Les portes sont des portes battantes
+
+Un battant tourne sur un gond, et un gond est scellé dans la pierre. Le gond
+est désormais choisi quand la grille est lue : du côté où il y a un montant.
+Les deux battants d'un passage de deux cases prennent donc appui chacun sur
+SON montant, et s'ouvrent en sens inverse — avant, ils s'ouvraient du même
+côté et la partie fixe de l'un tenait « à du vent ». Un test le vérifie sur
+tous les étages, écrits comme tirés au sort.

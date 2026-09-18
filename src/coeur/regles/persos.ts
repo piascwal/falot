@@ -180,14 +180,13 @@ export function majPersos(partie: Partie, dt: number, eclaires: Set<Perso>): voi
             p.regard += ecartAngle(p.regard, vise) * Math.min(1, 7 * dt);
           }
         } else {
-          // plus rien à suivre : il balaye largement sur place
+          // Il se doute, mais il n'a rien vu : il RESTE où il est et balaye à
+          // gauche et à droite, autour de la direction qu'il tenait. Il ne se
+          // retourne pas vers le joueur — c'est ce qui laisse le temps de
+          // s'écarter, ou de lancer une pierre.
           p.route = null;
           p.phase += 1.5 * dt;
           p.regard = p.capAlerte + Math.sin(p.phase) * 0.9;
-          if (!loin) {
-            p.vx += Math.cos(p.regard) * 130 * dt;
-            p.vy += Math.sin(p.regard) * 130 * dt;
-          }
         }
         p.humeur = HUMEURS.ACHARNE; // il cherche, et ça se voit
         if (partie.hasard() < dt * 4)

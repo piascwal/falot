@@ -189,6 +189,9 @@ export function genererZone(
         verticale: c.couloirH,
         ouverte: 0,
         sens: 1,
+        // Un couloir tiré au sort fait une case de large : les deux côtés
+        // perpendiculaires sont de la pierre, le gond tient donc toujours.
+        gond: 1,
         phase: rnd() * TAU,
       });
     }

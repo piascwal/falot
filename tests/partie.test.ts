@@ -183,6 +183,54 @@ describe('un Guet', () => {
     expect(g.charge).toBe(0);
   });
 
+  it('reste où il est tant que la lumière ne fait que s’attarder', () => {
+    const p = creerPartie({ grain: 'GUET' });
+    const g = guets(p)[0];
+    g.regard = 0;
+    g.alerte = 0;
+    g.cligne = 0;
+    p.joueur.niveau = 1;
+    p.joueur.x = g.x - CASE * 2.5;
+    p.joueur.y = g.y;
+    p.joueur.regard = 0;
+    p.joueur.repit = 99;
+    const ou = { x: g.x, y: g.y };
+    // une demi-seconde : il se doute, il tourne la tête, il ne bouge pas
+    for (let i = 0; i < 30; i++) avancer(p, PAS);
+    expect(g.alerte).toBeGreaterThan(0);
+    expect(g.derniereVue).toBeNull();
+    expect(Math.hypot(g.x - ou.x, g.y - ou.y)).toBeLessThan(CASE * 0.5);
+  });
+
+  it('finit par venir si la lumière insiste', () => {
+    const p = creerPartie({ grain: 'GUET' });
+    const g = guets(p)[0];
+    g.regard = 0;
+    g.alerte = 0;
+    g.cligne = 0;
+    p.joueur.niveau = 1;
+    p.joueur.x = g.x - CASE * 2.5;
+    p.joueur.y = g.y;
+    p.joueur.regard = 0;
+    p.joueur.repit = 99;
+    // deux secondes de faisceau sur lui : il quitte son poste
+    for (let i = 0; i < 130; i++) avancer(p, PAS);
+    expect(g.derniereVue).not.toBeNull();
+  });
+
+  it('oublie où il nous a vus quand une pierre tombe près de lui', () => {
+    const p = creerPartie({ grain: 'GUET' });
+    const g = guets(p)[0];
+    seFaireVoir(p, g, 2.5);
+    avancer(p, PAS);
+    expect(g.derniereVue).not.toBeNull();
+    lancerPierre(p, Math.PI, 1); // vers l'arrière, loin de lui
+    jouer(p, 1.2);
+    expect(g.curiosite).not.toBeNull();
+    expect(g.derniereVue).toBeNull(); // la pierre annule la traque, pas la retarde
+    expect(g.charge).toBe(0);
+  });
+
   it('ne s’alerte pas pour un faisceau qui ne fait que passer', () => {
     const p = creerPartie({ grain: 'GUET' });
     const g = guets(p)[0];
@@ -366,6 +414,49 @@ describe('rallumer une âme', () => {
     jouer(p, DUREE_CALME + 0.3);
     expect(q.calme).toBe(true);
     expect(p.joueur.eclat).toBe(eclat + 6);
+  });
+});
+
+describe('le convoi', () => {
+  it('souffle sa lumière dès qu’un Guet se doute de quelque chose', () => {
+    const p = creerPartie({ grain: 'CONVOI' });
+    const q = ames(p)[0];
+    q.calme = true;
+    q.suit = true;
+    q.prime = true;
+    q.x = p.joueur.x + CASE * 0.5;
+    q.y = p.joueur.y;
+    avancer(p, PAS);
+    expect(q.eteint).toBe(false);
+    // un Guet se doute : tout le convoi s'éteint
+    guets(p)[0].alerte = 3;
+    avancer(p, PAS);
+    avancer(p, PAS);
+    expect(q.eteint).toBe(true);
+    // et une âme éteinte n'éclaire plus personne
+    expect(p.eclaires.has(q)).toBe(false);
+  });
+
+  it('n’est plus un corps à voir une fois éteint : seul Falot se fait prendre', () => {
+    const p = creerPartie({ grain: 'CONVOI' });
+    const g = guets(p)[0];
+    g.regard = 0;
+    g.aveugle = 0;
+    g.cligne = 0;
+    g.alerte = 3; // il se doute déjà : le convoi est donc éteint
+    p.joueur.x = g.x + CASE * 2.5;
+    p.joueur.y = g.y;
+    p.joueur.repit = 0;
+    for (const q of ames(p).slice(0, 3)) {
+      q.calme = true;
+      q.suit = true;
+      q.prime = true;
+      q.x = p.joueur.x;
+      q.y = p.joueur.y;
+    }
+    avancer(p, PAS);
+    // trois âmes collées au joueur, et il ne compte QUE le joueur
+    expect(g.corpsVus).toBe(1);
   });
 });
 

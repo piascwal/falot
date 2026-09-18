@@ -45,7 +45,7 @@ export function lancerPierre(partie: Partie, angle?: number, portion?: number): 
     x: joueur.x,
     y: joueur.y,
     t: 0,
-    duree: 0.34 + d / (CASE * 16),
+    duree: 0.28 + d / (CASE * 22),
     hauteur: 0,
     rang: rangPierre(joueur),
   });
@@ -124,6 +124,11 @@ export function toucherLeSol(
     p.charge = 0;
     p.enAlerte = false;
     p.route = null;
+    // ET IL OUBLIE OÙ IL NOUS A VUS. Sans cette ligne il repartait vers son
+    // dernier point de détection sitôt sa curiosité finie : la pierre ne
+    // faisait que retarder la traque au lieu de l'annuler.
+    p.derniereVue = null;
+    p.bain = 0;
     emettre(partie, p.x, p.y - D.taille * 0.8, '#b2bacc', 3, 40);
   }
   if (r.eclate) montrerToast(partie, "Éclat — les Guets n'ont plus rien à distinguer");

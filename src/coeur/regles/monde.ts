@@ -7,10 +7,14 @@
  * t'atteint — ou si tu le touches — c'est fini. La distance fait donc le délai
  * toute seule, sans aucune formule.
  *
- * Et ce qu'il voit, ce n'est pas toi : ce sont des LAMPES. Chaque âme que tu
- * escortes est une petite lumière de plus dans son cône, et sa jauge monte
- * d'autant plus vite. C'est tout l'arbitrage du jeu, et la bible en donne la
- * raison (`docs/lux-falot.md`, « Les deux lumières »).
+ * Et ce qu'il cherche, ce n'est pas toi : c'est de la LUMIÈRE. Un Guet veut
+ * éteindre le monde et vider la tienne — donc ce que tu portes t'expose, et une
+ * flamme trop grande pour lui te protège.
+ *
+ * Le convoi, lui, souffle sa lumière dès qu'un Guet se doute de quelque chose
+ * (voir `souffler`) : on se fait prendre pour ce qu'on porte, pas pour ceux
+ * qu'on emmène. Les âmes restaient sinon des corps à voir, et escorter revenait
+ * à traîner des projecteurs.
  */
 
 import { CASE, D, PORTEE_VUE } from '../dimensions.js';
@@ -31,8 +35,16 @@ import { aLAbri, estEclaire, prochedUneBraise } from './lumiere.js';
 import { eteindre, gagnerEclat, paniquer, ramasser } from './progression.js';
 import { ouvrirLeSeuil } from './seuil.js';
 
-/** Le temps qu'une lumière doit rester sur un Guet pour qu'il vienne voir. */
+/** Le temps qu'une lumière doit rester sur un Guet pour qu'il se doute. */
 const BAIN_ALERTE = 0.35;
+
+/**
+ * Et le temps qu'il faut pour qu'il quitte son poste et vienne. Entre les deux,
+ * il est en alerte mais il reste là où il était : il balaye à gauche et à
+ * droite, sans se retourner vers nous. Un Guet qui fonce dès qu'un faisceau
+ * l'effleure ne laisse aucune porte de sortie — c'était trop punitif.
+ */
+const BAIN_TRAQUE = 1.6;
 
 /**
  * La lumière que le joueur PORTE touche-t-elle ce Guet ? Le halo, ou le
@@ -248,9 +260,13 @@ export function majRegles(partie: Partie, dt: number): void {
     // un faisceau à cinq sans rien perdre.
     const voile = aBonus(joueur, 'souffle');
     const joueurVu = !voile && !abri && joueur.repit <= 0 && exposable(joueur);
+    // Une âme qui a soufflé sa lumière n'est plus un corps à voir : seul ce que
+    // Falot porte le désigne encore (voir `souffler`).
     const convoi = voile
       ? []
-      : zone.persos.filter((q) => q.suit && !q.livre && !q.abri && exposable(q));
+      : zone.persos.filter(
+          (q) => q.suit && !q.livre && !q.abri && !q.eteint && exposable(q),
+        );
     const corps = (joueurVu ? 1 : 0) + convoi.length;
     p.corpsVus = corps; // exposé pour les mesures
 
@@ -295,11 +311,15 @@ export function majRegles(partie: Partie, dt: number): void {
     const baigne =
       !p.gene && p.aveugle <= 0 && d < PORTEE_VUE * 1.6 && toucheParLaLumiere(partie, p);
     p.bain = baigne ? p.bain + dt : Math.max(0, p.bain - dt * 2);
-    // La lumière ALERTE, elle ne dénonce pas : il cesse sa ronde et fouille sur
-    // place. C'est le cône qui déclenche la traque, et lui seul (plus haut) —
-    // là il sait OÙ, et il y va. Confondre les deux rendait le faisceau
-    // suicidaire : escorter tombait à 6 essais sur 20.
+    // La lumière ALERTE, elle ne dénonce pas. Trois crans, dans cet ordre :
+    //   — elle effleure : rien ;
+    //   — elle s'attarde (0,35 s) : il se doute. Il cesse sa ronde, devient
+    //     rouge, prend son point d'interrogation, et balaye là où il est ;
+    //   — elle insiste (1,6 s) : il quitte son poste et vient voir.
+    // C'est le cône, lui, qui déclenche la traque tout de suite (plus haut) :
+    // là il a vu, et il sait où.
     if (p.bain > BAIN_ALERTE) p.alerte = Math.max(p.alerte, 2.2);
+    if (p.bain > BAIN_TRAQUE) p.derniereVue = { x: joueur.x, y: joueur.y };
     pire = Math.max(pire, p.charge);
   }
 

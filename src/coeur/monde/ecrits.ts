@@ -181,6 +181,7 @@ export function zoneEcrite(numero: number): Zone | null {
           verticale: c === '|',
           ouverte: 0,
           sens: 1,
+          gond: 1, // posé plus bas, quand toute la grille est lue
           phase: rnd() * TAU,
         });
       else if (c >= '1' && c <= '9')
@@ -192,6 +193,20 @@ export function zoneEcrite(numero: number): Zone | null {
   // Nommés une fois, non nuls : tout ce qui suit lit ces deux noms-là.
   const leDepart: Case = depart;
   const leSeuil: Case = sortie;
+
+  // LES GONDS. Un battant est scellé à de la pierre, jamais au vide — et deux
+  // battants qui ferment le même passage se scellent donc à des murs opposés,
+  // ce qui les fait s'ouvrir en sens inverse. On ne peut le faire qu'ici : il
+  // faut toute la grille pour savoir où est la pierre.
+  const pierreEn = (cx: number, cy: number) =>
+    cx < 0 || cy < 0 || cx >= cols || cy >= lignes || mur[cy][cx] === 1;
+  for (const pt of portes) {
+    // perpendiculairement au battant : au-dessus/en dessous s'il est vertical,
+    // à gauche/à droite s'il est horizontal
+    const avant = pt.verticale ? pierreEn(pt.cx, pt.cy - 1) : pierreEn(pt.cx - 1, pt.cy);
+    const apres = pt.verticale ? pierreEn(pt.cx, pt.cy + 1) : pierreEn(pt.cx + 1, pt.cy);
+    pt.gond = avant ? 1 : apres ? -1 : 1;
+  }
 
   const z = {
     mur,

@@ -105,3 +105,8 @@ a changé — parce qu'un port silencieux est un port qu'on ne peut pas vérifie
   galerie du prologue a deux Guets, et mourir comme changer d'étage passent par
   une animation de lumière qui s'en va. Tout est détaillé et mesuré dans
   [`lux-niveau-1.md`](lux-niveau-1.md).
+- **Troisième tour** : l'alerte des Guets se fait en deux temps (il se doute,
+  puis il vient), une pierre efface le point de détection, le convoi souffle sa
+  lumière pendant une alerte, les torches reviennent à des formes simples et
+  les portes tournent sur un gond scellé dans la pierre. Détail dans
+  [`lux-niveau-1.md`](lux-niveau-1.md).

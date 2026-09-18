@@ -237,7 +237,9 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
         (a.emotion === EMOTIONS.COLERE ? 1 : 0) - (b.emotion === EMOTIONS.COLERE ? 1 : 0),
     );
   for (const p of ordre) {
-    const couleur = p.calme ? RALLUME : COULEURS[p.emotion];
+    // Une âme qui a soufflé sa lumière redevient sombre : c'est le signal que
+    // le convoi se cache, et il se lit d'un coup d'œil sur toute la file.
+    const couleur = p.calme && !p.eteint ? RALLUME : COULEURS[p.emotion];
     const repere = p.emotion === EMOTIONS.COLERE && (p.alerte > 0 || p.charge > 0.04);
     // une âme en train d'être rallumée : on voit le niveau monter en elle
     const recharge =
@@ -251,7 +253,7 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
       p,
       couleur,
       D.taille,
-      p.eclaire || p.calme || repere,
+      p.eclaire || (p.calme && !p.eteint) || repere,
       1,
       p.humeur,
       temps,
@@ -259,13 +261,15 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
     );
   }
 
-  // --- ce qu'un Guet a entendu ---
+  // --- ce qu'un Guet a entendu, ou cru voir ---
   // Un point d'interrogation au-dessus de la tête. Sans ça on lance une pierre
-  // et on ne sait jamais s'il a servi : la seule arme du début n'avait aucune
-  // réponse visible.
+  // et on ne sait jamais si elle a servi — et surtout, on ne sait pas qu'on
+  // vient d'être remarqué. Il s'affiche pour les deux : le bruit d'une pierre,
+  // et l'alerte quand une lumière s'est attardée.
   for (const p of zone.persos) {
-    if (p.emotion !== EMOTIONS.COLERE || p.livre || p.curieuxT <= 0) continue;
-    const k = clamp(p.curieuxT / 4.5, 0, 1);
+    if (p.emotion !== EMOTIONS.COLERE || p.livre) continue;
+    if (p.curieuxT <= 0 && p.alerte <= 0) continue;
+    const k = clamp(Math.max(p.curieuxT / 4.5, p.alerte / 2.2), 0, 1);
     ctx.save();
     ctx.textAlign = 'center';
     ctx.font = '700 23px Georgia, serif';
@@ -455,7 +459,8 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
   // Un calmé n'est pas qu'un faisceau : son corps et un petit halo restent
   // éclairés, sinon on ne voit qu'un cône sortir du néant.
   for (const p of zone.persos) {
-    if (p.calme) percerDisque(lctx, p.x - cam.x, p.y - cam.y, D.taille * 2.1, 0.95);
+    if (p.calme && !p.eteint)
+      percerDisque(lctx, p.x - cam.x, p.y - cam.y, D.taille * 2.1, 0.95);
     // Une sentinelle qui t'a repéré se montre en entier : c'est le signal le
     // plus important du jeu, il ne doit pas rester caché dans le noir.
     // Un Guet qui a entendu quelque chose se montre aussi : c'est la réponse
@@ -759,7 +764,7 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
     }
   }
   for (const p of zone.persos) {
-    if (!p.calme) continue;
+    if (!p.calme || p.eteint) continue;
     const rc = D.taille * 2.1;
     const gc = ctx.createRadialGradient(
       p.x - cam.x,

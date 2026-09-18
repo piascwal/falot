@@ -46,6 +46,7 @@ export function nouveauPerso(
     tremble: rnd() * TAU,
     humeur: HUMEURS.INTRIGUE,
     fuit: 0,
+    eteint: false,
     alerte: 0,
     etape: 0,
     charge: 0,

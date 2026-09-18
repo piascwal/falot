@@ -13,6 +13,27 @@ import { dansLeCone, vueLibre } from '../monde/grille.js';
 import type { Partie, Perso, Zone } from '../types.js';
 
 /**
+ * LE CONVOI SOUFFLE SA LUMIÈRE. Dès qu'un Guet se doute de quelque chose, les
+ * âmes rallumées s'éteignent : elles n'éclairent plus, et on ne les voit plus.
+ * Il ne reste que ce que Falot porte — c'est lui qui se fait prendre, pas ceux
+ * qu'il emmène.
+ *
+ * Ça se décide AVANT la propagation de la lumière, sinon le convoi éclaire
+ * encore pendant l'image où il vient de s'éteindre.
+ */
+export function souffler(partie: Partie): void {
+  const { zone } = partie;
+  const menace = zone.persos.some(
+    (q) =>
+      q.emotion === EMOTIONS.COLERE &&
+      !q.livre &&
+      q.aveugle <= 0 &&
+      (q.alerte > 0 || q.charge > 0.04),
+  );
+  for (const q of zone.persos) q.eteint = q.calme && !q.livre && menace;
+}
+
+/**
  * Relais : ton faisceau réveille un bonhomme, qui éclaire à son tour dans la
  * direction de son regard. Ça ne décide de rien — ça sert à voir plus loin.
  */
@@ -20,7 +41,7 @@ export function propager(partie: Partie): Set<Perso> {
   const { zone, joueur } = partie;
   const eclaires = new Set<Perso>();
   // un calmé brille tout seul, faisceau ou pas
-  for (const q of zone.persos) if (q.calme && !q.livre) eclaires.add(q);
+  for (const q of zone.persos) if (q.calme && !q.livre && !q.eteint) eclaires.add(q);
   const portee = porteeFaisceau(joueur);
   if (!portee) return eclaires;
   const cone = coneFaisceau(joueur);
@@ -81,6 +102,7 @@ export function estEclaire(partie: Partie, x: number, y: number): boolean {
   return zone.persos.some(
     (q) =>
       q.calme &&
+      !q.eteint &&
       dansLeCone(q.x, q.y, q.regard, x, y, D.portee * 5, D.cone) &&
       vueLibre(zone, q.x, q.y, x, y),
   );

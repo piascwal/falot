@@ -69,6 +69,14 @@ export interface Perso extends Corps {
   compteCalme: number;
   fuit: number;
   abri: boolean;
+  /**
+   * Une âme rallumée qui SE CACHE : dès qu'un Guet se doute de quelque chose,
+   * le convoi souffle sa lumière. Il cesse d'éclairer, et cesse d'être vu —
+   * seule la lumière que Falot porte le désigne encore. C'est ce qui rend
+   * l'escorte lisible : on se fait prendre pour ce qu'on porte, pas pour ceux
+   * qu'on emmène.
+   */
+  eteint: boolean;
 
   // --- propre aux Guets ---
   /** Elle se doute de quelque chose (posé par les règles, pas par elle). */
@@ -167,6 +175,13 @@ export interface Braise extends Source {}
 export interface Porte extends Case, Point {
   /** Le battant barre verticalement (donc le couloir est horizontal). */
   verticale: boolean;
+  /**
+   * De quel bout le battant est scellé : +1 côté haut (ou gauche), −1 côté bas
+   * (ou droite). Le gond doit tenir à de la PIERRE — un battant accroché au
+   * vide ne veut rien dire — et c'est ce qui fait que les deux battants d'un
+   * même passage s'ouvrent en sens inverse, comme des portes battantes.
+   */
+  gond: 1 | -1;
   /** 0 fermée, 1 grande ouverte. Sous 0,5 elle est solide. */
   ouverte: number;
   sens: number;

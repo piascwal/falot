@@ -161,6 +161,11 @@ export function dessinerSol(
     ctx.save();
     ctx.translate(x, y);
     if (pt.verticale) ctx.rotate(Math.PI / 2);
+    // Le gond est scellé dans la pierre, d'un côté ou de l'autre du passage :
+    // on retourne le repère pour que le battant parte de CE côté-là. Deux
+    // battants voisins ont des gonds opposés, donc ils s'ouvrent en sens
+    // inverse — ce sont des portes battantes, pas deux planches parallèles.
+    ctx.scale(pt.gond, 1);
     // le battant pivote sur son gond : fermé il barre le couloir, ouvert il
     // se range le long de la paroi
     const angle = pt.ouverte * (Math.PI / 2) * 0.92 * (pt.sens || 1);

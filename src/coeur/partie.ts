@@ -15,7 +15,7 @@ import { PIERRE } from './formes.js';
 import { chargerZone } from './monde/chargement.js';
 import { majFlottants, majParticules } from './particules.js';
 import { majJoueur } from './regles/joueur.js';
-import { propager } from './regles/lumiere.js';
+import { propager, souffler } from './regles/lumiere.js';
 import { majRegles } from './regles/monde.js';
 import { majPersos } from './regles/persos.js';
 import { majPierres } from './regles/pierre.js';
@@ -208,6 +208,8 @@ export function avancer(partie: Partie, dt: number = PAS): void {
 
   majPortes(partie, dt);
   majJoueur(partie, dt);
+  // qui éteint sa lumière, avant de savoir qui éclaire quoi
+  souffler(partie);
   const eclaires = propager(partie);
   partie.eclaires = eclaires;
   majPersos(partie, dt, eclaires);
