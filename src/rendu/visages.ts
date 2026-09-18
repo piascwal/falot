@@ -95,13 +95,9 @@ export function dessinerTete(
     plein.addColorStop(1, assombrir(RALLUME, 0.18));
     ctx.fillStyle = plein;
     ctx.fillRect(-w / 2, haut, w, h);
-    // le ménisque : la ligne vive à la surface, qui dit que ça monte
-    ctx.strokeStyle = 'rgba(255,255,255,0.85)';
-    ctx.lineWidth = 1.6;
-    ctx.beginPath();
-    ctx.moveTo(-w / 2, haut);
-    ctx.lineTo(w / 2, haut);
-    ctx.stroke();
+    // Pas de ménisque : la ligne blanche à la surface se lisait comme une
+    // barre de chargement collée sur le visage. Le dégradé suffit à dire que
+    // ça monte.
     ctx.restore();
   }
 
