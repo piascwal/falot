@@ -277,27 +277,27 @@ Elle vit dans `poc/lux-paranoia.html`, sous `ETAGES_ECRITS`.
 #########################
 ##############.........##     1  la salle de la torche
 ##...#########.........##
-##.@..o.o.o.o.*8.......##     3  le réveil, puis le couloir des lueurs
+##.@.%o.o.o.o.*8.......##     3  le réveil : ses DEUX issues sont fêlées
 ##.6.#########.........##     4
-###%##########.........##     5  la pierre fendue, sous la salle du réveil
-##.g.#########...T2....##     6  la niche ; le brandon, et la règle des deux lumières
+###%##########.........##     5  la seconde fente, sous la salle du réveil
+##.g.#########...T2....##     6  la niche, et la poche de cailloux
 ##################*######
-##################=######
+##################=######     8  entrée de la galerie, colonne 18
 ############......1....##     9  le Guet nommé, et ce que fait le caillou
 ############..r........##    10
-############...........##    11  la SALLE du Guet : 44 cases, de la place pour lancer
+############...........##    11  la SALLE du premier Guet : 44 cases
 ############...........##    12
-##################=######
-##############....*....##    14  le Frileux qu'on ne peut pas encore aider
+##############=##########    13  SORTIE colonne 14 : elle n'est plus alignée
+##############*........##    14  la salle du Frileux qu'on ne peut pas aider
 ##############.......b.##
 ##############.........##
 ######.......|.*.......##    17  le couloir calme, et sa porte
 ######=##################
 ##....*.########......###
-##......##5T####......###    20  l'alcôve de la torche, sur le trajet de l'escorte
-##..S...|o.o.or|*.....###    21  le Seuil, les fragments, le Guet de l'escorte
-##....4.####..##....b.###    22  le renfoncement de la première âme
-##......####.b##......###    23  la seconde âme, au fond de la dernière salle
+##......##5T####......###    20  l'alcôve de la torche, au-dessus du couloir
+##..S...|o.o..r|o*....###    21  le couloir de l'escorte, ligne du haut
+##....4.|......|.b....###    22  sa ligne du bas, et la 2e âme à sa bouche
+##......####.b##......###    23  la 1re âme, dans sa poche sous le couloir
 #########################
 ```
 
@@ -440,17 +440,17 @@ cette forme. Une flamme posée n'en a pas : c'est un morceau de la pièce, et
 dedans tu n'es plus qu'une tache un peu plus sombre. *On ne repère pas une
 bougie dans un brasier.*
 
-L'étage 1 l'enseigne en deux murmures, dans la salle de la torche : le brandon à
+L'étage 1 l'enseigne en deux murmures, dans la salle de la torche : la torche à
 l'entrée, la règle à la flamme. Le texte de la forme Veilleur et le récit du
 quatrième étage disent la même chose avec d'autres mots.
 
-**Et le brandon n'est plus « laissé allumé » par quelqu'un** — c'est le joueur
-qui le rallume, la première version se contredisait. Ce sont des brandons morts,
-accrochés là par ceux qui sont passés avant ; ce qu'il reste de lumière à Falot
+**Et la torche n'est plus « laissé allumé » par quelqu'un** — c'est le joueur
+qui la rallume, la première version se contredisait. Ce sont des torches
+éteintes, accrochées là par ceux qui sont passés avant ; ce qu'il reste de lumière à Falot
 suffit à les reprendre.
 
-> **Un réglage au passage.** Le rayon de rallumage était de 0,75 case, et le
-> brandon est décalé vers sa paroi : il fallait lui rentrer dedans au pixel
+> **Un réglage au passage.** Le rayon de rallumage était de 0,75 case, et la
+> torche est décalée vers sa paroi : il fallait lui rentrer dedans au pixel
 > près. On passait à côté d'un abri sans le reprendre. Il est à 1,15 case, et
 > le trajet naturel vers la sortie de la salle l'allume désormais.
 >
@@ -620,3 +620,62 @@ les deux barres avec 4 px de part et d'autre, il paraissait posé dessus. Le
 bandeau d'état est repassé de 83 à 68 px de haut.
 
 ### Passer le prologue
+---
+
+## Ce que les tests utilisateurs ont montré (et ce qu'on a mesuré ensuite)
+
+Trois relevés à la manette, par quelqu'un d'autre que l'auteur. Aucun bug : de
+la géographie qui enseignait le contraire de ce qu'on voulait.
+
+| Observé | Mesuré ensuite, pilote automatique, 20 essais par moment de ronde |
+|---|---|
+| « Le caillou n'est jamais rentabilisé, on va tout droit » | La galerie se traversait **20/20 en 2,3 s**. Ses deux portes étaient alignées sur la colonne 18 : on descendait une ligne droite de cinq cases. Les 44 cases « pour avoir la place de lancer » n'étaient jamais parcourues |
+| « Au deuxième Guet on essaye, on meurt, on recommence, sans comprendre » | Le couloir de l'escorte était **0/20**. Large d'une case, il était *bouché* par le Guet : le toucher tue, et le caillou n'étourdit qu'à partir d'Ardent — hors budget du prologue (plafond 68 d'éclat, Ardent à 88). Le caillou ne **pouvait pas** résoudre ce couloir |
+| « Après la première âme, le joueur remonte tout l'étage » | Repartir à l'est chercher la seconde était **0/20, jamais atteinte**. Il n'a pas manqué d'intuition : le niveau punissait la route prévue et récompensait l'autre — au nord c'était connu, sûr, et il y avait un Frileux dont il se souvenait |
+
+**Le diagnostic, en une phrase : le prologue ne contenait aucun endroit où le
+caillou était la réponse.** Pas un. Et son seul passage difficile ne pouvait pas
+être résolu par l'outil qu'il était censé enseigner.
+
+### Ce qui a été fait
+
+1. **Les deux issues de la première salle sont fêlées.** On ne quitte pas le
+   réveil sans casser un mur : le caillou sert dans les quinze premières
+   secondes, avant le moindre Guet, et la carte dit enfin ce que ce document
+   affirmait déjà. La fente se lit d'elle-même — la lumière mord 0,95 case dans
+   une pierre fendue, donc le réseau de fractures s'allume sous le halo, à
+   bout portant, sans une phrase.
+2. **Les portes de la galerie sont désalignées** : entrée colonne 18, sortie
+   colonne 14. Traverser demande de se déplacer dans la ronde du Guet, là où il
+   y a la place de lancer.
+3. **La dernière lueur est passée à l'est du Guet de l'escorte** (colonne 16) et
+   **la seconde âme à la bouche du couloir** (17,22) : on devient Curieux
+   *après* avoir traversé, et les deux âmes sont vues à l'aller. Plus rien
+   n'oblige à deviner qu'il en reste une.
+4. **Le couloir de l'escorte fait deux cases de haut** sur toute la ronde du
+   Guet, et **ses deux battants sont hauts de deux cases**. Sans ce doublement,
+   on ne pouvait entrer que par la ligne du haut, c'est-à-dire pile sur le poste
+   du Guet ; et une case de porte reste un mur pour lui, battant ouvert ou non,
+   donc son quartier est toujours scellé.
+5. Le mot **« brandon » a disparu** : ce sont des torches. La fiction qui va
+   avec (des torches mortes qu'on reprend) est inchangée, sa formulation
+   attendra une passe d'écriture.
+
+### Ce que ça donne
+
+| Passage | Avant | Après |
+|---|---|---|
+| Galerie, tout droit | 20/20 | **6/20** |
+| Galerie, en lançant un caillou et en attendant que le Guet parte | — | **20/20** |
+| Couloir de l'escorte, ligne du haut | 0/20 | 0/20 *(inchangé, et voulu)* |
+| Couloir de l'escorte, ligne du bas | impossible | **20/20 seul, 18/20 à deux âmes** |
+| Retour vers la bouche du couloir | 0/20 | **20/20** |
+
+Foncer n'est plus la stratégie dominante dans la galerie, le caillou l'est. Le
+couloir est devenu un choix de voie au lieu d'un mur : la ligne du haut tue
+toujours, celle du bas passe, et escorter deux âmes coûte deux essais sur vingt.
+
+**Tout ceci est en tests** — `tests/prologue.test.ts` pilote la vraie
+simulation, sans canvas ni navigateur, et chaque intention du niveau y est une
+assertion. Si quelqu'un réaligne les portes de la galerie ou remet une âme au
+fond de la salle de droite, la suite le dit.

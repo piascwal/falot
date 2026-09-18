@@ -53,7 +53,7 @@ export const ETAGES_ECRITS: Readonly<Record<number, EtageEcrit>> = {
       '#########################', //  0
       '##############.........##', //  1   la salle de la torche
       '##...#########.........##', //  2
-      '##.@..o.o.o.o.*8.......##', //  3   le réveil, puis le couloir des lueurs
+      '##.@.%o.o.o.o.*8.......##', //  3   le réveil : ses DEUX issues sont fêlées
       '##.6.#########.........##', //  4
       '###%##########.........##', //  5   la pierre fendue, sous la salle du réveil
       '##.g.#########...T2....##', //  6   la niche, et la poche de cailloux qu'on y trouve
@@ -63,16 +63,20 @@ export const ETAGES_ECRITS: Readonly<Record<number, EtageEcrit>> = {
       '############..r........##', // 10   la SALLE du premier Guet : de la place pour lancer
       '############...........##', // 11
       '############...........##', // 12
-      '##################=######', // 13
-      '##############....*....##', // 14   la salle du Frileux qu'on ne peut pas aider
+      '##############=##########', // 13   la sortie, décalée de quatre cases
+      '##############*........##', // 14   la salle du Frileux qu'on ne peut pas aider
       '##############.......b.##', // 15
       '##############.........##', // 16
       '######.......|.*.......##', // 17   le couloir calme, et sa porte
       '######=##################', // 18
       '##....*.########......###', // 19
       '##......##5T####......###', // 20   l'alcôve de la torche, sur le trajet de l'escorte
-      '##..S...|o.o.or|*.....###', // 21   le Seuil, les fragments, le Guet de l'escorte
-      '##....4.####..##....b.###', // 22   le renfoncement de la première âme, sous le nez du Guet
+      // Les deux battants du couloir sont hauts de DEUX cases : sans ça on ne
+      // peut entrer que par la ligne du haut, c'est-à-dire pile sur le poste du
+      // Guet. Doublés, ils scellent toujours son quartier — une case de porte
+      // est un mur pour lui, battant ouvert ou non.
+      '##..S...|o.o..r|o*....###', // 21   le Seuil, les fragments, le Guet de l'escorte
+      '##....4.|......|.b....###', // 22   le couloir sur deux cases, et la 2e âme à sa bouche
       '##......####.b##......###', // 23
       '#########################', // 24
     ],
@@ -96,7 +100,7 @@ export const ETAGES_ECRITS: Readonly<Record<number, EtageEcrit>> = {
       '4': "Sortir, c'est monter. Mais un Seuil ne s'ouvre pas avec une clé : il cède quand assez d'âmes se tiennent dedans.",
       '5': 'Tant que la flamme tient, il ne te voit pas. Ni toi, ni ceux qui se serrent contre toi.',
       '6': 'Le mur, juste en dessous, est fendu. Un caillou suffirait.',
-      '8': "Un brandon mort au mur, laissé par qui passait avant toi. Ce qu'il te reste de lumière suffit à le reprendre.",
+      '8': "Une torche éteinte au mur, laissée par qui passait avant toi. Ce qu'il te reste de lumière suffit à la rallumer.",
     },
     // Deux âmes, et les deux sont dans la même salle, au bout du couloir des
     // fragments. Elles ont d'abord été posées aux deux bouts du niveau : il
@@ -207,7 +211,7 @@ export function zoneEcrite(numero: number): Zone | null {
   z.porteDe = porteDe;
 
   // Une torche se fixe à une paroi : on cherche le mur voisin et on décale le
-  // brandon vers lui, exactement comme le fait le générateur.
+  // torche vers lui, exactement comme le fait le générateur.
   const torchesPosees = torches.map(({ cx, cy }) => {
     const cotes = [
       [1, 0],

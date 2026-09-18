@@ -85,3 +85,17 @@ a changé — parce qu'un port silencieux est un port qu'on ne peut pas vérifie
 - Reprendre le contenu : l'étage 1 est écrit, les suivants sont tirés au sort.
   Les quatre questions ouvertes de la bible (« À débattre ») attendent toujours
   une réponse.
+
+## Depuis le portage
+
+- **L'étage 1 a changé** après des tests utilisateurs : deux issues fêlées dans
+  la salle du réveil, les portes de la galerie désalignées, le couloir de
+  l'escorte élargi à deux cases, la seconde âme déplacée à la bouche du
+  couloir. Le détail et les mesures sont dans
+  [`lux-niveau-1.md`](lux-niveau-1.md).
+  **Conséquence pour `npm run comparer`** : le POC gelé n'est plus une
+  référence valable pour l'étage 1 — il l'est toujours pour les étages
+  procéduraux, qui n'ont pas bougé. Les deux scènes comparées (étages 3 et 4)
+  sont justement là.
+- Le mot « brandon » a été remplacé par « torche » partout, dans le jeu comme
+  dans la doc. La fiction (des torches mortes que Falot reprend) est inchangée.

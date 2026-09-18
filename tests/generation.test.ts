@@ -8,7 +8,6 @@ import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 import { CASE } from '../src/coeur/dimensions.js';
 import { EMOTIONS } from '../src/coeur/formes.js';
-import { zoneEcrite } from '../src/coeur/monde/ecrits.js';
 import { genererZone } from '../src/coeur/monde/generation.js';
 import { distances } from '../src/coeur/monde/grille.js';
 import type { Point, Zone } from '../src/coeur/types.js';
@@ -94,65 +93,26 @@ describe('genererZone', () => {
     }
   });
 
+  it('ne fait jamais d’une fissure un passage obligé', () => {
+    // C'est la règle exactement inverse de celle du prologue (voir
+    // `prologue.test.ts`) : là-bas casser un mur est imposé pour enseigner le
+    // caillou ; ici une fente n'ouvre qu'un raccourci, et la zone reste
+    // entièrement parcourable sans rien casser. Les distances sont calculées
+    // sur la pierre telle qu'elle est — une fissure est un mur.
+    for (let i = 0; i < 80; i++) {
+      const z = genererZone(`FENTE-${i}`, 5, 3)!;
+      const d = depuisLeDepart(z);
+      expect(atteignable(d, z.sortie)).toBe(true);
+      for (const q of z.persos) expect(atteignable(d, q)).toBe(true);
+      for (const l of z.lueurs) expect(atteignable(d, l)).toBe(true);
+    }
+  });
+
   it('est déterministe : même graine, même plan, jusqu’aux personnages', () => {
     const a = genererZone('LUX-1042', 4, 2)!;
     const b = genererZone('LUX-1042', 4, 2)!;
     expect(empreinte(a)).toBe(empreinte(b));
     expect(empreinte(genererZone('LUX-1043', 4, 2)!)).not.toBe(empreinte(a));
-  });
-});
-
-describe('zoneEcrite — l’étage 1', () => {
-  /**
-   * LA règle des murs fêlés, telle qu'elle est écrite dans la bible : « les
-   * casser ouvre un raccourci et jamais un passage obligatoire — la zone reste
-   * finissable par quelqu'un qui n'a pas compris le caillou ».
-   *
-   * L'étage 1 la met à l'épreuve pour de bon : sa poche de cailloux est DERRIÈRE
-   * la pierre fendue. On vérifie donc les deux moitiés de la règle — ce qui est
-   * obligatoire est atteignable sans rien casser, et tout le reste l'est une
-   * fois les fentes ouvertes.
-   */
-  it('est finissable sans casser un seul mur', () => {
-    const z = zoneEcrite(1)!;
-    expect(z).not.toBeNull();
-    const d = depuisLeDepart(z);
-    expect(atteignable(d, z.sortie)).toBe(true);
-    for (const p of z.persos) expect(atteignable(d, p)).toBe(true);
-    for (const rp of z.reprises) expect(atteignable(d, rp)).toBe(true);
-  });
-
-  it('rend tout le reste atteignable une fois les fentes ouvertes', () => {
-    const z = zoneEcrite(1)!;
-    for (const f of z.fissures) z.mur[f.cy][f.cx] = 0;
-    const d = depuisLeDepart(z);
-    for (const l of z.lueurs) expect(atteignable(d, l)).toBe(true);
-  });
-
-  it('cache au moins une chose derrière une pierre fendue — sinon elle ne sert à rien', () => {
-    const z = zoneEcrite(1)!;
-    const avant = depuisLeDepart(z);
-    const cacheesAvant = z.lueurs.filter((l) => !atteignable(avant, l));
-    expect(z.fissures.length).toBeGreaterThan(0);
-    expect(cacheesAvant.length).toBeGreaterThan(0);
-  });
-
-  it('demande deux âmes, et il y en a assez sur le plan', () => {
-    const z = zoneEcrite(1)!;
-    const ames = z.persos.filter((p) => p.emotion !== EMOTIONS.COLERE).length;
-    expect(z.requis).toBe(2);
-    expect(ames).toBeGreaterThanOrEqual(2);
-  });
-
-  it('donne une ronde à chaque Guet qui en a une d’écrite', () => {
-    const z = zoneEcrite(1)!;
-    const guets = z.persos.filter((p) => p.emotion === EMOTIONS.COLERE);
-    expect(guets).toHaveLength(2);
-    for (const g of guets) expect(g.ronde.length).toBeGreaterThanOrEqual(2);
-  });
-
-  it('ne pose aucun murmure sans texte', () => {
-    for (const m of zoneEcrite(1)!.murmures) expect(typeof m.texte).toBe('string');
   });
 });
 

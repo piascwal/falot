@@ -160,7 +160,7 @@ De là, tout découle :
 
 Corollaire à corriger : le jeu fait **rallumer** les torches par le joueur, donc
 elles ne peuvent pas « brûler encore un peu » en l'attendant. Ce sont des
-**brandons morts**, accrochés là par ceux qui sont passés avant. Il suffit
+**torches éteintes**, accrochées là par ceux qui sont passés avant. Il suffit
 d'approcher : ce qu'il reste de lumière à Falot suffit à les reprendre — et ce
 qu'il donne là, il ne l'a plus sur lui.
 
@@ -212,7 +212,7 @@ peut pas ouvrir un mur avec de la lumière.
 | Mourir se dit « éteint », on repart du seuil | On ne meurt pas ici ; se rallumer coûte du temps, pas la vie |
 | Les âmes livrées restent, le convoi se disperse | Ce qui a franchi le Seuil est hors d'atteinte ; ce qu'il portait encore tombe avec lui |
 | Un fil marque le chemin déjà parcouru | Il ne connaît pas les Dessous, seulement ce qu'il a déjà traversé |
-| Des brandons morts au mur, qu'on rallume en passant | Laissés par ceux qui sont passés avant. Ils ne brûlent plus : c'est Falot qui les reprend, avec ce qu'il lui reste |
+| Des torches éteintes au mur, qu'on rallume en passant | Laissées par ceux qui sont passés avant. Elles ne brûlent plus : c'est Falot qui les reprend, avec ce qu'il lui reste |
 | Une torche allumée met à l'abri | Un Guet cherche une petite lumière seule dans le noir. Dans une plus grande, Falot n'a plus cette forme-là |
 | Ton halo et ton faisceau te trahissent | Ce sont précisément la forme qu'il guette : une lampe isolée qui se déplace |
 | Des murs fêlés qu'un caillou ouvre | Personne n'a bâti les Dessous : on y a entassé. Ça tient mal, et la lumière ne perce pas la pierre — seule la chose qui ne brille pas le peut |

@@ -63,7 +63,7 @@ export function majRegles(partie: Partie, dt: number): void {
     if (t.reste > 0 && partie.hasard() < 0.1) {
       emettre(partie, t.x, t.y, '#ffb45c', 1, 26);
     }
-    // Une case et demie, pas trois quarts de case : le brandon est décalé vers
+    // Une case et demie, pas trois quarts de case : la torche est décalée vers
     // sa paroi, et à 0,75 il fallait lui rentrer dedans au pixel près. On
     // passait à côté d'un abri sans le reprendre, sans jamais savoir pourquoi.
     if (
