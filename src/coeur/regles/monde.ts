@@ -21,6 +21,7 @@ import { CASE, D, PORTEE_VUE } from '../dimensions.js';
 import { BONUS, DUREE_CALME, EMOTIONS } from '../formes.js';
 import {
   aBonus,
+  aTrait,
   coneFaisceau,
   porteeFaisceau,
   rangPierre,
@@ -29,7 +30,7 @@ import {
 import { dansLeCone, vueLibre } from '../monde/grille.js';
 import { emettre, onde } from '../particules.js';
 import { ETEINTS, REPLIQUES } from '../textes.js';
-import type { Partie, Perso } from '../types.js';
+import type { Partie, Perso, Point } from '../types.js';
 import { montrerToast, murmurer } from '../voix.js';
 import { aLAbri, estEclaire, prochedUneBraise } from './lumiere.js';
 import { eteindre, gagnerEclat, paniquer, ramasser } from './progression.js';
@@ -45,6 +46,9 @@ const BAIN_ALERTE = 0.35;
  * l'effleure ne laisse aucune porte de sortie — c'était trop punitif.
  */
 const BAIN_TRAQUE = 1.6;
+
+/** Jusqu'où un Guet passe le mot à un autre (étage 2, « l'appel »). */
+const PORTEE_APPEL = CASE * 5;
 
 /**
  * La lumière que le joueur PORTE touche-t-elle ce Guet ? Le halo, ou le
@@ -136,7 +140,7 @@ export function majRegles(partie: Partie, dt: number): void {
   // Une âme qu'on ne peut pas encore rallumer laisse le joueur tourner autour
   // d'elle sans comprendre ce qu'elle attend. Elle le dit — une fois, et
   // seulement tant qu'on n'a pas de faisceau, c'est-à-dire tant que c'est vrai.
-  if (!porteeFaisceau(joueur)) {
+  if (!porteeFaisceau(joueur) && !joueur.eteint) {
     for (const p of zone.persos) {
       if (p.emotion === EMOTIONS.COLERE || p.calme || p.livre || p.aDit) continue;
       if (Math.hypot(p.x - joueur.x, p.y - joueur.y) > CASE * 2.4) continue;
@@ -224,6 +228,13 @@ export function majRegles(partie: Partie, dt: number): void {
   }
   let pire = 0,
     traque = false;
+  // L'APPEL (étage 2). Ils n'ont qu'un seul regard, et ils se le passent :
+  // celui qui voit quelque chose le dit à ses voisins. On récolte les points
+  // pendant la boucle et on les distribue après — prévenir un Guet déjà
+  // parcouru dans la même image ferait dépendre le résultat de l'ordre de la
+  // liste, et la même partie ne se rejouerait pas deux fois pareil.
+  const appels: Point[] = [];
+  const appel = aTrait(zone, 'appel');
 
   for (const p of zone.persos) {
     if (p.emotion !== EMOTIONS.COLERE || p.livre) continue;
@@ -259,7 +270,11 @@ export function majRegles(partie: Partie, dt: number): void {
     // bonus d'escorte, et c'est le seul moment du jeu où l'on peut traverser
     // un faisceau à cinq sans rien perdre.
     const voile = aBonus(joueur, 'souffle');
-    const joueurVu = !voile && !abri && joueur.repit <= 0 && exposable(joueur);
+    // Un Guet ne voit pas les corps, il voit des lampes : une lampe soufflée
+    // n'est plus rien pour lui. Le contact, lui, tue toujours — se cacher
+    // n'est pas traverser.
+    const joueurVu =
+      !voile && !abri && !joueur.eteint && joueur.repit <= 0 && exposable(joueur);
     // Une âme qui a soufflé sa lumière n'est plus un corps à voir : seul ce que
     // Falot porte le désigne encore (voir `souffler`).
     const convoi = voile
@@ -278,7 +293,10 @@ export function majRegles(partie: Partie, dt: number): void {
       // fouillait au hasard dans la direction de son regard, et on pouvait
       // rester planté à trois cases de lui sans qu'il ne vienne jamais.
       const cible = joueurVu ? joueur : convoi[0];
-      if (cible) p.derniereVue = { x: cible.x, y: cible.y };
+      if (cible) {
+        p.derniereVue = { x: cible.x, y: cible.y };
+        if (appel) appels.push({ x: cible.x, y: cible.y });
+      }
       p.charge = Math.min(1, p.charge + 0.34 * corps * dt);
 
       // Le front rouge rattrape quelqu'un : le joueur est éliminé, mais un
@@ -321,6 +339,19 @@ export function majRegles(partie: Partie, dt: number): void {
     if (p.bain > BAIN_ALERTE) p.alerte = Math.max(p.alerte, 2.2);
     if (p.bain > BAIN_TRAQUE) p.derniereVue = { x: joueur.x, y: joueur.y };
     pire = Math.max(pire, p.charge);
+  }
+
+  // On fait passer le mot. Il ne porte pas loin — cinq cases, et à travers la
+  // pierre : ce n'est pas un cri, c'est un regard qui se transmet. Le voisin
+  // n'a rien vu, lui : il se doute et il vient voir, comme si la lumière
+  // l'avait baigné.
+  for (const ou of appels) {
+    for (const q of zone.persos) {
+      if (q.emotion !== EMOTIONS.COLERE || q.livre || q.aveugle > 0) continue;
+      if (Math.hypot(q.x - ou.x, q.y - ou.y) > PORTEE_APPEL) continue;
+      q.alerte = Math.max(q.alerte, 2.6);
+      q.derniereVue = { x: ou.x, y: ou.y };
+    }
   }
 
   // Le halo suit la jauge la plus pleine : la lumière rétrécit à mesure qu'une

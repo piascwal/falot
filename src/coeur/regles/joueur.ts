@@ -32,6 +32,17 @@ export function majJoueur(partie: Partie, dt: number): void {
   const { joueur, zone, entrees } = partie;
   const demi = D.taille * 0.5;
 
+  // SOUFFLER SA LUMIÈRE. Un geste tenu, jamais un interrupteur : on le garde
+  // le temps d'un passage et on respire après. Il faut s'en être souvenu
+  // (étage 3), et ça ne tient pas pendant qu'il arrive ou qu'il s'en va —
+  // sinon on ressort d'une vidange déjà éteint sans avoir rien demandé.
+  joueur.eteint =
+    partie.pouvoirs.souffle &&
+    entrees.souffle &&
+    !partie.vidange &&
+    !partie.envol &&
+    !partie.chute;
+
   // clavier d'abord : sur ordinateur c'est lui qui commande
   const kx = (entrees.touches.droite ? 1 : 0) - (entrees.touches.gauche ? 1 : 0);
   const ky = (entrees.touches.bas ? 1 : 0) - (entrees.touches.haut ? 1 : 0);

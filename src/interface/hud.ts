@@ -31,6 +31,8 @@ export interface Hud {
   maj(partie: Partie): void;
   /** Le bouton pierre, dont les entrées ont besoin pour la visée. */
   pierre: HTMLButtonElement;
+  /** Le bouton souffle, tenu tant qu'on veut rester couvert. */
+  souffle: HTMLButtonElement;
 }
 
 export function creerHud(): Hud {
@@ -43,6 +45,7 @@ export function creerHud(): Hud {
   const elAmes = el('ames');
   const elToast = el('toast');
   const elPierre = el<HTMLButtonElement>('pierre');
+  const elSouffle = el<HTMLButtonElement>('souffle');
   const elPierreN = el('pierre-n');
   const elBonus = el('bonus');
   const elBonusNom = el('bonus-nom');
@@ -53,6 +56,7 @@ export function creerHud(): Hud {
 
   return {
     pierre: elPierre,
+    souffle: elSouffle,
     maj(partie: Partie): void {
       const { joueur, zone } = partie;
       const f = forme(joueur);
@@ -68,6 +72,11 @@ export function creerHud(): Hud {
       elBarre.style.width = `${clamp((joueur.eclat - bas) / (haut - bas), 0, 1) * 100}%`;
       elBarre.style.background = f.couleur;
       elZone.textContent = `ZONE ${zone.numero}`;
+
+      // Le souffle n'existe que depuis que Falot s'en est souvenu. Un bouton
+      // grisé aurait promis quelque chose sans le donner : il n'est pas là.
+      elSouffle.hidden = !partie.pouvoirs.souffle;
+      elSouffle.classList.toggle('tenu', joueur.eteint);
 
       // --- les pastilles d'âmes : on ne les reconstruit que si le compte bouge ---
       const etat = `${zone.sortie.ames}/${zone.requis}`;

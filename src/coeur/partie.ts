@@ -38,6 +38,7 @@ const nouvellesEntrees = (): Entrees => ({
   // l'écran sans qu'aucun doigt ne le tienne.
   touches: { gauche: false, droite: false, haut: false, bas: false },
   visee: { actif: false, ox: 0, oy: 0, dx: 0, dy: 0, force: 0, id: null },
+  souffle: false,
 });
 
 const nouveauJoueur = (): Joueur => ({
@@ -55,6 +56,7 @@ const nouveauJoueur = (): Joueur => ({
   niveau: 0,
   souffle: 1,
   repit: 0,
+  eteint: false,
   vu: 0,
   // Sans lui, `sin(temps + undefined)` valait NaN et la bouche du joueur ne se
   // dessinait pas du tout.

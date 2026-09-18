@@ -108,3 +108,26 @@ export function brancherPointeur(
 
   bouton.addEventListener('click', (e) => e.preventDefault());
 }
+
+/**
+ * Le bouton souffle : tenu, pas basculé. Tant que le doigt est dessus, Falot se
+ * couvre ; dès qu'il part — relâché, annulé, ou le doigt qui sort du bouton —
+ * la lumière revient. Un doigt qui glisse hors du bouton ne doit pas laisser
+ * Falot éteint sans qu'il le sache.
+ */
+export function brancherSouffle(bouton: HTMLButtonElement, partie: Partie): void {
+  const tenir = (oui: boolean) => {
+    partie.entrees.souffle = oui;
+    bouton.classList.toggle('tenu', oui);
+  };
+  bouton.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    bouton.setPointerCapture(e.pointerId);
+    tenir(true);
+  });
+  for (const t of ['pointerup', 'pointercancel', 'pointerleave'] as const)
+    bouton.addEventListener(t, () => tenir(false));
+  bouton.addEventListener('click', (e) => e.preventDefault());
+  window.addEventListener('blur', () => tenir(false));
+}

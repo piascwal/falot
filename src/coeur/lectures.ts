@@ -35,14 +35,26 @@ export const bonusActif = (j: Joueur) => (j.bonus ? BONUS[j.bonus] : null);
  * Pendant la vidange le halo se referme jusqu'à presque rien : c'est la lumière
  * qui s'en va, et c'est le seul moment où on la voit quitter le corps.
  */
+/**
+ * Ce qu'il reste de halo quand Falot a soufflé sa lumière : une mèche. Pas
+ * zéro — un écran entièrement noir n'est pas un jeu, et il ne s'éteint pas
+ * vraiment, il se couvre. À 0,22 il voit sa propre case et rien d'autre.
+ */
+const MECHE = 0.22;
+
 export const rayonHalo = (partie: Partie): number =>
   D.halo *
   forme(partie.joueur).halo *
+  (partie.joueur.eteint ? MECHE : 1) *
   (0.68 + partie.joueur.souffle * 0.32) *
   (partie.vidange ? Math.max(0.04, 1 - partie.vidange.t / partie.vidange.duree) : 1) *
   partie.eclosion;
 
-export const porteeFaisceau = (j: Joueur): number => forme(j).portee * CASE;
+// Soufflé, il n'a plus de faisceau du tout : c'est ce qui l'empêche de
+// rallumer quoi que ce soit pendant qu'il se cache, et ce qui rend le geste
+// coûteux au lieu d'être gratuit.
+export const porteeFaisceau = (j: Joueur): number =>
+  j.eteint ? 0 : forme(j).portee * CASE;
 export const coneFaisceau = (j: Joueur): number => forme(j).cone;
 
 /**

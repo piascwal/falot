@@ -284,6 +284,26 @@ canvas {
   touch-action: none;
 }
 
+/* Le souffle. Bouton tenu : il s'enfonce et s'assombrit tant qu'on le garde,
+     parce que c'est exactement ce que fait Falot — il se couvre, et il n'y voit
+     plus rien. Bleu comme la lumière qui tombe, jamais comme la pierre. */
+#souffle {
+  border-color: rgba(143, 208, 255, 0.5);
+  color: #8fd0ff;
+  width: 60px;
+  height: 60px;
+  touch-action: none;
+}
+#souffle:not([hidden]) {
+  display: block;
+}
+#souffle.tenu {
+  background: rgba(143, 208, 255, 0.02);
+  border-color: rgba(143, 208, 255, 0.22);
+  color: rgba(143, 208, 255, 0.45);
+  transform: scale(0.94);
+}
+
 /* La pierre vient d'apprendre quelque chose. Une modale coupait le jeu pour
      le dire ; le bouton le dit tout seul, en prenant la couleur de la forme et
      en pulsant deux fois. On ne lit pas, on voit. */

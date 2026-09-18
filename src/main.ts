@@ -9,7 +9,7 @@
 import { avancer, creerPartie, PAS, PAS_MAX_PAR_IMAGE } from './coeur/partie.js';
 import { montrerToast } from './coeur/voix.js';
 import { brancherClavier } from './entrees/clavier.js';
-import { brancherPointeur } from './entrees/pointeur.js';
+import { brancherPointeur, brancherSouffle } from './entrees/pointeur.js';
 import { creerCage } from './interface/cage.js';
 import { creerHud } from './interface/hud.js';
 import { descendre, poserLEcranTitre, retenirPrologue } from './interface/ouverture.js';
@@ -35,6 +35,7 @@ const hud = creerHud();
 const cage = creerCage();
 
 brancherPointeur(canvas, hud.pierre, partie);
+brancherSouffle(hud.souffle, partie);
 brancherClavier(partie);
 
 window.addEventListener('resize', () => {

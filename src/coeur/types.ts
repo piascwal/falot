@@ -123,6 +123,13 @@ export interface Joueur extends Corps {
   souffle: number;
   /** Invulnérabilité courte après une mort. */
   repit: number;
+  /**
+   * IL A SOUFFLÉ SA PROPRE LUMIÈRE (pouvoir acquis à l'étage 3). Il garde sa
+   * couleur — il ne s'éteint pas, il se couvre — mais il n'éclaire plus, il
+   * ne rallume plus personne, et un Guet n'a plus rien à voir de lui. Le prix
+   * est immédiat : on n'y voit soi-même presque plus rien.
+   */
+  eteint: boolean;
   /** Lissage de « on me regarde », pour le rougissement des bords. */
   vu: number;
   /** Pierres en poche, et la fraction de recharge du prochain. */
@@ -382,6 +389,8 @@ export interface Entrees {
   manche: Manche;
   touches: Touches;
   visee: Visee;
+  /** Maintenu : Falot souffle sa lumière (voir `Joueur.eteint`). */
+  souffle: boolean;
 }
 
 /**

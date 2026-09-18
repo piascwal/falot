@@ -1,7 +1,8 @@
 /**
  * Le clavier : les flèches pour marcher, l'espace pour lancer une pierre droit
- * devant. On empêche les flèches de faire défiler la page — il n'y a rien à
- * défiler, mais le navigateur ne le sait pas.
+ * devant, et Maj tenue pour souffler sa lumière. On empêche les flèches de
+ * faire défiler la page — il n'y a rien à défiler, mais le navigateur ne le
+ * sait pas.
  */
 
 import { lancerPierre } from '../coeur/regles/pierre.js';
@@ -27,7 +28,11 @@ export function brancherClavier(partie: Partie): void {
     if (e.key === ' ' && !e.repeat) {
       lancerPierre(partie, partie.joueur.regard, 0.55);
       e.preventDefault();
+      return;
     }
+    // Maj tenue : il souffle sa lumière. Une touche tenue, pas une bascule —
+    // se cacher doit rester un geste qu'on fait, pas un état qu'on oublie.
+    if (e.key === 'Shift') partie.entrees.souffle = true;
   });
 
   window.addEventListener('keyup', (e) => {
@@ -35,7 +40,9 @@ export function brancherClavier(partie: Partie): void {
     if (t) {
       touches[t] = false;
       e.preventDefault();
+      return;
     }
+    if (e.key === 'Shift') partie.entrees.souffle = false;
   });
 
   // une fenêtre qui perd le focus garde les touches enfoncées : on relâche tout
@@ -44,5 +51,6 @@ export function brancherClavier(partie: Partie): void {
     touches.droite = false;
     touches.haut = false;
     touches.bas = false;
+    partie.entrees.souffle = false;
   });
 }
