@@ -1,6 +1,6 @@
 /**
  * L'interface du haut : la zone, les pastilles d'âmes, la jauge de confiance,
- * le bandeau, et le bouton caillou.
+ * le bandeau, et le bouton pierre.
  *
  * Elle ne fait que REFLÉTER la partie, une fois par image. Aucune règle du jeu
  * ne vit ici, et le cœur n'appelle jamais le DOM : quand une animation doit
@@ -11,7 +11,7 @@
 import { rgba } from '../coeur/couleurs.js';
 import { BONUS, FORMES } from '../coeur/formes.js';
 import { clamp } from '../coeur/geometrie.js';
-import { forme, rangCaillou } from '../coeur/lectures.js';
+import { forme, rangPierre } from '../coeur/lectures.js';
 import type { Partie } from '../coeur/types.js';
 
 const el = <T extends HTMLElement>(id: string): T => {
@@ -29,8 +29,8 @@ function rejouer(e: HTMLElement, classe: string): void {
 
 export interface Hud {
   maj(partie: Partie): void;
-  /** Le bouton caillou, dont les entrées ont besoin pour la visée. */
-  caillou: HTMLButtonElement;
+  /** Le bouton pierre, dont les entrées ont besoin pour la visée. */
+  pierre: HTMLButtonElement;
 }
 
 export function creerHud(): Hud {
@@ -42,17 +42,17 @@ export function creerHud(): Hud {
   const elJauge = el('jauge');
   const elAmes = el('ames');
   const elToast = el('toast');
-  const elCaillou = el<HTMLButtonElement>('caillou');
-  const elCaillouN = el('caillou-n');
+  const elPierre = el<HTMLButtonElement>('pierre');
+  const elPierreN = el('pierre-n');
   const elBonus = el('bonus');
   const elBonusNom = el('bonus-nom');
   const elBonusJauge = el('bonus-jauge');
 
   // Ce que l'interface a déjà montré : on ne touche au DOM que si ça a bougé.
-  const vu = { caillou: 0, jauge: 0, forme: 0, galets: -1, recharge: -1, bandeau: '' };
+  const vu = { pierre: 0, jauge: 0, forme: 0, pierres: -1, recharge: -1, bandeau: '' };
 
   return {
-    caillou: elCaillou,
+    pierre: elPierre,
     maj(partie: Partie): void {
       const { joueur, zone } = partie;
       const f = forme(joueur);
@@ -93,18 +93,18 @@ export function creerHud(): Hud {
         elBonus.classList.remove('on');
       }
 
-      // --- le bouton caillou : le compte, et l'anneau de recharge ---
-      const rang = rangCaillou(joueur);
-      const plein = joueur.galets >= rang.reserve;
-      const recharge = plein ? 1 : Math.round(joueur.caillouDispo * 100) / 100;
-      if (vu.galets !== joueur.galets) {
-        vu.galets = joueur.galets;
-        elCaillou.disabled = joueur.galets <= 0;
-        elCaillouN.textContent = String(joueur.galets);
+      // --- le bouton pierre : le compte, et l'anneau de recharge ---
+      const rang = rangPierre(joueur);
+      const plein = joueur.pierres >= rang.reserve;
+      const recharge = plein ? 1 : Math.round(joueur.pierreDispo * 100) / 100;
+      if (vu.pierres !== joueur.pierres) {
+        vu.pierres = joueur.pierres;
+        elPierre.disabled = joueur.pierres <= 0;
+        elPierreN.textContent = String(joueur.pierres);
       }
       if (vu.recharge !== recharge) {
         vu.recharge = recharge;
-        elCaillou.style.setProperty('--recharge', recharge.toFixed(2));
+        elPierre.style.setProperty('--recharge', recharge.toFixed(2));
       }
 
       // --- le bandeau : il ne disparaît pas, il pâlit et il reste ---
@@ -119,13 +119,13 @@ export function creerHud(): Hud {
       // --- les signaux : des animations, jamais des décisions ---
       if (vu.forme !== partie.signaux.forme) {
         vu.forme = partie.signaux.forme;
-        elCaillou.style.color = f.couleur;
-        elCaillou.style.borderColor = rgba(f.couleur, 0.75);
-        elCaillou.style.setProperty('--aura', `${6 + joueur.niveau * 5}px`);
+        elPierre.style.color = f.couleur;
+        elPierre.style.borderColor = rgba(f.couleur, 0.75);
+        elPierre.style.setProperty('--aura', `${6 + joueur.niveau * 5}px`);
       }
-      if (vu.caillou !== partie.signaux.caillou) {
-        vu.caillou = partie.signaux.caillou;
-        rejouer(elCaillou, 'evolue');
+      if (vu.pierre !== partie.signaux.pierre) {
+        vu.pierre = partie.signaux.pierre;
+        rejouer(elPierre, 'evolue');
       }
       if (vu.jauge !== partie.signaux.jauge) {
         vu.jauge = partie.signaux.jauge;

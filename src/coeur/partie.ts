@@ -11,16 +11,16 @@
  */
 
 import { grainDepuisTexte, mulberry32 } from './alea.js';
-import { CAILLOU } from './formes.js';
+import { PIERRE } from './formes.js';
 import { chargerZone } from './monde/chargement.js';
 import { majFlottants, majParticules } from './particules.js';
-import { majCailloux } from './regles/caillou.js';
 import { majJoueur } from './regles/joueur.js';
 import { propager } from './regles/lumiere.js';
 import { majRegles } from './regles/monde.js';
 import { majPersos } from './regles/persos.js';
+import { majPierres } from './regles/pierre.js';
 import { majPortes } from './regles/portes.js';
-import { majChute, majVidange } from './regles/seuil.js';
+import { majChute, majEnvol, majVidange } from './regles/seuil.js';
 import type { Entrees, Joueur, Partie, Perso, Zone } from './types.js';
 import { majVoix, nouveauBandeau } from './voix.js';
 
@@ -63,8 +63,8 @@ const nouveauJoueur = (): Joueur => ({
   // âmes : les champs existent, à zéro.
   aveugle: 0,
   cligne: 0,
-  galets: CAILLOU[0].reserve,
-  caillouDispo: 1,
+  pierres: PIERRE[0].reserve,
+  pierreDispo: 1,
   bonus: null,
   bonusT: 0,
   abri: false,
@@ -100,13 +100,14 @@ export function creerPartie(reglages: Reglages = {}): Partie {
     priseCount: 0,
     particules: [],
     ondes: [],
-    cailloux: [],
+    pierres: [],
     traces: [],
     flottants: [],
     fil: [],
     filDernier: { x: 0, y: 0 },
     vidange: null,
     chute: null,
+    envol: null,
     eclosion: 1,
     montee: [],
     menace: false,
@@ -118,15 +119,15 @@ export function creerPartie(reglages: Reglages = {}): Partie {
     bandeau: nouveauBandeau(),
     filVoix: [],
     voixT: 0,
-    signaux: { caillou: 0, jauge: 0, forme: 0 },
+    signaux: { pierre: 0, jauge: 0, forme: 0 },
     // À quoi servent les petites choses jaunes ? On ne l'avait jamais dit. La
     // première fois, une phrase le nomme ; ensuite, chaque ramassage fait
     // monter un « +4 » vers la barre du haut.
-    premieres: { lueur: true, reprise: true, mort: true, seuil: false },
+    premieres: { lueur: true, mort: true, seuil: false },
     // La règle attachée à une espèce ne se dit qu'une fois : répétée à chaque
     // âme, elle redevient la modale intrusive qu'on a retirée.
     regleDite: {},
-    nudgeCaillou: 0,
+    nudgePierre: 0,
     nudgeArme: false,
     numReplique: 0,
     numEteint: 0,
@@ -171,6 +172,15 @@ function zoneVide(): Zone {
 export function avancer(partie: Partie, dt: number = PAS): void {
   majVoix(partie, dt);
 
+  if (partie.envol) {
+    // Sa lumière s'en va : le monde attend. C'est la seule chose à regarder.
+    majEnvol(partie, dt);
+    majParticules(partie, dt);
+    majFlottants(partie, dt);
+    partie.eclaires = propager(partie);
+    return;
+  }
+
   if (partie.chute) {
     majChute(partie, dt);
     majParticules(partie, dt);
@@ -202,7 +212,7 @@ export function avancer(partie: Partie, dt: number = PAS): void {
   partie.eclaires = eclaires;
   majPersos(partie, dt, eclaires);
   majRegles(partie, dt);
-  majCailloux(partie, dt);
+  majPierres(partie, dt);
   majParticules(partie, dt);
   majFlottants(partie, dt);
 }

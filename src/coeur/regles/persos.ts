@@ -88,7 +88,7 @@ export function majPersos(partie: Partie, dt: number, eclaires: Set<Perso>): voi
       if (p.alerte > 0) p.alerte -= dt; // l'alerte est posée par majRegles
       if (p.gene) p.alerte = 0;
 
-      // LE BRUIT PASSE AVANT TOUT. Un caillou qui tombe à portée lui fait
+      // LE BRUIT PASSE AVANT TOUT. Une pierre qui tombe à portée lui fait
       // oublier ce qu'elle était en train de faire, alerte comprise : elle se
       // tourne et elle y va. C'est la seule arme du début du jeu, elle ne peut
       // pas dépendre de l'humeur où on la surprend.
@@ -103,7 +103,7 @@ export function majPersos(partie: Partie, dt: number, eclaires: Set<Perso>): voi
         } else {
           if (!p.route?.length)
             p.route = routeVers(zone, p.x, p.y, p.curiosite.x, p.curiosite.y, true);
-          // Pas de chemin — le caillou est tombé derrière une porte, ou dans un
+          // Pas de chemin — la pierre est tombée derrière une porte, ou dans un
           // recoin qu'elle ne peut pas atteindre : elle y va quand même, tout
           // droit. Mieux vaut qu'elle bute contre un mur en regardant ailleurs
           // que de rester plantée comme si elle n'avait rien entendu.
@@ -137,27 +137,64 @@ export function majPersos(partie: Partie, dt: number, eclaires: Set<Perso>): voi
         }
         p.humeur = HUMEURS.INTRIGUE;
       } else if (p.alerte > 0) {
-        // EN ALERTE, ELLE N'A PAS VU LE HÉROS. Elle se doute de quelque chose
-        // et fouille sa zone : elle balaye largement et avance dans la
-        // direction qu'elle regarde. Elle ne fonce surtout pas sur le joueur —
-        // c’est le front rouge de son cône qui menace, pas elle.
-        p.route = null;
+        // EN ALERTE, IL VA VOIR. Il a détecté de la lumière quelque part — un
+        // corps dans son cône, ou le faisceau du joueur qui l'a effleuré — et
+        // il se rend à cet endroit-là. Il ne fonce pas sur le joueur : il va au
+        // DERNIER endroit connu, et c'est au joueur de ne plus y être. Avant,
+        // il fouillait au hasard dans la direction de son regard, et on pouvait
+        // attendre à trois cases sans qu'il ne vienne jamais.
         if (!p.enAlerte) {
           p.enAlerte = true;
           p.capAlerte = p.regard;
           p.phase = 0;
+          p.route = null;
         }
-        p.phase += 1.5 * dt;
-        p.regard = p.capAlerte + Math.sin(p.phase) * 0.9;
-        if (!loin) {
-          p.vx += Math.cos(p.regard) * 130 * dt;
-          p.vy += Math.sin(p.regard) * 130 * dt;
+        const su = p.derniereVue;
+        if (su && !loin) {
+          const sd = Math.hypot(su.x - p.x, su.y - p.y);
+          if (sd < CASE * 0.8) {
+            // arrivé sur place et personne : il fouille les environs
+            p.derniereVue = null;
+            p.route = null;
+          } else {
+            if (!p.route?.length) p.route = routeVers(zone, p.x, p.y, su.x, su.y, true);
+            let vx = su.x - p.x;
+            let vy = su.y - p.y;
+            if (p.route?.length) {
+              const w = p.route[0];
+              const rx = w.x - p.x,
+                ry = w.y - p.y,
+                rd = Math.hypot(rx, ry) || 1;
+              if (rd < CASE * 0.45) p.route.shift();
+              else {
+                vx = rx;
+                vy = ry;
+              }
+            }
+            const vd = Math.hypot(vx, vy) || 1;
+            p.vx += (vx / vd) * 380 * dt;
+            p.vy += (vy / vd) * 380 * dt;
+            // il regarde où il va, et balaye un peu autour
+            p.phase += 1.5 * dt;
+            const vise = Math.atan2(vy, vx) + Math.sin(p.phase) * 0.35;
+            p.regard += ecartAngle(p.regard, vise) * Math.min(1, 7 * dt);
+          }
+        } else {
+          // plus rien à suivre : il balaye largement sur place
+          p.route = null;
+          p.phase += 1.5 * dt;
+          p.regard = p.capAlerte + Math.sin(p.phase) * 0.9;
+          if (!loin) {
+            p.vx += Math.cos(p.regard) * 130 * dt;
+            p.vy += Math.sin(p.regard) * 130 * dt;
+          }
         }
-        p.humeur = HUMEURS.ACHARNE; // elle cherche, et ça se voit
+        p.humeur = HUMEURS.ACHARNE; // il cherche, et ça se voit
         if (partie.hasard() < dt * 4)
           emettre(partie, p.x, p.y - D.taille * 0.75, '#ff7a6b', 1, 34, 'trait');
       } else {
         p.enAlerte = false;
+        p.derniereVue = null;
         // ronde : elle va d'un point de passage au suivant, et le regard
         // balaye autour de sa direction de marche
         // elle recule jusqu'à être NETTEMENT hors de la braise : s'arrêter à

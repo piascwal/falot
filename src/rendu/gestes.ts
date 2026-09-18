@@ -1,6 +1,6 @@
 /**
  * Ce que la main du joueur dessine à l'écran : le joystick flottant, et la
- * trajectoire du caillou pendant qu'on vise.
+ * trajectoire de la pierre pendant qu'on vise.
  *
  * Les deux sont en coordonnées d'ÉCRAN et pas de monde — c'est de l'interface
  * posée sur le jeu, pas du décor.

@@ -1,5 +1,5 @@
 /**
- * Les DONNÉES du jeu : les cinq formes de Falot, ce que le caillou sait faire à
+ * Les DONNÉES du jeu : les cinq formes de Falot, ce que la pierre sait faire à
  * chaque palier, les trois émotions, les six humeurs et les lueurs à ramasser.
  *
  * Rien ici ne calcule quoi que ce soit. C'est volontaire : ces nombres sont
@@ -23,8 +23,8 @@ export interface Forme {
   readonly texte: string;
 }
 
-/** Ce que la poche de cailloux vaut, à chaque palier de forme. */
-export interface RangCaillou {
+/** Ce que la poche de pierres vaut, à chaque palier de forme. */
+export interface RangPierre {
   readonly reserve: number;
   readonly delai: number;
   readonly couve?: boolean;
@@ -52,9 +52,9 @@ export const FORMES: readonly Forme[] = [
     halo: 1.0,
     portee: 0,
     cone: 0,
-    verbe: 'Le caillou',
+    verbe: 'La pierre',
     texte:
-      "Tu n'as qu'un halo minuscule — mais tu peux lancer un caillou devant toi. La pierre ne brille pas ; ce que tu as laissé dessus, si. Là où elle tombe, une autre petite lumière apparaît, et les Guets vont la voir. C'est toute ton arme.",
+      "Tu n'as qu'un halo minuscule — mais tu peux lancer une pierre devant toi. Un peu de ta lumière reste dessus : là où elle tombe, une lueur s'allume, et un Guet ira l'éteindre plutôt que toi. C'est toute ton arme.",
   },
   {
     nom: 'Curieux',
@@ -65,7 +65,7 @@ export const FORMES: readonly Forme[] = [
     cone: 0.34,
     verbe: 'Le faisceau',
     texte:
-      "Un faisceau s'ouvre devant toi. Il porte loin, et il réveille les autres : un bonhomme éclairé relaie ta lumière avec son regard.",
+      "Un faisceau s'ouvre devant toi. Il réveille les autres — un bonhomme éclairé relaie ta lumière avec son regard. Mais il porte loin : le Guet qu'il effleure sait aussitôt qu'il y a de la lumière à prendre par ici.",
   },
   {
     nom: 'Veilleur',
@@ -74,9 +74,9 @@ export const FORMES: readonly Forme[] = [
     halo: 1.45,
     portee: 6.0,
     cone: 0.32,
-    verbe: 'Le caillou couve',
+    verbe: 'La pierre couve',
     texte:
-      "Ton caillou ne retombe plus éteint : là où il tombe, il se met à brûler pour toujours. Dans cette lumière-là tu n'as plus la forme qu'un regard cherche — tu poses tes abris à distance.",
+      "Ta pierre ne retombe plus éteinte : là où elle tombe, elle se met à brûler pour toujours. Aucun Guet n'approche d'un feu plus grand que lui — tu poses tes abris à distance.",
   },
   {
     nom: 'Ardent',
@@ -85,7 +85,7 @@ export const FORMES: readonly Forme[] = [
     halo: 1.62,
     portee: 7.0,
     cone: 0.3,
-    verbe: 'Le caillou frappe',
+    verbe: 'La pierre frappe',
     texte:
       "Vise un rouge, touche-le : il est étourdi et perd ta trace. Ce n'est plus seulement un leurre, c'est de quoi ouvrir un passage à ton convoi.",
   },
@@ -96,17 +96,17 @@ export const FORMES: readonly Forme[] = [
     halo: 1.9,
     portee: 8.2,
     cone: 0.3,
-    verbe: 'Le caillou éclate',
+    verbe: 'La pierre éclate',
     texte:
-      "À l'impact, le caillou se brise en un éclat qui aveugle tous les Guets autour du point de chute : plus rien à distinguer, ni lumière ni noir. Un seul lancer, et toute une salle cesse de te chercher.",
+      "À l'impact, la pierre se brise en un éclat qui aveugle tous les Guets autour du point de chute : trop de lumière d'un coup, ils n'en prennent plus rien. Un seul lancer, et toute une salle cesse de te chercher.",
   },
 ];
 
 // Tout le jeu tient sur UN bouton. Chaque forme ne donne pas un nouveau verbe
 // à apprendre : elle enrichit le seul geste qu'on connaît déjà. La réserve
 // grossit et le délai fond à chaque palier — c'est la progression qu'on sent
-// en jouant, avant même de lire ce que le caillou fait de plus.
-export const CAILLOU: readonly RangCaillou[] = [
+// en jouant, avant même de lire ce que la pierre fait de plus.
+export const PIERRE: readonly RangPierre[] = [
   { reserve: 1, delai: 2.6 },
   { reserve: 2, delai: 1.9 },
   { reserve: 2, delai: 1.5, couve: true },
@@ -185,8 +185,8 @@ export const BONUS = {
   eclat: { couleur: '#ffe9a8', forme: 0, duree: 0, nom: 'Lueur', phrase: '' },
   // Les trois bonus parlent tous d'ESCORTE, sinon on les ramasse sans rien
   // sentir. Voilé cache le convoi entier, Hâte presse le convoi entier, et
-  // Galet rend la poche intarissable le temps de dégager une route.
-  galet: {
+  // Poche rend la poche intarissable le temps de dégager une route.
+  poche: {
     couleur: '#b2bacc',
     forme: 0,
     duree: 6,

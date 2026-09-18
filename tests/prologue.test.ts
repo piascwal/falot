@@ -8,9 +8,9 @@
  *
  * Ce qui a été mesuré AVANT ces corrections, et qui les a motivées :
  *   - la galerie du 1er Guet se traversait tout droit 20 fois sur 20 en 2,3 s
- *     (ses deux portes étaient alignées) : le caillou n'y servait jamais ;
+ *     (ses deux portes étaient alignées) : le pierre n'y servait jamais ;
  *   - le couloir de l'escorte, large d'une case, était 0/20 : on ne peut pas
- *     croiser un Guet qui le bouche, et le caillou n'étourdit qu'à partir
+ *     croiser un Guet qui le bouche, et le pierre n'étourdit qu'à partir
  *     d'Ardent — hors budget du prologue ;
  *   - une fois la première âme livrée, repartir la chercher à l'est était
  *     0/20 et mortel, ce qui poussait le joueur à remonter tout l'étage.
@@ -22,7 +22,7 @@ import { EMOTIONS, FORMES } from '../src/coeur/formes.js';
 import { zoneEcrite } from '../src/coeur/monde/ecrits.js';
 import { distances } from '../src/coeur/monde/grille.js';
 import { avancer, creerPartie, PAS } from '../src/coeur/partie.js';
-import { lancerCaillou } from '../src/coeur/regles/caillou.js';
+import { lancerPierre } from '../src/coeur/regles/pierre.js';
 import type { Partie, Point, Zone } from '../src/coeur/types.js';
 
 const c = (cx: number, cy: number): Point => ({
@@ -53,12 +53,12 @@ interface Essai {
   /** Déphasage de la ronde des Guets, en pas de simulation. */
   decalage: number;
   /** Ce que le pilote fait en plus de marcher. */
-  ruse?: 'caillou';
+  ruse?: 'pierre';
 }
 
 /**
  * Fait jouer un pilote automatique. Il ne sait que marcher vers un point — et,
- * si on le lui demande, lancer un caillou et attendre de voir le Guet partir.
+ * si on le lui demande, lancer un pierre et attendre de voir le Guet partir.
  * C'est volontairement bête : ce qu'on mesure, c'est ce que la géographie
  * autorise, pas l'habileté de quelqu'un.
  */
@@ -89,10 +89,10 @@ function piloter({ voie, convoi = 0, decalage, ruse }: Essai): {
   let lance = false;
   let attente = 0;
   for (let i = 0; i < 60 * 25; i++) {
-    if (ruse === 'caillou' && !lance && cases(p.joueur, voie[0]) > 1.2) {
+    if (ruse === 'pierre' && !lance && cases(p.joueur, voie[0]) > 1.2) {
       // il jette la pierre à l'autre bout de la salle, loin de sa sortie
       const vers = c(22, 12);
-      lancerCaillou(p, Math.atan2(vers.y - p.joueur.y, vers.x - p.joueur.x), 1);
+      lancerPierre(p, Math.atan2(vers.y - p.joueur.y, vers.x - p.joueur.x), 1);
       lance = true;
     }
     const guet = guets(p.zone).find((q) => q.y < c(0, 13).y);
@@ -125,7 +125,7 @@ function surToutesLesRondes(essai: Omit<Essai, 'decalage'>): number {
 }
 
 describe('le prologue — la première salle', () => {
-  it('ne se quitte pas sans casser un mur : le caillou sert avant le premier Guet', () => {
+  it('ne se quitte pas sans casser un mur : le pierre sert avant le premier Guet', () => {
     const z = zoneEcrite(1)!;
     const d = distances(z, {
       cx: Math.floor(z.depart.x / CASE),
@@ -152,11 +152,19 @@ describe('le prologue — la première salle', () => {
     }
     // on casse les deux depuis la case de départ, sans bouger
     for (const f of [...p.zone.fissures]) {
-      p.joueur.galets = 1;
-      lancerCaillou(p, Math.atan2(f.y - p.joueur.y, f.x - p.joueur.x), 0);
+      p.joueur.pierres = 1;
+      lancerPierre(p, Math.atan2(f.y - p.joueur.y, f.x - p.joueur.x), 0);
       for (let i = 0; i < 120; i++) avancer(p, PAS);
       expect(p.zone.mur[f.cy][f.cx]).toBe(0);
     }
+  });
+
+  it('ne donne rien dans sa niche : c’est un cul-de-sac, pas une récompense', () => {
+    const z = zoneEcrite(1)!;
+    // La poche de pierres qui s'y trouvait annonçait « intarissable, lance sans
+    // compter » — une phrase de bonus au milieu d'une leçon sur les murs. La
+    // niche ne prouve plus qu'une chose : on casse des murs.
+    expect(z.lueurs.every((l) => l.type === 'eclat')).toBe(true);
   });
 
   it('ouvre tout le niveau une fois les fentes cassées', () => {
@@ -182,13 +190,15 @@ describe('le prologue — la galerie du premier Guet', () => {
 
   it('ne se traverse pas tout droit', () => {
     const passes = surToutesLesRondes({ voie });
-    // Mesuré à 6/20. On laisse de la marge : ce qui compte est que foncer ne
-    // soit PAS la stratégie dominante. Portes alignées, c'était 20/20.
-    expect(passes).toBeLessThanOrEqual(12);
+    // Mesuré à 4/20 avec les deux Guets en place. Portes alignées et un seul
+    // Guet, c'était 20/20 ; portes décalées, 6/20. Six configurations de rondes
+    // ont été essayées : celle-ci est la seule qui rende « foncer » perdant
+    // sans rendre la salle injuste.
+    expect(passes).toBeLessThanOrEqual(10);
   });
 
-  it('se traverse à tous les coups en lançant d’abord un caillou', () => {
-    const passes = surToutesLesRondes({ voie, ruse: 'caillou' });
+  it('se traverse à tous les coups en lançant d’abord un pierre', () => {
+    const passes = surToutesLesRondes({ voie, ruse: 'pierre' });
     // Mesuré à 20/20 : le leurre est la réponse, et il marche toujours.
     expect(passes).toBeGreaterThanOrEqual(18);
   });
@@ -211,8 +221,12 @@ describe('le prologue — le couloir de l’escorte', () => {
 
   it('se refait dans l’autre sens : aller rechercher la seconde âme est possible', () => {
     // Avant l'élargissement, ce trajet était 0/20 et mortel — le joueur
-    // remontait donc tout l'étage plutôt que de revenir ici.
-    expect(surToutesLesRondes({ voie: [...bas].reverse() })).toBeGreaterThanOrEqual(16);
+    // remontait donc tout l'étage plutôt que de revenir ici. Il est retombé à
+    // 8/20 depuis qu'un Guet détecté se rend sur place : c'est le prix de la
+    // nouvelle règle, et c'est voulu. Ce qui compte est que ça ne soit plus
+    // une impasse — et de toute façon les deux âmes sont vues à l'aller, donc
+    // ce retour n'est plus un passage obligé.
+    expect(surToutesLesRondes({ voie: [...bas].reverse() })).toBeGreaterThanOrEqual(5);
   });
 
   it('laisse ses deux battants sceller le quartier du Guet', () => {
@@ -284,10 +298,13 @@ describe('le prologue — ce qui n’a pas changé', () => {
     expect(zoneEcrite(1)!.reprises.length).toBeGreaterThanOrEqual(5);
   });
 
-  it('donne une ronde écrite à chacun de ses deux Guets', () => {
+  it('donne une ronde écrite à chacun de ses trois Guets', () => {
     const z = zoneEcrite(1)!;
-    expect(guets(z)).toHaveLength(2);
+    // Deux dans la galerie — un par moitié de salle — et un dans le couloir de
+    // l'escorte. Deux dans la galerie, c'est ce qui rend « foncer » perdant.
+    expect(guets(z)).toHaveLength(3);
     for (const g of guets(z)) expect(g.ronde.length).toBeGreaterThanOrEqual(2);
+    expect(guets(z).filter((g) => g.y < c(0, 13).y)).toHaveLength(2);
   });
 
   it('parle de torches, jamais de brandons, et jamais dans le vide', () => {
@@ -298,6 +315,18 @@ describe('le prologue — ce qui n’a pas changé', () => {
       expect(m.texte.toLowerCase()).not.toContain('brandon');
     }
     expect(z.murmures.some((m) => m.texte.toLowerCase().includes('torche'))).toBe(true);
+  });
+
+  it('montre deux torches dans la salle des torches, et bien écartées', () => {
+    const z = zoneEcrite(1)!;
+    // Une seule ne suffisait pas à faire comprendre qu'on les rallume en
+    // passant : il en faut deux, sur deux murs, assez loin l'une de l'autre
+    // pour qu'on ne les prenne pas pour un décor unique.
+    const salle = z.torches.filter((t) => t.y < c(0, 8).y);
+    expect(salle).toHaveLength(2);
+    expect(cases(salle[0], salle[1])).toBeGreaterThan(4);
+    // et chacune est accrochée à un mur : c'est ce qui la dessine tournée
+    for (const t of z.torches) expect(Math.abs(t.ox) + Math.abs(t.oy)).toBe(1);
   });
 
   it('garde le halo assez large pour voir les deux voies du couloir', () => {

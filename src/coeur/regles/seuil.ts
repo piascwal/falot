@@ -20,16 +20,52 @@ import type { Partie } from '../types.js';
 /** Le minutage de la scène d'ouverture, en secondes. */
 export const CHUTE = { tombe: 1.5, pose: 0.5, gauche: 0.8, droite: 0.8, fin: 0.45 };
 
-/** Démarre la scène d'ouverture : la lumière part de trois cases au-dessus. */
-export function lancerLaChute(partie: Partie): void {
+/**
+ * Démarre une arrivée. `sens` dit d'où vient la lumière : du plafond au premier
+ * étage (elle tombe), du sol partout ailleurs (il monte d'un étage, et on doit
+ * le VOIR monter). `ceremonie` n'est vraie que pour le prologue.
+ */
+export function lancerLaChute(
+  partie: Partie,
+  sens: 'haut' | 'bas' = 'haut',
+  ceremonie = true,
+): void {
+  const loin = partie.joueur.y + (sens === 'haut' ? -1 : 1) * CASE * 3.5;
   partie.chute = {
     t: 0,
     x: partie.joueur.x,
-    y: partie.joueur.y - CASE * 3.5,
-    y0: partie.joueur.y - CASE * 3.5,
+    y: loin,
+    y0: loin,
     pose: false,
+    sens,
+    ceremonie,
   };
+  partie.recadrer = true;
   partie.eclosion = 0;
+}
+
+/**
+ * Le corps se vide de sa couleur et s'en va vers le haut. Deux fins d'étage,
+ * la même image : s'éteindre et franchir le Seuil, c'est la même chose qui
+ * arrive à sa lumière — elle le quitte.
+ */
+export function lancerLEnvol(
+  partie: Partie,
+  raison: 'mort' | 'seuil',
+  suivante = partie.numeroZone,
+): void {
+  partie.envol = {
+    t: 0,
+    // La mort doit coûter des secondes, pas de la patience : sa version est
+    // deux fois plus courte que celle du Seuil, qui, elle, est une récompense.
+    duree: raison === 'mort' ? 0.6 : 1.1,
+    raison,
+    suivante,
+    motes: [],
+    reste: 0,
+  };
+  partie.joueur.vx = 0;
+  partie.joueur.vy = 0;
 }
 
 export function ouvrirLeSeuil(partie: Partie): void {
@@ -61,10 +97,15 @@ export function majChute(partie: Partie, dt: number): void {
   const { joueur } = partie;
   const chute = partie.chute;
   if (!chute) return;
+  // Le prologue prend son temps ; ailleurs on a déjà vu la scène, et une mort
+  // doit coûter des secondes, pas de la patience : trois fois plus vite.
+  const vite = chute.ceremonie ? 1 : 3;
+  const tombe = CHUTE.tombe / vite;
+  const pose = CHUTE.pose / vite;
   chute.t += dt;
   const t = chute.t;
-  if (t < CHUTE.tombe) {
-    const k = t / CHUTE.tombe;
+  if (t < tombe) {
+    const k = t / tombe;
     chute.y = chute.y0 + (joueur.y - chute.y0) * (k * k); // elle accélère
     partie.eclosion = 0;
     if (partie.hasard() < dt * 26) emettre(partie, chute.x, chute.y, '#8fd0ff', 1, 16);
@@ -77,17 +118,21 @@ export function majChute(partie: Partie, dt: number): void {
     emettre(partie, joueur.x, joueur.y, '#8fd0ff', 24, 95);
     emettre(partie, joueur.x, joueur.y, '#c6e6ff', 12, 45);
   }
-  const a = t - CHUTE.tombe;
+  const a = t - tombe;
   const vers = (cible: number, vitesse?: number) => {
     joueur.regard += ecartAngle(joueur.regard, cible) * Math.min(1, (vitesse || 5) * dt);
   };
-  if (a < CHUTE.pose) {
-    partie.eclosion = a / CHUTE.pose;
+  if (a < pose) {
+    partie.eclosion = a / pose;
     joueur.regard = Math.PI / 2;
     return;
   }
   partie.eclosion = 1;
-  const b = a - CHUTE.pose;
+  if (!chute.ceremonie) {
+    partie.chute = null; // il est là, il peut partir
+    return;
+  }
+  const b = a - pose;
   if (b < CHUTE.gauche) {
     vers(Math.PI);
     return;
@@ -155,11 +200,79 @@ export function majVidange(partie: Partie, dt: number): void {
   }
 
   if (vidange.t >= vidange.duree) {
+    // Il a tout donné au Seuil ; maintenant il monte. On le voit partir, et il
+    // réapparaîtra par le bas à l'étage suivant : c'est ce qui fait comprendre
+    // qu'on monte, plutôt qu'un simple changement de décor.
     const n = vidange.suivante;
     partie.vidange = null;
-    chargerZone(partie, n);
-    partie.cage = n;
+    lancerLEnvol(partie, 'seuil', n);
   }
 }
 
 // Peinte après le voile d'obscurité, en lumière additive : c'est de la
+
+/**
+ * La lumière s'en va. À la fin, selon la raison : soit l'étage suivant se
+ * charge et la cage d'escalier s'ouvre, soit Falot renaît au point de reprise.
+ * Dans les deux cas il réapparaît par une arrivée, et jamais d'un coup.
+ */
+export function majEnvol(partie: Partie, dt: number): void {
+  const envol = partie.envol;
+  if (!envol) return;
+  envol.t += dt;
+  const k = clamp(envol.t / envol.duree, 0, 1);
+  // le corps s'éteint, et le halo avec : `eclosion` porte les deux
+  partie.eclosion = 1 - k;
+
+  // des motes qui montent, comme à la vidange mais plus vite : là il PART
+  const cadence = 90 * (1 - k * 0.4);
+  const aNaitre = cadence * dt + envol.reste;
+  envol.reste = aNaitre % 1;
+  for (let i = 0; i < Math.floor(aNaitre); i++) {
+    envol.motes.push({
+      a: partie.hasard() * TAU,
+      r: D.taille * (0.15 + partie.hasard() * 0.5),
+      h: 0,
+      vh: 90 + partie.hasard() * 110,
+      va: (partie.hasard() < 0.5 ? -1 : 1) * (1.4 + partie.hasard() * 2.2),
+      vie: 1,
+      max: 0.55 + partie.hasard() * 0.4,
+      taille: 1.4 + partie.hasard() * 2.2,
+    });
+  }
+  for (let i = envol.motes.length - 1; i >= 0; i--) {
+    const m = envol.motes[i];
+    m.h += m.vh * dt;
+    m.a += m.va * dt;
+    m.r *= 1 - 0.5 * dt;
+    m.vie -= dt / m.max;
+    if (m.vie <= 0) envol.motes.splice(i, 1);
+  }
+
+  if (envol.t < envol.duree) return;
+
+  partie.envol = null;
+  if (envol.raison === 'seuil') {
+    chargerZone(partie, envol.suivante);
+    partie.cage = envol.suivante;
+    // il arrive par le bas : on monte d'un étage
+    lancerLaChute(partie, 'bas', false);
+    return;
+  }
+  renaitre(partie);
+}
+
+/** Il revient au point de reprise, et la lumière redescend avec lui. */
+function renaitre(partie: Partie): void {
+  const { joueur, zone } = partie;
+  joueur.x = zone.depart.x;
+  joueur.y = zone.depart.y;
+  joueur.vx = 0;
+  joueur.vy = 0;
+  joueur.souffle = 1;
+  joueur.repit = 1.6;
+  partie.fil.push(null); // coupure : on ne relie pas la mort au seuil
+  partie.filDernier = { x: zone.depart.x, y: zone.depart.y };
+  partie.recadrer = true;
+  lancerLaChute(partie, 'haut', false);
+}

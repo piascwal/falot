@@ -15,15 +15,41 @@
 
 import { CASE, D, PORTEE_VUE } from '../dimensions.js';
 import { BONUS, DUREE_CALME, EMOTIONS } from '../formes.js';
-import { aBonus, porteeFaisceau, rangCaillou } from '../lectures.js';
+import {
+  aBonus,
+  coneFaisceau,
+  porteeFaisceau,
+  rangPierre,
+  rayonHalo,
+} from '../lectures.js';
 import { dansLeCone, vueLibre } from '../monde/grille.js';
 import { emettre, onde } from '../particules.js';
 import { ETEINTS, REPLIQUES } from '../textes.js';
-import type { Partie } from '../types.js';
+import type { Partie, Perso } from '../types.js';
 import { montrerToast, murmurer } from '../voix.js';
 import { aLAbri, estEclaire, prochedUneBraise } from './lumiere.js';
 import { eteindre, gagnerEclat, paniquer, ramasser } from './progression.js';
 import { ouvrirLeSeuil } from './seuil.js';
+
+/** Le temps qu'une lumière doit rester sur un Guet pour qu'il vienne voir. */
+const BAIN_ALERTE = 0.35;
+
+/**
+ * La lumière que le joueur PORTE touche-t-elle ce Guet ? Le halo, ou le
+ * faisceau — pas les torches ni les braises : celles-là sont posées, elles font
+ * partie de la pièce, et c'est justement ce qui en fait des abris.
+ */
+function toucheParLaLumiere(partie: Partie, p: Perso): boolean {
+  const { joueur, zone } = partie;
+  const d = Math.hypot(p.x - joueur.x, p.y - joueur.y);
+  if (d < rayonHalo(partie) && vueLibre(zone, joueur.x, joueur.y, p.x, p.y)) return true;
+  const portee = porteeFaisceau(joueur);
+  return (
+    portee > 0 &&
+    dansLeCone(joueur.x, joueur.y, joueur.regard, p.x, p.y, portee, coneFaisceau(joueur)) &&
+    vueLibre(zone, joueur.x, joueur.y, p.x, p.y)
+  );
+}
 
 export function majRegles(partie: Partie, dt: number): void {
   const { joueur, zone } = partie;
@@ -85,10 +111,6 @@ export function majRegles(partie: Partie, dt: number): void {
     zone.depart = { x: rp.x, y: rp.y };
     emettre(partie, rp.x, rp.y, '#ffe9a8', 10, 45);
     onde(partie, rp.x, rp.y, CASE * 1.5, '#ffe9a8');
-    if (partie.premieres.reprise) {
-      partie.premieres.reprise = false;
-      montrerToast(partie, "Tu te souviendras d'être passé ici");
-    }
   }
 
   // Les murmures : de la matière narrative posée exactement là où elle est
@@ -198,7 +220,7 @@ export function majRegles(partie: Partie, dt: number): void {
     // basculait alerte / pas alerte plusieurs fois par seconde. Elle entre
     // dans l'état « gênée » plus loin qu'elle n'en sort.
     // Pendant qu'elle va voir un bruit, elle ne cherche plus personne. C'est
-    // tout l'intérêt du caillou : il ne détourne pas seulement son regard, il
+    // tout l'intérêt de la pierre : il ne détourne pas seulement son regard, il
     // lui fait lâcher ce qu'elle tenait.
     p.gene =
       p.aveugle > 0 ||
@@ -234,7 +256,13 @@ export function majRegles(partie: Partie, dt: number): void {
 
     if (corps > 0) {
       traque = true;
-      p.alerte = 2.8; // elle se doute, elle n'a pas vu
+      p.alerte = 2.8;
+      // IL SAIT OÙ. Un Guet qui détecte quelque chose cesse de balayer et se
+      // dirige vers l'endroit : c'est au joueur de s'en aller. Avant, il
+      // fouillait au hasard dans la direction de son regard, et on pouvait
+      // rester planté à trois cases de lui sans qu'il ne vienne jamais.
+      const cible = joueurVu ? joueur : convoi[0];
+      if (cible) p.derniereVue = { x: cible.x, y: cible.y };
       p.charge = Math.min(1, p.charge + 0.34 * corps * dt);
 
       // Le front rouge rattrape quelqu'un : le joueur est éliminé, mais un
@@ -253,20 +281,39 @@ export function majRegles(partie: Partie, dt: number): void {
       const cache = !vueLibre(zone, p.x, p.y, joueur.x, joueur.y);
       p.charge = Math.max(0, p.charge - (cache ? 0.7 : 0.45) * dt);
     }
+
+    // TA LUMIÈRE TE DÉSIGNE. Un Guet veut éteindre le monde : ce qui brille
+    // l'appelle. Ton halo ou ton faisceau qui le baigne ne te fait pas repérer
+    // — sa jauge ne monte pas — mais il sait qu'il y a de la lumière par ici,
+    // et il vient voir.
+    //
+    // Deux garde-fous, mesurés : il faut que la lumière S'ATTARDE (un faisceau
+    // qui balaye en passant ne compte pas), et qu'elle vienne d'assez près.
+    // Sans eux, escorter devenait impossible — le faisceau pointe forcément là
+    // où l'on va, donc droit sur ce qu'on veut éviter : 4 essais sur 20
+    // aboutissaient.
+    const baigne =
+      !p.gene && p.aveugle <= 0 && d < PORTEE_VUE * 1.6 && toucheParLaLumiere(partie, p);
+    p.bain = baigne ? p.bain + dt : Math.max(0, p.bain - dt * 2);
+    // La lumière ALERTE, elle ne dénonce pas : il cesse sa ronde et fouille sur
+    // place. C'est le cône qui déclenche la traque, et lui seul (plus haut) —
+    // là il sait OÙ, et il y va. Confondre les deux rendait le faisceau
+    // suicidaire : escorter tombait à 6 essais sur 20.
+    if (p.bain > BAIN_ALERTE) p.alerte = Math.max(p.alerte, 2.2);
     pire = Math.max(pire, p.charge);
   }
 
   // Le halo suit la jauge la plus pleine : la lumière rétrécit à mesure qu'une
   // sentinelle te verrouille, et revient quand tu lui échappes. Une seule
   // idée, deux lectures.
-  // Le caillou ne sert que si on se souvient qu'il existe au moment où il
+  // La pierre ne sert que si on se souvient qu'il existe au moment où il
   // servirait. Quand un regard commence à nous tenir, le bouton se signale —
   // trois fois par partie au plus, et jamais deux fois sans être ressorti du
   // danger entre-temps.
-  if (pire > 0.28 && !partie.nudgeArme && partie.nudgeCaillou < 3) {
+  if (pire > 0.28 && !partie.nudgeArme && partie.nudgePierre < 3) {
     partie.nudgeArme = true;
-    partie.nudgeCaillou++;
-    partie.signaux.caillou++;
+    partie.nudgePierre++;
+    partie.signaux.pierre++;
   } else if (pire < 0.05) partie.nudgeArme = false;
 
   joueur.souffle = 1 - pire;
@@ -301,15 +348,15 @@ export function majRegles(partie: Partie, dt: number): void {
     if (joueur.bonusT <= 0) joueur.bonus = null; // sa jauge se vide, c'est assez
   }
 
-  // Les galets reviennent un par un, au rythme du palier atteint.
-  const rang = rangCaillou(joueur);
-  if (joueur.galets < rang.reserve) {
-    joueur.caillouDispo += dt / rang.delai;
-    if (joueur.caillouDispo >= 1) {
-      joueur.galets++;
-      joueur.caillouDispo = 0;
+  // Les pierres reviennent un par un, au rythme du palier atteint.
+  const rang = rangPierre(joueur);
+  if (joueur.pierres < rang.reserve) {
+    joueur.pierreDispo += dt / rang.delai;
+    if (joueur.pierreDispo >= 1) {
+      joueur.pierres++;
+      joueur.pierreDispo = 0;
     }
-  } else joueur.caillouDispo = 0;
+  } else joueur.pierreDispo = 0;
 
   // Livraison : tout membre du convoi qui touche le portail y entre.
   for (const q of zone.persos) {

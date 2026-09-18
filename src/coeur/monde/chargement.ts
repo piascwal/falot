@@ -7,7 +7,7 @@
  * propos du jeu.
  */
 
-import { CAILLOU, FORMES } from '../formes.js';
+import { FORMES, PIERRE } from '../formes.js';
 import type { Partie } from '../types.js';
 import { ETAGES_ECRITS, zoneEcrite } from './ecrits.js';
 import { genererZone } from './generation.js';
@@ -34,7 +34,7 @@ export function chargerZone(partie: Partie, numero: number): void {
   partie.eclosion = 1;
   partie.particules = [];
   partie.ondes = [];
-  partie.cailloux = [];
+  partie.pierres = [];
   partie.traces = [];
   partie.flottants = [];
   partie.filVoix = [];
@@ -50,8 +50,8 @@ export function chargerZone(partie: Partie, numero: number): void {
   joueur.bonusT = 0;
   joueur.souffle = 1;
   joueur.repit = 0;
-  joueur.galets = CAILLOU[0].reserve;
-  joueur.caillouDispo = 0;
+  joueur.pierres = PIERRE[0].reserve;
+  joueur.pierreDispo = 0;
   joueur.x = zone.depart.x;
   joueur.y = zone.depart.y;
   joueur.vx = joueur.vy = 0;

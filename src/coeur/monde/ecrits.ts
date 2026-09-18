@@ -41,8 +41,8 @@ interface EtageEcrit {
 // posée au joueur — une salle, un problème, une seule issue.
 //
 //   #  mur         .  sol          @  départ       S  Seuil
-//   o  lueur       g  poche de cailloux           T  torche
-//   b  Frileux     r  Guet         %  mur fêlé (à casser au caillou)
+//   o  lueur       g  poche de pierres           T  torche
+//   b  Frileux     r  Guet         %  mur fêlé (à ouvrir à la pierre)
 //   |  porte (battant vertical)    =  porte (battant horizontal)
 //   *  point de reprise            1-9  murmure
 //
@@ -51,18 +51,18 @@ export const ETAGES_ECRITS: Readonly<Record<number, EtageEcrit>> = {
   1: {
     carte: [
       '#########################', //  0
-      '##############.........##', //  1   la salle de la torche
+      '##############.......T.##', //  1   la salle des torches : une au nord…
       '##...#########.........##', //  2
       '##.@.%o.o.o.o.*8.......##', //  3   le réveil : ses DEUX issues sont fêlées
       '##.6.#########.........##', //  4
       '###%##########.........##', //  5   la pierre fendue, sous la salle du réveil
-      '##.g.#########...T2....##', //  6   la niche, et la poche de cailloux qu'on y trouve
+      '##...#########..T.2....##', //  6   … et l'autre au sud ; à gauche, la niche vide
       '##################*######', //  7
       '##################=######', //  8
-      '############......1....##', //  9   le Guet nommé, et ce que fait le caillou
-      '############..r........##', // 10   la SALLE du premier Guet : de la place pour lancer
+      '############......1....##', //  9   ce que fait la pierre, dit une fois
+      '############.....r.....##', // 10   la SALLE des deux Guets : de la place pour lancer
       '############...........##', // 11
-      '############...........##', // 12
+      '############...r.......##', // 12   le second garde la sortie, en bas à gauche
       '##############=##########', // 13   la sortie, décalée de quatre cases
       '##############*........##', // 14   la salle du Frileux qu'on ne peut pas aider
       '##############.......b.##', // 15
@@ -84,22 +84,32 @@ export const ETAGES_ECRITS: Readonly<Record<number, EtageEcrit>> = {
     // tirées : un premier étage doit se relire à l'identique d'une partie sur
     // l'autre, sinon on ne peut ni l'équilibrer ni le déboguer.
     rondes: [
+      // Les deux Guets de la galerie se partagent la salle en bandes : celui du
+      // haut barre l'entrée, celui du bas passe devant la sortie. Traverser
+      // demande donc d'ouvrir un trou dans l'une des deux — c'est le travail de
+      // la pierre.
+      // Mesuré : six configurations essayées, celle-ci est la seule qui rende
+      // « foncer » perdant sans rendre la salle injuste — 4 essais sur 20
+      // passent tout droit, 20 sur 20 en lançant d'abord une pierre.
       [
-        [13, 10],
-        [21, 12],
-        [14, 12],
-      ], // celui de la salle la balaye en entier
+        [14, 10],
+        [20, 10],
+      ], // il barre la moitié haute, juste sous l'entrée
+      [
+        [13, 12],
+        [18, 12],
+      ], // il barre la moitié basse, devant la sortie
       [
         [9, 21],
         [13, 21],
       ], // celui de l'escorte fait l'aller-retour du couloir
     ],
     murmures: {
-      '1': "En bas, un Guet. Ton caillou garde un peu de toi : là où il tombe, il fait une autre petite lumière — et c'est elle qu'il ira voir.",
-      '2': 'Un Guet ne voit pas les corps. Il cherche une petite lumière seule dans le noir. Dans une plus grande que lui, il ne distingue plus rien.',
+      '1': "En bas, un Guet. Ta pierre garde un peu de ta lumière : là où elle tombe, une lueur s'allume — et il ira l'éteindre, elle, pas toi.",
+      '2': "Un Guet veut éteindre le monde, et vider ta lumière. Mais il n'approche jamais d'une flamme plus grande que lui.",
       '4': "Sortir, c'est monter. Mais un Seuil ne s'ouvre pas avec une clé : il cède quand assez d'âmes se tiennent dedans.",
-      '5': 'Tant que la flamme tient, il ne te voit pas. Ni toi, ni ceux qui se serrent contre toi.',
-      '6': 'Le mur, juste en dessous, est fendu. Un caillou suffirait.',
+      '5': "Tant que la flamme tient, aucun Guet n'approche. Ni de toi, ni de ceux qui se serrent contre toi.",
+      '6': 'Le mur, juste en dessous, est fendu. Une pierre suffirait.',
       '8': "Une torche éteinte au mur, laissée par qui passait avant toi. Ce qu'il te reste de lumière suffit à la rallumer.",
     },
     // Deux âmes, et les deux sont dans la même salle, au bout du couloir des
@@ -157,7 +167,7 @@ export function zoneEcrite(numero: number): Zone | null {
       else if (c === 'o')
         lueurs.push({ x, y, type: 'eclat', prise: false, vue: false, phase: rnd() * TAU });
       else if (c === 'g')
-        lueurs.push({ x, y, type: 'galet', prise: false, vue: false, phase: rnd() * TAU });
+        lueurs.push({ x, y, type: 'poche', prise: false, vue: false, phase: rnd() * TAU });
       else if (c === 'T') torches.push({ cx, cy });
       else if (c === 'b') bleus.push({ cx, cy });
       else if (c === 'r') rouges.push({ cx, cy });
@@ -231,6 +241,8 @@ export function zoneEcrite(numero: number): Zone | null {
       duree: 26,
       reste: 0,
       phase: rnd() * TAU,
+      ox,
+      oy,
     };
   });
 

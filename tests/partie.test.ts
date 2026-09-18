@@ -5,10 +5,10 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { CASE, D, PORTEE_VUE } from '../src/coeur/dimensions.js';
-import { CAILLOU, DUREE_CALME, EMOTIONS, FORMES } from '../src/coeur/formes.js';
-import { solideEn } from '../src/coeur/monde/grille.js';
+import { DUREE_CALME, EMOTIONS, FORMES, PIERRE } from '../src/coeur/formes.js';
+import { distances, solideEn } from '../src/coeur/monde/grille.js';
 import { avancer, creerPartie, PAS } from '../src/coeur/partie.js';
-import { lancerCaillou } from '../src/coeur/regles/caillou.js';
+import { lancerPierre } from '../src/coeur/regles/pierre.js';
 import { eteindre, gagnerEclat } from '../src/coeur/regles/progression.js';
 import type { Partie, Perso } from '../src/coeur/types.js';
 
@@ -30,7 +30,7 @@ describe('une partie qui démarre', () => {
     expect(p.zone.grain).toBe('ÉCRIT-1');
     expect(p.joueur.x).toBe(p.zone.depart.x);
     expect(p.joueur.niveau).toBe(0);
-    expect(p.joueur.galets).toBe(CAILLOU[0].reserve);
+    expect(p.joueur.pierres).toBe(PIERRE[0].reserve);
   });
 
   it('tourne dix secondes sans rien casser, et laisse Falot sur du sol', () => {
@@ -72,7 +72,7 @@ describe('le déterminisme', () => {
         const a = (i / 120) * Math.PI;
         p.entrees.manche.dx = Math.cos(a);
         p.entrees.manche.dy = Math.sin(a);
-        if (i % 180 === 0) lancerCaillou(p, a, 0.8);
+        if (i % 180 === 0) lancerPierre(p, a, 0.8);
         avancer(p, PAS);
       }
     };
@@ -93,7 +93,7 @@ describe('les formes', () => {
       gagnerEclat(p, 1);
       expect(p.joueur.niveau).toBe(n);
       // le palier élargit la poche, et on la remplit tout de suite
-      expect(p.joueur.galets).toBe(CAILLOU[n].reserve);
+      expect(p.joueur.pierres).toBe(PIERRE[n].reserve);
     }
   });
 
@@ -132,17 +132,87 @@ describe('un Guet', () => {
     p.joueur.repit = 0;
   };
 
-  it('remplit sa jauge quand il nous tient, et la vide quand on sort', () => {
+  it('remplit sa jauge quand il nous tient, et la vide quand on s’en va', () => {
     const p = creerPartie({ grain: 'GUET' });
     const g = guets(p)[0];
     seFaireVoir(p, g, 2.5);
     avancer(p, PAS);
     const apresUnPas = g.charge;
     expect(apresUnPas).toBeGreaterThan(0);
-    // on se cache derrière son dos : la jauge redescend
-    g.regard = Math.PI;
+    // On s'en va VRAIMENT : lui tourner le dos ne suffit plus, puisqu'il se
+    // rend maintenant au dernier endroit où il a vu quelque chose.
+    p.joueur.x = p.zone.depart.x;
+    p.joueur.y = p.zone.depart.y;
     for (let i = 0; i < 30; i++) avancer(p, PAS);
     expect(g.charge).toBeLessThan(apresUnPas);
+  });
+
+  it('se rend au dernier endroit où il a vu quelque chose', () => {
+    const p = creerPartie({ grain: 'GUET' });
+    const g = guets(p)[0];
+    seFaireVoir(p, g, 2.5);
+    const ou = { x: p.joueur.x, y: p.joueur.y };
+    avancer(p, PAS);
+    expect(g.derniereVue).not.toBeNull();
+    // le joueur file ailleurs ; le Guet, lui, va voir là où il l'a vu
+    p.joueur.x = p.zone.depart.x;
+    p.joueur.y = p.zone.depart.y;
+    p.joueur.repit = 99;
+    const avant = Math.hypot(g.x - ou.x, g.y - ou.y);
+    for (let i = 0; i < 90; i++) avancer(p, PAS);
+    expect(Math.hypot(g.x - ou.x, g.y - ou.y)).toBeLessThan(avant);
+  });
+
+  it('se met en alerte quand la lumière du joueur s’attarde sur lui, sans le repérer', () => {
+    const p = creerPartie({ grain: 'GUET' });
+    const g = guets(p)[0];
+    // dos tourné : il ne peut pas nous voir. Mais notre faisceau le baigne.
+    g.regard = 0;
+    g.aveugle = 0;
+    g.cligne = 0;
+    g.alerte = 0;
+    g.charge = 0;
+    p.joueur.niveau = 1; // Curieux : il a un faisceau
+    p.joueur.x = g.x - CASE * 2.5;
+    p.joueur.y = g.y;
+    p.joueur.regard = 0; // droit sur lui
+    p.joueur.repit = 99;
+    for (let i = 0; i < 40; i++) avancer(p, PAS);
+    expect(g.alerte).toBeGreaterThan(0);
+    // sa jauge, elle, n'a pas bougé : la lumière alerte, elle ne dénonce pas
+    expect(g.charge).toBe(0);
+  });
+
+  it('ne s’alerte pas pour un faisceau qui ne fait que passer', () => {
+    const p = creerPartie({ grain: 'GUET' });
+    const g = guets(p)[0];
+    g.regard = 0;
+    g.alerte = 0;
+    p.joueur.niveau = 1;
+    p.joueur.x = g.x - CASE * 2.5;
+    p.joueur.y = g.y;
+    p.joueur.repit = 99;
+    // dix pas seulement, soit un sixième de seconde : il faut s'attarder
+    p.joueur.regard = 0;
+    for (let i = 0; i < 10; i++) avancer(p, PAS);
+    expect(g.alerte).toBe(0);
+  });
+
+  it('franchit un mur qu’on a cassé : une fissure ouverte est un couloir', () => {
+    const p = creerPartie({ grain: 'GUET', etage: 1 });
+    const f = p.zone.fissures[0];
+    expect(solideEn(p.zone, f.x, f.y)).toBe(true);
+    p.zone.mur[f.cy][f.cx] = 0;
+    expect(solideEn(p.zone, f.x, f.y)).toBe(false);
+    // Et le parcours en largeur d'un Guet — celui qui exclut les portes, et
+    // elles seules — la traverse : rien ne distingue une fissure ouverte d'un
+    // sol ordinaire, pour personne. Une porte, si.
+    const depart = {
+      cx: Math.floor(p.zone.depart.x / CASE),
+      cy: Math.floor(p.zone.depart.y / CASE),
+    };
+    expect(distances(p.zone, depart, true)[f.cy][f.cx]).toBeGreaterThanOrEqual(0);
+    expect(p.zone.porteDe[f.cy][f.cx]).toBeNull();
   });
 
   it('monte d’autant plus vite qu’il y a de corps à regarder', () => {
@@ -192,7 +262,7 @@ describe('un Guet', () => {
     expect(g.charge).toBe(0);
   });
 
-  it('se détourne pour aller voir où un caillou est tombé', () => {
+  it('se détourne pour aller voir où un pierre est tombé', () => {
     const p = creerPartie({ grain: 'GUET' });
     const g = guets(p)[0];
     g.aveugle = 0;
@@ -200,9 +270,9 @@ describe('un Guet', () => {
     p.joueur.x = g.x;
     p.joueur.y = g.y + CASE * 2;
     p.joueur.regard = -Math.PI / 2;
-    lancerCaillou(p, 0, 0.3);
+    lancerPierre(p, 0, 0.3);
     jouer(p, 1.2);
-    // Il oublie TOUT : alerte, jauge, poursuite. C'est ce qui fait du caillou
+    // Il oublie TOUT : alerte, jauge, poursuite. C'est ce qui fait du pierre
     // une arme et pas une curiosité.
     expect(g.curiosite).not.toBeNull();
     expect(g.alerte).toBeLessThanOrEqual(0);
@@ -231,24 +301,24 @@ describe('la mort', () => {
     }
   });
 
-  it('signale le caillou la toute première fois, et une seule', () => {
+  it('signale le pierre la toute première fois, et une seule', () => {
     const p = creerPartie({ grain: 'MORT' });
-    const avant = p.signaux.caillou;
+    const avant = p.signaux.pierre;
     eteindre(p);
-    expect(p.signaux.caillou).toBe(avant + 1);
+    expect(p.signaux.pierre).toBe(avant + 1);
     eteindre(p);
-    expect(p.signaux.caillou).toBe(avant + 1);
+    expect(p.signaux.pierre).toBe(avant + 1);
   });
 });
 
-describe('le caillou', () => {
+describe('le pierre', () => {
   it('ouvre un mur fêlé quand il tombe à côté', () => {
     const p = creerPartie({ grain: 'FENTE' });
     const f = p.zone.fissures[0];
     expect(p.zone.mur[f.cy][f.cx]).toBe(1);
     p.joueur.x = f.x;
     p.joueur.y = f.y + CASE; // juste en dessous de la fente
-    lancerCaillou(p, -Math.PI / 2, 0);
+    lancerPierre(p, -Math.PI / 2, 0);
     jouer(p, 1.5);
     expect(p.zone.mur[f.cy][f.cx]).toBe(0);
     expect(p.zone.versionPortes).toBeGreaterThan(0);
@@ -256,18 +326,18 @@ describe('le caillou', () => {
 
   it('ne part pas quand la poche est vide, et se recharge au rythme du palier', () => {
     const p = creerPartie({ grain: 'POCHE' });
-    p.joueur.galets = 0;
-    lancerCaillou(p, 0, 1);
-    expect(p.cailloux).toHaveLength(0);
-    jouer(p, CAILLOU[0].delai + 0.2);
-    expect(p.joueur.galets).toBe(1);
+    p.joueur.pierres = 0;
+    lancerPierre(p, 0, 1);
+    expect(p.pierres).toHaveLength(0);
+    jouer(p, PIERRE[0].delai + 0.2);
+    expect(p.joueur.pierres).toBe(1);
   });
 
   it('s’arrête avant la pierre : il ne la traverse jamais', () => {
     const p = creerPartie({ grain: 'PIERRE' });
     // plein nord depuis le seuil de l'étage 1 : il y a un mur à deux pas
-    lancerCaillou(p, -Math.PI / 2, 1);
-    const c = p.cailloux[0];
+    lancerPierre(p, -Math.PI / 2, 1);
+    const c = p.pierres[0];
     expect(solideEn(p.zone, c.x1, c.y1)).toBe(false);
   });
 });
@@ -349,7 +419,7 @@ function empreinte(p: Partie): string {
     r(p.joueur.y),
     r(p.joueur.eclat),
     p.joueur.niveau,
-    p.joueur.galets,
+    p.joueur.pierres,
     p.zone.sortie.ames,
     p.zone.braises.length,
     p.particules.length,

@@ -8,7 +8,7 @@
  * sous le même nom dans le code.
  */
 
-import type { Emotion, Humeur, RangCaillou, TypeLueur } from './formes.js';
+import type { Emotion, Humeur, RangPierre, TypeLueur } from './formes.js';
 import type { Bandeau, Voix } from './voix.js';
 
 export interface Point {
@@ -86,9 +86,15 @@ export interface Perso extends Corps {
   immobile: number;
   dernierX: number;
   dernierY: number;
-  /** Là où un caillou est tombé, et le temps qu'elle va y consacrer. */
+  /** Là où une pierre est tombée, et le temps qu'il va y consacrer. */
   curiosite: Point | null;
   curieuxT: number;
+  /** Le dernier endroit où il a vu de la lumière. Il y va : c'est ce qui fait
+   *  d'une détection une poursuite, et non un simple balayage inquiet. */
+  derniereVue: Point | null;
+  /** Depuis combien de temps la lumière du joueur le baigne. Un faisceau qui
+   *  balaye ne suffit pas : il faut s'attarder. */
+  bain: number;
   prochainCligne: number;
   ronde: PointRonde[];
   /** Combien de corps elle voit à cet instant. Exposé pour les mesures. */
@@ -110,9 +116,9 @@ export interface Joueur extends Corps {
   repit: number;
   /** Lissage de « on me regarde », pour le rougissement des bords. */
   vu: number;
-  /** Cailloux en poche, et la fraction de recharge du prochain. */
-  galets: number;
-  caillouDispo: number;
+  /** Pierres en poche, et la fraction de recharge du prochain. */
+  pierres: number;
+  pierreDispo: number;
   bonus: TypeLueur | null;
   bonusT: number;
   abri: boolean;
@@ -148,6 +154,10 @@ export interface Source extends Point {
 export interface Torche extends Source {
   duree: number;
   reste: number;
+  /** Direction du mur auquel elle est accrochée (−1, 0 ou 1 sur chaque axe).
+   *  C'est ce qui permet de la dessiner tournée vers la salle. */
+  ox: number;
+  oy: number;
   /** Déjà croisée : on se souvient d'où aller rallumer. */
   vue?: boolean;
 }
@@ -217,7 +227,7 @@ export interface Zone {
   longueur: number;
 }
 
-export interface CaillouVol {
+export interface PierreEnVol {
   x0: number;
   y0: number;
   x1: number;
@@ -228,7 +238,7 @@ export interface CaillouVol {
   duree: number;
   /** L'arc de cercle : sa hauteur au-dessus du sol. */
   hauteur: number;
-  rang: RangCaillou;
+  rang: RangPierre;
 }
 
 /** Ce que Falot a laissé là où la pierre est tombée. */
@@ -284,11 +294,37 @@ export interface Vidange {
   reste: number;
 }
 
-/** La scène d'ouverture : une lumière tombe, touche le sol, et Falot est là. */
+/**
+ * Une ARRIVÉE : une lumière parcourt la distance, touche le sol, et Falot est
+ * là. Elle tombe du plafond au tout premier étage — « une lumière qui s'éteint
+ * ne disparaît pas, elle tombe » — et elle MONTE partout ailleurs, puisqu'on
+ * sort des Dessous en montant. C'est la même scène, prise dans l'autre sens.
+ */
 export interface Chute extends Point {
   t: number;
   y0: number;
   pose: boolean;
+  /** D'où vient la lumière. `bas` = il monte d'un étage. */
+  sens: 'haut' | 'bas';
+  /** Le prologue s'offre le regard à gauche, à droite, puis devant. Les étages
+   *  suivants non : on a déjà vu la scène, elle doit être brève. */
+  ceremonie: boolean;
+}
+
+/**
+ * Un DÉPART : le corps se vide de sa couleur et sa lumière s'en va vers le
+ * haut. C'est la même image pour les deux fins possibles d'un étage — s'éteindre,
+ * ou franchir le Seuil — parce que c'est la même chose qui se passe.
+ */
+export interface Envol {
+  t: number;
+  duree: number;
+  /** `mort` : il renaît au point de reprise. `seuil` : l'étage suivant. */
+  raison: 'mort' | 'seuil';
+  /** L'étage à charger, pour un envol de Seuil. */
+  suivante: number;
+  motes: Mote[];
+  reste: number;
 }
 
 /** Un étage vidé, et combien d'âmes y sont remontées. */
@@ -315,7 +351,7 @@ export interface Touches {
   bas: boolean;
 }
 
-/** La visée du caillou : on appuie, on glisse, on relâche pour lancer. */
+/** La visée de la pierre : on appuie, on glisse, on relâche pour lancer. */
 export interface Visee extends Manche {}
 
 /**
@@ -353,7 +389,7 @@ export interface Partie {
 
   particules: Particule[];
   ondes: Onde[];
-  cailloux: CaillouVol[];
+  pierres: PierreEnVol[];
   traces: Trace[];
   flottants: Flottant[];
   /** La trace du joueur : sa seule mémoire du terrain. `null` = une coupure. */
@@ -362,6 +398,7 @@ export interface Partie {
 
   vidange: Vidange | null;
   chute: Chute | null;
+  envol: Envol | null;
   /** 0 = Falot n'est pas encore là, 1 = il y est. */
   eclosion: number;
   /** Les étages déjà vidés. La seule chose qu'il garde d'une zone à l'autre. */
@@ -388,13 +425,13 @@ export interface Partie {
    * Les animations de l'interface, en compteurs. Le cœur incrémente, l'interface
    * observe : c'est ce qui garde le DOM hors des règles du jeu.
    */
-  signaux: { caillou: number; jauge: number; forme: number };
+  signaux: { pierre: number; jauge: number; forme: number };
 
   /** Ce qui ne se dit qu'une fois. */
-  premieres: { lueur: boolean; reprise: boolean; mort: boolean; seuil: boolean };
+  premieres: { lueur: boolean; mort: boolean; seuil: boolean };
   regleDite: Partial<Record<Emotion, boolean>>;
-  /** Le bouton caillou ne se signale que trois fois par partie. */
-  nudgeCaillou: number;
+  /** Le bouton pierre ne se signale que trois fois par partie. */
+  nudgePierre: number;
   nudgeArme: boolean;
   /** Où l'on en est dans les répliques : elles tournent sans se répéter. */
   numReplique: number;

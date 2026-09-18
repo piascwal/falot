@@ -53,11 +53,11 @@ export const RECIT_CAGE: Readonly<Record<number, string>> = {
     "qu'elles montrent. Personne n'a construit cet endroit. On y a entassé " +
     "ce qui ne servait plus, jusqu'à ce que ça ressemble à une prison.",
   4:
-    "Les Guets ne montent pas derrière toi. Ils n'ont nulle part " +
-    "où aller : ils sont ce qui reste quand une lampe a renoncé, et c'est une " +
-    "lampe qu'ils attendent — pas un corps. Une petite lumière seule dans le " +
-    "noir, exactement la forme que tu as. C'est pour ça qu'une flamme posée " +
-    "les désarme : dedans, tu n'as plus cette forme-là.",
+    "Les Guets ne montent pas derrière toi. Ils n'ont nulle part où aller, et " +
+    "ils ne veulent rien d'autre : éteindre le monde, une lumière après " +
+    "l'autre, et vider la tienne pendant qu'elle passe. Ce n'est pas toi " +
+    "qu'ils cherchent — c'est ce que tu portes. Une flamme trop grande pour " +
+    'eux les tient à distance ; tout le reste, ils viennent le prendre.',
 };
 export const RECIT_PLUS_HAUT: readonly string[] = [
   'Tu ne comptes plus les étages. Elles, si.',

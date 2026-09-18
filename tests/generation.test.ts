@@ -96,7 +96,7 @@ describe('genererZone', () => {
   it('ne fait jamais d’une fissure un passage obligé', () => {
     // C'est la règle exactement inverse de celle du prologue (voir
     // `prologue.test.ts`) : là-bas casser un mur est imposé pour enseigner le
-    // caillou ; ici une fente n'ouvre qu'un raccourci, et la zone reste
+    // pierre ; ici une fente n'ouvre qu'un raccourci, et la zone reste
     // entièrement parcourable sans rien casser. Les distances sont calculées
     // sur la pierre telle qu'elle est — une fissure est un mur.
     for (let i = 0; i < 80; i++) {

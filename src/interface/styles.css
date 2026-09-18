@@ -278,16 +278,16 @@ canvas {
      défilement : il envoyait un pointercancel dès le premier mouvement, et la
      visée mourait avant qu'on ait pu orienter quoi que ce soit. Ce bouton-ci
      se garde le geste entier. */
-#caillou {
+#pierre {
   border-color: rgba(178, 186, 204, 0.55);
   color: #b2bacc;
   touch-action: none;
 }
 
-/* Le caillou vient d'apprendre quelque chose. Une modale coupait le jeu pour
+/* La pierre vient d'apprendre quelque chose. Une modale coupait le jeu pour
      le dire ; le bouton le dit tout seul, en prenant la couleur de la forme et
      en pulsant deux fois. On ne lit pas, on voit. */
-@keyframes caillouEvolue {
+@keyframes pierreEvolue {
   0% {
     transform: scale(1);
     box-shadow: 0 0 0 0 currentColor;
@@ -310,13 +310,13 @@ canvas {
   }
 }
 
-#caillou.evolue {
-  animation: caillouEvolue 1.5s ease-out;
+#pierre.evolue {
+  animation: pierreEvolue 1.5s ease-out;
 }
 
 /* un halo permanent, d'autant plus marqué que la forme est haute : le bouton
      porte la progression, elle n'a pas besoin d'être annoncée */
-#caillou {
+#pierre {
   box-shadow: 0 0 var(--aura, 0px) rgba(255, 255, 255, 0.18);
 }
 
@@ -482,7 +482,7 @@ canvas {
 
 /* La cage d'escalier, seul écran plein du jeu. Le bandeau modal qui servait
      à l'évolution et au passage de zone a disparu : l'un se dit par le bouton
-     caillou, l'autre par cette carte. */
+     pierre, l'autre par cette carte. */
 .cage {
   position: fixed;
   inset: 0;

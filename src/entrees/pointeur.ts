@@ -1,16 +1,16 @@
 /**
- * Le doigt : le joystick flottant, et le bouton caillou.
+ * Le doigt : le joystick flottant, et le bouton pierre.
  *
  * Le joystick naît exactement sous le doigt, où qu'on le pose — sur un
  * téléphone, une croix fixe demande de regarder ses pouces.
  *
- * Le bouton caillou garde le doigt : on appuie, on glisse pour viser, on
+ * Le bouton pierre garde le doigt : on appuie, on glisse pour viser, on
  * relâche pour lancer. Le lancer part au RELÂCHEMENT, jamais à l'appui : c'est
  * ce qui laisse ajuster la direction tant que le doigt est posé.
  */
 
 import { clamp } from '../coeur/geometrie.js';
-import { lancerCaillou } from '../coeur/regles/caillou.js';
+import { lancerPierre } from '../coeur/regles/pierre.js';
 import type { Partie, Point } from '../coeur/types.js';
 import { RAYON_MANCHE } from '../rendu/gestes.js';
 
@@ -96,7 +96,7 @@ export function brancherPointeur(
     if (e.pointerId !== visee.id) return;
     visee.id = null;
     visee.actif = false;
-    lancerCaillou(partie, Math.atan2(visee.dy, visee.dx), visee.force);
+    lancerPierre(partie, Math.atan2(visee.dy, visee.dx), visee.force);
   });
 
   // Une annulation n'est pas un lâcher : on abandonne la visée sans rien lancer.

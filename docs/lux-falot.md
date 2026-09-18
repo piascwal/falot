@@ -122,6 +122,19 @@ Et ce qu'il a retrouvé, il le donne au Seuil. Tout. C'est le prix du passage.
 
 ## Les deux lumières — pourquoi une torche protège et ton halo te trahit
 
+> **⚠️ Cette section est dépassée depuis les tests utilisateurs.** Le concept
+> « un Guet ne voit pas les corps, il cherche une petite lumière seule dans le
+> noir » n'a pas pris : personne ne l'a compris, et il ne plaisait pas. La règle
+> en vigueur dans le jeu est maintenant celle-ci :
+>
+> **« Un Guet veut éteindre le monde, et vider ta lumière. Il n'approche jamais
+> d'une flamme plus grande que lui. »**
+>
+> Les conséquences mécaniques sont les mêmes — ce que tu portes t'expose, ce qui
+> est posé te protège, la pierre détourne — mais la raison est inversée : il ne
+> reconnaît plus une forme, il vient prendre de la lumière. Le texte ci-dessous
+> est gardé le temps d'une passe d'écriture.
+
 C'est le trou le plus voyant de la première version : ton halo, ton faisceau et
 celui de chaque âme qui te suit te font repérer, alors qu'une torche au mur ou
 une braise posée t'effacent. Deux lumières, deux effets contraires, et aucune
@@ -148,7 +161,7 @@ De là, tout découle :
   tu n'as simplement plus la forme qu'il cherche.
 - **Et ça vaut pour qui se serre contre toi.** L'abri n'est pas un statut, c'est
   une place : chaque âme qui dépasse du halo redevient une petite lumière seule.
-- **Le caillou n'est ni l'un ni l'autre.** Il ne brille pas du tout. C'est la
+- **La pierre n'est ni l'un ni l'autre.** Elle ne brille pas du tout. C'est la
   seule chose ici qui puisse déplacer un regard sans le nourrir.
 - **Trop d'un coup l'aveugle.** L'éclat du Solaire ne l'éclaire pas : il efface
   d'un seul coup toute différence entre la lumière et le noir. Il n'a plus rien
@@ -164,9 +177,9 @@ elles ne peuvent pas « brûler encore un peu » en l'attendant. Ce sont des
 d'approcher : ce qu'il reste de lumière à Falot suffit à les reprendre — et ce
 qu'il donne là, il ne l'a plus sur lui.
 
-## L'objet — pourquoi un caillou
+## L'objet — pourquoi une pierre
 
-Dans les Dessous, tout est lumière ou noir. Un caillou n'est ni l'un ni l'autre :
+Dans les Dessous, tout est lumière ou noir. Une pierre n'est ni l'un ni l'autre :
 **c'est la seule chose ici qui ne brille pas.** C'est exactement pour ça qu'il
 fonctionne — mais pas de la façon qu'on croit.
 
@@ -190,11 +203,11 @@ peut pas ouvrir un mur avec de la lumière.
 
 | Forme | Le geste | Ce qu'il y met |
 |---|---|---|
-| Peureux | Il le lance | Un leurre, rien d'autre : détourner un regard de lui |
+| Peureux | Il la lance | Un leurre, rien d'autre : détourner un regard de lui |
 | Curieux | Il ose regarder | Le faisceau — c'est par le regard qu'il rappelle aux autres qu'ils sont des lampes |
-| Veilleur | Le caillou couve | Un morceau de lui brûle où il tombe : un abri posé à distance |
-| Ardent | Le caillou frappe | Assez de lui dedans pour étourdir un regard — la première fois qu'il rend un coup |
-| Solaire | Le caillou éclate | Il rend d'un coup tout ce qu'il avait retrouvé |
+| Veilleur | La pierre couve | Un morceau de lui brûle où il tombe : un abri posé à distance |
+| Ardent | La pierre frappe | Assez de lui dedans pour étourdir un regard — la première fois qu'il rend un coup |
+| Solaire | La pierre éclate | Il rend d'un coup tout ce qu'il avait retrouvé |
 
 ## Le lexique — chaque règle a sa raison
 
@@ -215,7 +228,7 @@ peut pas ouvrir un mur avec de la lumière.
 | Des torches éteintes au mur, qu'on rallume en passant | Laissées par ceux qui sont passés avant. Elles ne brûlent plus : c'est Falot qui les reprend, avec ce qu'il lui reste |
 | Une torche allumée met à l'abri | Un Guet cherche une petite lumière seule dans le noir. Dans une plus grande, Falot n'a plus cette forme-là |
 | Ton halo et ton faisceau te trahissent | Ce sont précisément la forme qu'il guette : une lampe isolée qui se déplace |
-| Des murs fêlés qu'un caillou ouvre | Personne n'a bâti les Dessous : on y a entassé. Ça tient mal, et la lumière ne perce pas la pierre — seule la chose qui ne brille pas le peut |
+| Des murs fêlés qu'une pierre ouvre | Personne n'a bâti les Dessous : on y a entassé. Ça tient mal, et la lumière ne perce pas la pierre — seule la chose qui ne brille pas le peut |
 | On repart Peureux à chaque nouvelle zone | Il a tout donné au Seuil, et il le paie à chaque fois |
 | On le voit se vider avant de passer | La lumière quitte son corps par filets et rejoint le portail ; le halo se referme jusqu'à presque rien |
 | Le corps d'une âme se remplit pendant qu'on l'éclaire | On la rallume vraiment : le niveau monte en elle, du contour sombre au vert plein |
@@ -252,9 +265,9 @@ l'intention d'origine, gardée telle quelle pour mémoire.
 L'histoire écrit déjà le scénario du niveau linéaire : une salle par mécanique,
 et chaque salle est un moment du récit plutôt qu'un tutoriel.
 
-1. Falot se réveille seul dans le noir avec un caillou — *le noir, le halo, se
+1. Falot se réveille seul dans le noir avec une pierre — *le noir, le halo, se
    déplacer*.
-2. Un premier Guet passe sans le voir, et le caillou le détourne — *le cône, le
+2. Un premier Guet passe sans le voir, et la pierre le détourne — *le cône, le
    leurre*.
 3. Derrière une porte, un Frileux tremble hors de portée : il faut oser le
    regarder pour le rallumer — *le faisceau, calmer*.

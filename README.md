@@ -1,7 +1,7 @@
 # Falot — *Lux & Paranoïa*
 
 Aventure procédurale dans le noir. Falot est la plus petite lampe des Dessous :
-il n'a qu'un caillou, et il escorte des âmes jusqu'au Seuil sans croiser les
+il n'a qu'une pierre, et il escorte des âmes jusqu'au Seuil sans croiser les
 regards rouges.
 
 - **La bible narrative** : [`docs/lux-falot.md`](docs/lux-falot.md) — le monde,
@@ -56,12 +56,12 @@ src/
 ├── coeur/              LE JEU. Aucun DOM, aucun canvas, aucune horloge.
 │   ├── partie.ts       l'état complet + avancer(partie, dt)
 │   ├── types.ts        ce qu'est une zone, un perso, une partie
-│   ├── formes.ts       LES DONNÉES : formes, caillou, bonus, humeurs
+│   ├── formes.ts       LES DONNÉES : formes, pierre, bonus, humeurs
 │   ├── dimensions.ts   tout se mesure en CASES, jamais en pixels d'écran
 │   ├── lectures.ts     les questions qu'on pose sans rien modifier
 │   ├── voix.ts textes.ts particules.ts alea.ts geometrie.ts couleurs.ts
 │   ├── monde/          grille (BFS, collisions, vue), génération, étages écrits
-│   └── regles/         joueur, convoi, persos, portes, caillou, seuil, monde
+│   └── regles/         joueur, convoi, persos, portes, pierre, seuil, monde
 ├── rendu/              CANVAS 2D. Ne décide rien, ne mute rien.
 │   ├── ecran.ts        canvas, calque d'obscurité, caméra, budget de pixels
 │   ├── lumiere.ts      le rendu signature : cônes et ronds percés dans le noir
@@ -77,7 +77,7 @@ de `interface/`. Le rendu lit la partie et n'y écrit que ses caches de rayons.
 L'interface lit la partie et n'y touche qu'au travers des entrées. Quand une
 règle du jeu doit déclencher une animation, elle incrémente un compteur dans
 `partie.signaux` et l'interface le voit changer — c'est ce qui permet de tester
-« le jeu signale le caillou la première fois qu'on meurt » sans navigateur.
+« le jeu signale la pierre la première fois qu'on meurt » sans navigateur.
 
 Une image, c'est trois gestes dans [`src/main.ts`](src/main.ts) : lire les
 entrées, avancer la simulation d'un pas **fixe** de 1/60, dessiner l'état obtenu.
@@ -92,7 +92,7 @@ entrées, avancer la simulation d'un pas **fixe** de 1/60, dessiner l'état obte
 - **L'étage 1 écrit à la main** : finissable sans casser un seul mur, et tout le
   reste atteignable une fois les fentes ouvertes — la règle même de la bible.
 - **Les règles** : la jauge d'un Guet qui monte plus vite avec un gros convoi,
-  son dos qui ne voit rien, le caillou qui le détourne, la mort qui lâche le
+  son dos qui ne voit rien, la pierre qui le détourne, la mort qui lâche le
   convoi sans reprendre l'éclat, l'abri qui efface, les paliers de forme.
 - **La grille**, sur des plans dessinés : ligne de vue, portes, chemins,
   collisions.

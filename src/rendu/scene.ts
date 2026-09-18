@@ -44,6 +44,7 @@ import {
 } from './lumiere.js';
 import { dessinerSol } from './sol.js';
 import { flecheVers, texteCerne } from './texte.js';
+import { dessinerTorche } from './torches.js';
 import { dessinerVidange } from './vidange.js';
 import { dessinerTete } from './visages.js';
 
@@ -98,6 +99,7 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
   for (const t of zone.torches) {
     if (t.reste <= 0) continue;
     const k = clamp(t.reste / (t.duree * 0.35), 0, 1);
+    // la lueur chaude au sol, puis la torche elle-même par-dessus
     const h = (14 + Math.sin(temps * 9 + t.phase) * 3) * (0.5 + k * 0.5);
     const g = ctx.createRadialGradient(
       t.x - cam.x,
@@ -113,6 +115,7 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
     ctx.beginPath();
     ctx.arc(t.x - cam.x, t.y - cam.y, h * 1.9, 0, TAU);
     ctx.fill();
+    dessinerTorche(ecran, t, 0.35 + k * 0.65, temps);
   }
 
   // --- braises ---
@@ -257,7 +260,7 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
   }
 
   // --- ce qu'un Guet a entendu ---
-  // Un point d'interrogation au-dessus de la tête. Sans ça on lance un caillou
+  // Un point d'interrogation au-dessus de la tête. Sans ça on lance une pierre
   // et on ne sait jamais s'il a servi : la seule arme du début n'avait aucune
   // réponse visible.
   for (const p of zone.persos) {
@@ -302,15 +305,18 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
     );
   }
 
-  // --- la lumière qui tombe ---
+  // --- la lumière qui arrive : elle tombe au prologue, elle monte ensuite ---
   if (partie.chute && !partie.chute.pose) {
     const cx = partie.chute.x - cam.x,
       cy = partie.chute.y - cam.y;
-    const tr = ctx.createLinearGradient(cx, cy - CASE * 1.1, cx, cy);
+    // la traîne est DERRIÈRE elle : au-dessus si elle descend, en dessous si
+    // elle monte. C'est ce qui dit le sens du voyage en une image.
+    const derriere = partie.chute.sens === 'haut' ? -CASE * 1.1 : CASE * 1.1;
+    const tr = ctx.createLinearGradient(cx, cy + derriere, cx, cy);
     tr.addColorStop(0, 'rgba(143,208,255,0)');
     tr.addColorStop(1, 'rgba(143,208,255,0.28)');
     ctx.fillStyle = tr;
-    ctx.fillRect(cx - 2.5, cy - CASE * 1.1, 5, CASE * 1.1);
+    ctx.fillRect(cx - 2.5, Math.min(cy, cy + derriere), 5, CASE * 1.1);
     const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, CASE * 0.75);
     g.addColorStop(0, 'rgba(198,230,255,0.9)');
     g.addColorStop(0.35, 'rgba(143,208,255,0.42)');
@@ -325,7 +331,7 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
     ctx.fill();
   }
 
-  // --- ce que le caillou a laissé là où il est tombé ---
+  // --- ce que la pierre a laissé là où elle est tombée ---
   // La pierre ne brille pas. Ce qui brille, c'est ce que Falot y a laissé en
   // la tenant — et ça fait, quelques secondes, une petite lumière seule dans
   // le noir : le leurre est exactement ça.
@@ -349,8 +355,8 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
     ctx.fill();
   }
 
-  // --- cailloux en vol : une ombre au sol, le caillou en l'air, et sa lueur ---
-  for (const c of partie.cailloux) {
+  // --- pierres en vol : une ombre au sol, la pierre en l'air, et sa lueur ---
+  for (const c of partie.pierres) {
     ctx.fillStyle = 'rgba(0,0,0,0.35)';
     ctx.beginPath();
     ctx.ellipse(c.x - cam.x, c.y - cam.y, 4, 2, 0, 0, TAU);
@@ -435,12 +441,12 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
     );
   for (const b of zone.braises)
     percerRond(lctx, b.x - cam.x, b.y - cam.y, b.r, 0.92, rayonsSource(zone, b, b.r));
-  // Le caillou en vol et sa trace. Sans ça on lance dans le noir et on ne
+  // La pierre en vol et sa trace. Sans ça on lance dans le noir et on ne
   // sait jamais où c'est retombé — or c'est précisément l'information dont on
   // a besoin pour décider par où passer.
   if (partie.chute && !partie.chute.pose)
     percerDisque(lctx, partie.chute.x - cam.x, partie.chute.y - cam.y, CASE * 1.5, 0.92);
-  for (const c of partie.cailloux)
+  for (const c of partie.pierres)
     percerDisque(lctx, c.x - cam.x, c.y - cam.y - c.hauteur, CASE * 0.5, 0.7);
   for (const t of partie.traces) {
     const k = 1 - t.t / t.duree;
@@ -453,7 +459,7 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
     // Une sentinelle qui t'a repéré se montre en entier : c'est le signal le
     // plus important du jeu, il ne doit pas rester caché dans le noir.
     // Un Guet qui a entendu quelque chose se montre aussi : c'est la réponse
-    // à un caillou, et elle ne doit pas rester dans le noir.
+    // à une pierre, et elle ne doit pas rester dans le noir.
     else if (
       p.emotion === EMOTIONS.COLERE &&
       (p.alerte > 0 || p.charge > 0.04 || p.curieuxT > 0)
@@ -543,12 +549,12 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
   // repères, et savoir où rallumer fait partie du jeu.
   for (const t of zone.torches) {
     if (t.reste > 0 || !t.vue) continue;
-    ctx.strokeStyle = 'rgba(255,180,92,0.22)';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(t.x - cam.x, t.y - cam.y - 7);
-    ctx.lineTo(t.x - cam.x, t.y - cam.y + 7);
-    ctx.stroke();
+    // Le même dessin qu'allumée, mais froid : on reconnaît l'objet, et on voit
+    // qu'il ne brûle pas. Un trait vertical ne disait ni l'un ni l'autre.
+    ctx.save();
+    ctx.globalAlpha = 0.5;
+    dessinerTorche(ecran, t, 0, temps);
+    ctx.restore();
   }
 
   // LES YEUX DANS LE NOIR. La seule chose qu'on distingue d'un inconnu. On

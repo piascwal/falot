@@ -1,10 +1,10 @@
 /**
- * Le clavier : les flèches pour marcher, l'espace pour lancer un caillou droit
+ * Le clavier : les flèches pour marcher, l'espace pour lancer une pierre droit
  * devant. On empêche les flèches de faire défiler la page — il n'y a rien à
  * défiler, mais le navigateur ne le sait pas.
  */
 
-import { lancerCaillou } from '../coeur/regles/caillou.js';
+import { lancerPierre } from '../coeur/regles/pierre.js';
 import type { Partie, Touches } from '../coeur/types.js';
 
 const CAP_TOUCHES: Record<string, keyof Touches> = {
@@ -25,7 +25,7 @@ export function brancherClavier(partie: Partie): void {
       return;
     }
     if (e.key === ' ' && !e.repeat) {
-      lancerCaillou(partie, partie.joueur.regard, 0.55);
+      lancerPierre(partie, partie.joueur.regard, 0.55);
       e.preventDefault();
     }
   });

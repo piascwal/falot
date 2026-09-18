@@ -136,13 +136,13 @@ Un couloir traversé par un rouge en ronde. Il faut passer.
 
 La première tentative échoue : on est vu, on s'éteint, on se rallume à l'entrée
 de la salle — instantanément, sans écran, sans pénalité. **Et c'est à ce
-moment-là que le bouton CAILLOU se met à pulser.**
+moment-là que le bouton PIERRE se met à pulser.**
 
 **Enseigne** : le rouge, son cône, le fait que mourir ne coûte presque rien, et
-le caillou — dans cet ordre. On ne donne jamais l'outil avant le problème.
+la pierre — dans cet ordre. On ne donne jamais l'outil avant le problème.
 
 Deux solutions valables, et c'est ce qui en fait une bonne salle :
-- lancer un caillou pour qu'il aille voir ailleurs ;
+- lancer une pierre pour qu'il aille voir ailleurs ;
 - se tenir près de la torche allumée de la salle précédente, car **une torche
   allumée rend invisible** (vérifié dans le code : `abri` coupe la détection).
 
@@ -177,7 +177,7 @@ livrée.** On ne peut pas partir.
 ### 7. La montée en confiance
 Un passage latéral, assez de lueurs pour atteindre Curieux. Le bouton change de
 couleur, pulse, gagne son aura.
-**Enseigne** : l'éclat ouvre des formes, et les formes ouvrent le caillou.
+**Enseigne** : l'éclat ouvre des formes, et les formes ouvrent la pierre.
 
 ### 8. Le second Frileux — la révélation
 Dans le couloir qui suit la montée, **un deuxième Frileux**, tout de suite
@@ -275,19 +275,19 @@ Elle vit dans `poc/lux-paranoia.html`, sous `ETAGES_ECRITS`.
 
 ```
 #########################
-##############.........##     1  la salle de la torche
+##############.......T.##     1  la salle des torches : une au nord…
 ##...#########.........##
 ##.@.%o.o.o.o.*8.......##     3  le réveil : ses DEUX issues sont fêlées
-##.6.#########.........##     4
+##.6.#########.........##
 ###%##########.........##     5  la seconde fente, sous la salle du réveil
-##.g.#########...T2....##     6  la niche, et la poche de cailloux
+##...#########..T.2....##     6  … et l'autre au sud ; à gauche, la niche vide
 ##################*######
 ##################=######     8  entrée de la galerie, colonne 18
-############......1....##     9  le Guet nommé, et ce que fait le caillou
-############..r........##    10
-############...........##    11  la SALLE du premier Guet : 44 cases
-############...........##    12
-##############=##########    13  SORTIE colonne 14 : elle n'est plus alignée
+############......1....##     9
+############.....r.....##    10  la SALLE des deux Guets : 44 cases
+############...........##    11
+############...r.......##    12  le second garde la sortie
+##############=##########    13  SORTIE colonne 14 : elle n'est pas alignée
 ##############*........##    14  la salle du Frileux qu'on ne peut pas aider
 ##############.......b.##
 ##############.........##
@@ -301,14 +301,14 @@ Elle vit dans `poc/lux-paranoia.html`, sous `ETAGES_ECRITS`.
 #########################
 ```
 
-`#` mur — `@` départ — `S` Seuil — `o` lueur — `g` poche de cailloux —
+`#` mur — `@` départ — `S` Seuil — `o` lueur — `g` poche de pierres —
 `T` torche — `b` Frileux — `r` Guet — `%` mur fêlé — `|` et `=` portes —
 `*` point de reprise — `1-9` murmure.
 
 **La toute première chose qu'on fait dans ce jeu, désormais, c'est casser un
 mur.** La salle du réveil a une pierre fendue dans son plancher de pierre ; un
 murmure la désigne, le halo la montre, et le seul objet qu'on possède l'ouvre.
-Derrière : une niche et une poche de cailloux. Le caillou n'est plus un bouton
+Derrière : une niche et une poche de pierres. La pierre n'est plus un bouton
 dont on cherche l'usage — il a servi avant qu'on ait vu le moindre ennemi.
 
 **Le parcours.** Réveil, couloir des lueurs, salle de la torche, galerie du
@@ -378,7 +378,7 @@ niveau.
 **42 secondes de marche pure.** Le reste du temps de jeu, c'est ce qui fait le
 jeu — attendre qu'un regard passe, se mettre à l'abri, mourir une fois ou deux.
 
-Une précision honnête : ce pilote ne sait ni lancer un caillou ni se mettre à
+Une précision honnête : ce pilote ne sait ni lancer une pierre ni se mettre à
 l'abri. Guets actifs, il ne franchit pas un couloir gardé — ce qui dit que le
 couloir est un vrai obstacle, et rien du temps qu'y mettra quelqu'un qui a
 compris. Ce chiffre-là se mesure à la main.
@@ -390,7 +390,7 @@ appliquait sans jamais les dire.
 
 | Ce qui manquait | Ce qui a été fait |
 |---|---|
-| À quoi sert le caillou | Un murmure dès la première salle, un autre avant la galerie du Guet, le bouton qui bat quand un regard commence à te tenir — et surtout **les murs fêlés** (voir plus bas) |
+| À quoi sert la pierre | Un murmure dès la première salle, un autre avant la galerie du Guet, le bouton qui bat quand un regard commence à te tenir — et surtout **les murs fêlés** (voir plus bas) |
 | Qu'on charge le portail avec des âmes | Le compte est écrit **sur le portail** (« ÂMES — 1 / 2 », « ENTRE » quand il cède), une phrase le dit à la première approche, le murmure du Seuil l'explique |
 | Qu'on remplit une jauge qui change de forme | La barre passe de 80 à 148 px, gagne un contour et une légende : **PEUREUX → CURIEUX**. Toute la jauge sursaute au ramassage |
 | Que le portail se charge à plusieurs âmes | Les deux âmes sont séparées : on en livre une, on lit « 1/2 », on repart |
@@ -399,9 +399,9 @@ appliquait sans jamais les dire.
 
 ### Les murs fêlés
 
-Le vrai remède au caillou n'était pas de mieux l'expliquer : c'était de lui
+Le vrai remède à la pierre n'était pas de mieux l'expliquer : c'était de lui
 donner un travail qui ne dépende d'aucune sentinelle. **Certaines pierres sont
-fêlées, et seul un caillou les ouvre** — on ne perce pas un mur avec de la
+fêlées, et seul une pierre les ouvre** — on ne perce pas un mur avec de la
 lumière.
 
 - Une fissure est **de la pierre** : elle bloque le pas, arrête la lumière, et
@@ -411,10 +411,10 @@ lumière.
   Peureux s'arrêtait avant elle et la fente n'existait que pour qui savait
   déjà où regarder.
 - Une case de tolérance à l'impact : le jet s'arrête toujours *avant* le
-  premier mur, donc viser la fente fait tomber le caillou juste à côté.
+  premier mur, donc viser la fente fait tomber la pierre juste à côté.
 - **Dans le prologue**, c'est la toute première chose qu'on fait : la salle du
   réveil a une pierre fendue, un murmure la désigne, et derrière il y a une
-  poche de cailloux. Le caillou a donc servi avant qu'on ait vu le moindre
+  poche de pierres. La pierre a donc servi avant qu'on ait vu le moindre
   ennemi. La poche ne donne pas d'éclat — le budget du niveau reste calibré au
   point près.
 - **En procédural**, une fissure n'est jamais un passage obligé : on ne la pose
@@ -459,10 +459,10 @@ suffit à les reprendre.
 > couvrait tout — correctement. Le jeu avait raison, c'est la mesure qui
 > était devenue fausse.
 
-### Ce que le caillou laisse derrière lui
+### Ce que la pierre laisse derrière lui
 
 On lançait dans le noir sans jamais voir où ça tombait — or c'est précisément
-l'information dont on a besoin pour décider par où passer. Le caillou porte
+l'information dont on a besoin pour décider par où passer. La pierre porte
 désormais une petite lueur en vol, et il en laisse une où il tombe, trois
 secondes et demie.
 
@@ -507,8 +507,8 @@ le bandeau de l'éclat et le récit du quatrième étage disent « un Guet ».
 | Ça saccadait | Voir ci-dessous : ce n'était aucune fonctionnalité, c'était le nombre de pixels |
 | Les fissures brillaient dans le noir | Elles ne s'éclairent plus toutes seules. En échange, **la lumière mord plus profond dans une pierre déjà fendue** (0,95 case au lieu de 0,2) : le réseau entier se lit dès que le halo l'atteint, et rien du tout quand il ne l'atteint pas |
 | On tourne autour de la première âme sans comprendre | Elle parle : *« On m'a vidé de ma lumière. Il m'en faudrait un peu de la tienne — mais la tienne est trop petite. »* Une fois, et seulement tant qu'on n'a pas de faisceau, c'est-à-dire tant que c'est vrai |
-| Le Guet était dans un croisement : on ne pouvait pas lancer par-dessus un mur | Ce n'est plus un couloir mais une **salle de 44 cases**. Le Guet la balaye en entier sur trois points ; il y a enfin de la place pour envoyer un caillou d'un côté et passer de l'autre |
-| On ne voyait pas qu'un Guet avait entendu | Il porte un **point d'interrogation** au-dessus de la tête, et il sort du noir pendant qu'il cherche. Le caillou s'entend désormais à **9 cases** au lieu de 5,5 |
+| Le Guet était dans un croisement : on ne pouvait pas lancer par-dessus un mur | Ce n'est plus un couloir mais une **salle de 44 cases**. Le Guet la balaye en entier sur trois points ; il y a enfin de la place pour envoyer une pierre d'un côté et passer de l'autre |
+| On ne voyait pas qu'un Guet avait entendu | Il porte un **point d'interrogation** au-dessus de la tête, et il sort du noir pendant qu'il cherche. La pierre s'entend désormais à **9 cases** au lieu de 5,5 |
 
 ### Ce qui saccadait
 
@@ -552,33 +552,33 @@ du décor, contre 2,8 s avant.
 
 Trois bandeaux ont disparu : l'aide en bas de l'écran, « la pierre cède » (on le
 voit) et « le bonus s'éteint » (sa jauge se vide). Le murmure du réveil tient
-désormais en une ligne — *« Le mur, juste en dessous, est fendu. Un caillou
+désormais en une ligne — *« Le mur, juste en dessous, est fendu. Une pierre
 suffirait. »* : il débordait sur la tête du personnage, et il n'avait pas besoin
-de répéter que le caillou ne brille pas.
+de répéter que la pierre ne brille pas.
 
 Le bonus a quitté sa pastille flottante : même format que la jauge d'évolution,
 même largeur, juste en dessous.
 
 ### Le bruit passe avant tout
 
-Le caillou ne servait qu'à une sentinelle au repos : dès qu'elle était en
+La pierre ne servait qu'à une sentinelle au repos : dès qu'elle était en
 alerte, le jet ne faisait rien — c'est-à-dire précisément au moment où l'on en
-a besoin. Un caillou qui tombe à portée **efface tout** : alerte, jauge,
+a besoin. Une pierre qui tombe à portée **efface tout** : alerte, jauge,
 poursuite. Elle lâche, elle se tourne, elle y va, et pendant tout ce temps
 **elle ne cherche plus personne**.
 
 Mesuré, sentinelle en pleine poursuite avec le joueur à deux cases dans son
 cône : alerte 2,57 → **0**, jauge → **0**, curiosité 4,8 s, et elle se rapproche
-du caillou de 4,11 à 3,11 cases en une seconde, le regard à **0,06 radian** de
+de la pierre de 4,11 à 3,11 cases en une seconde, le regard à **0,06 radian** de
 sa direction de marche.
 
 > **Un bug bien à moi, attrapé par la mesure.** `ecartAngle(a, b)` rend *b moins
 > a* ; j'avais écrit `(cible, regard)` au lieu de `(regard, cible)`. La
-> sentinelle marchait vers le caillou **en se détournant de lui** — 171 degrés
+> sentinelle marchait vers la pierre **en se détournant de lui** — 171 degrés
 > à côté. Rien ne l'aurait montré sans mesurer l'écart entre le regard et la
 > marche.
 >
-> Au passage : si le caillou tombe dans un recoin qu'elle ne peut pas atteindre,
+> Au passage : si la pierre tombe dans un recoin qu'elle ne peut pas atteindre,
 > elle y va tout droit au lieu de rester plantée comme si elle n'avait rien
 > entendu.
 
@@ -629,18 +629,18 @@ la géographie qui enseignait le contraire de ce qu'on voulait.
 
 | Observé | Mesuré ensuite, pilote automatique, 20 essais par moment de ronde |
 |---|---|
-| « Le caillou n'est jamais rentabilisé, on va tout droit » | La galerie se traversait **20/20 en 2,3 s**. Ses deux portes étaient alignées sur la colonne 18 : on descendait une ligne droite de cinq cases. Les 44 cases « pour avoir la place de lancer » n'étaient jamais parcourues |
-| « Au deuxième Guet on essaye, on meurt, on recommence, sans comprendre » | Le couloir de l'escorte était **0/20**. Large d'une case, il était *bouché* par le Guet : le toucher tue, et le caillou n'étourdit qu'à partir d'Ardent — hors budget du prologue (plafond 68 d'éclat, Ardent à 88). Le caillou ne **pouvait pas** résoudre ce couloir |
+| « La pierre n'est jamais rentabilisé, on va tout droit » | La galerie se traversait **20/20 en 2,3 s**. Ses deux portes étaient alignées sur la colonne 18 : on descendait une ligne droite de cinq cases. Les 44 cases « pour avoir la place de lancer » n'étaient jamais parcourues |
+| « Au deuxième Guet on essaye, on meurt, on recommence, sans comprendre » | Le couloir de l'escorte était **0/20**. Large d'une case, il était *bouché* par le Guet : le toucher tue, et la pierre n'étourdit qu'à partir d'Ardent — hors budget du prologue (plafond 68 d'éclat, Ardent à 88). La pierre ne **pouvait pas** résoudre ce couloir |
 | « Après la première âme, le joueur remonte tout l'étage » | Repartir à l'est chercher la seconde était **0/20, jamais atteinte**. Il n'a pas manqué d'intuition : le niveau punissait la route prévue et récompensait l'autre — au nord c'était connu, sûr, et il y avait un Frileux dont il se souvenait |
 
 **Le diagnostic, en une phrase : le prologue ne contenait aucun endroit où le
-caillou était la réponse.** Pas un. Et son seul passage difficile ne pouvait pas
+pierre était la réponse.** Pas un. Et son seul passage difficile ne pouvait pas
 être résolu par l'outil qu'il était censé enseigner.
 
 ### Ce qui a été fait
 
 1. **Les deux issues de la première salle sont fêlées.** On ne quitte pas le
-   réveil sans casser un mur : le caillou sert dans les quinze premières
+   réveil sans casser un mur : la pierre sert dans les quinze premières
    secondes, avant le moindre Guet, et la carte dit enfin ce que ce document
    affirmait déjà. La fente se lit d'elle-même — la lumière mord 0,95 case dans
    une pierre fendue, donc le réseau de fractures s'allume sous le halo, à
@@ -666,12 +666,12 @@ caillou était la réponse.** Pas un. Et son seul passage difficile ne pouvait p
 | Passage | Avant | Après |
 |---|---|---|
 | Galerie, tout droit | 20/20 | **6/20** |
-| Galerie, en lançant un caillou et en attendant que le Guet parte | — | **20/20** |
+| Galerie, en lançant une pierre et en attendant que le Guet parte | — | **20/20** |
 | Couloir de l'escorte, ligne du haut | 0/20 | 0/20 *(inchangé, et voulu)* |
 | Couloir de l'escorte, ligne du bas | impossible | **20/20 seul, 18/20 à deux âmes** |
 | Retour vers la bouche du couloir | 0/20 | **20/20** |
 
-Foncer n'est plus la stratégie dominante dans la galerie, le caillou l'est. Le
+Foncer n'est plus la stratégie dominante dans la galerie, la pierre l'est. Le
 couloir est devenu un choix de voie au lieu d'un mur : la ligne du haut tue
 toujours, celle du bas passe, et escorter deux âmes coûte deux essais sur vingt.
 
@@ -679,3 +679,110 @@ toujours, celle du bas passe, et escorter deux âmes coûte deux essais sur ving
 simulation, sans canvas ni navigateur, et chaque intention du niveau y est une
 assertion. Si quelqu'un réaligne les portes de la galerie ou remet une âme au
 fond de la salle de droite, la suite le dit.
+
+---
+
+## Deuxième tour de tests utilisateurs
+
+Le prologue a été rejoué par quelqu'un d'autre, après les corrections
+précédentes. Trois retours, et un changement de fiction.
+
+### La pierre s'appelle une pierre
+
+« Caillou » est remplacé par « pierre » partout — textes, code, fichiers,
+identifiants du DOM. La convention du projet veut que le mot de la fiction et
+celui du code soient le même ; ils le sont.
+
+### Les Guets veulent éteindre le monde
+
+L'ancien concept — *un Guet ne voit pas les corps, il cherche une petite lumière
+seule dans le noir, exactement la forme que tu as* — n'a pas pris : personne ne
+l'a compris en jouant, et il ne plaisait pas. Il est remplacé par :
+
+> **Un Guet veut éteindre le monde, et vider ta lumière. Il n'approche jamais
+> d'une flamme plus grande que lui.**
+
+Les conséquences mécaniques ne changent pas d'un pouce — ce qu'on porte expose,
+ce qui est posé protège, la pierre détourne — mais la raison est inversée : il
+ne reconnaît plus une forme, il vient prendre de la lumière. Les murmures, les
+textes des formes et le récit du quatrième étage disent désormais ça. La section
+de la bible est marquée comme dépassée, en attendant une passe d'écriture.
+
+### Ce que les Guets font de neuf
+
+1. **Ta lumière les alerte.** Halo ou faisceau qui s'attarde sur un Guet : il
+   cesse sa ronde et fouille. Deux garde-fous, et ils ne sont pas décoratifs —
+   il faut que la lumière reste sur lui **plus de 0,35 s**, et qu'elle vienne de
+   moins de six cases. Sans eux, escorter devenait impossible : le faisceau
+   pointe forcément là où l'on va, donc droit sur ce qu'on veut éviter, et le
+   couloir tombait à **4 essais sur 20**.
+2. **Détecté, il va sur place.** Un corps dans son cône, et il retient
+   l'endroit : il cesse de balayer, s'y rend, et c'est au joueur de ne plus y
+   être. Avant, il fouillait au hasard dans la direction de son regard — on
+   pouvait rester planté à trois cases sans qu'il ne vienne jamais.
+   *La lumière alerte, le cône déclenche la traque : les deux sont distincts, et
+   les confondre rendait le faisceau suicidaire.*
+3. **Un mur cassé est un couloir, pour lui comme pour nous.** C'était déjà vrai
+   — une fissure ouverte devient du sol pour tout le monde — c'est maintenant
+   vérifié par un test. Seule une porte reste un mur pour un Guet.
+
+### Ce que le prologue devient
+
+| Changement | Pourquoi |
+|---|---|
+| Deux Guets dans la galerie, un par moitié de salle | Un seul laissait passer 6 essais sur 20 ; l'un barre l'entrée, l'autre la sortie |
+| La niche ne donne plus de poche de pierres | « Poche intarissable — lance sans compter » était une phrase de bonus au milieu d'une leçon sur les murs. C'est un cul-de-sac, et ça prouve qu'on casse des murs |
+| Deux torches dans la salle des torches, sur deux murs, à sept cases l'une de l'autre | Une seule ne suffisait pas à faire comprendre qu'on les rallume en passant |
+| La phrase « Tu te souviendras d'être passé ici » disparaît | Elle ne disait rien de l'histoire, et personne ne voyait le rapport |
+| Les torches sont DESSINÉES | Une torche éteinte était un trait vertical de quatorze pixels : un manche, un collier, et au bout une flamme ou un charbon noir. Debout et face à la caméra, comme les visages — couchée sur sa paroi, elle se lisait comme un verre à pied |
+
+**Les rondes de la galerie ont été choisies à la mesure**, pas au jugé : six
+configurations essayées, vingt essais chacune, à tous les moments de la ronde.
+
+| Rondes essayées | Tout droit | Avec une pierre |
+|---|---|---|
+| Bandes horizontales larges | 16/20 | 20/20 |
+| Verticales, colonnes 17 et 15 | 4/20 | 19/20 |
+| Horizontales serrées, rangs 10 et 12 | 13/20 | 20/20 |
+| L'un barre l'entrée, l'autre la sortie | 6/20 | 20/20 |
+| Croix : un vertical, un horizontal | 12/20 | 20/20 |
+| **Les deux autour de la sortie (retenue)** | **4/20** | **20/20** |
+
+### Ce que ça donne
+
+| Passage | Avant ce tour | Après |
+|---|---|---|
+| Galerie, tout droit | 6/20 | **4/20** |
+| Galerie, en lançant d'abord une pierre | 20/20 | **20/20** |
+| Couloir de l'escorte, ligne du haut | 0/20 | 0/20 |
+| Couloir, ligne du bas, seul | 20/20 | 16/20 |
+| Couloir, ligne du bas, une et deux âmes | 20/20 et 18/20 | **17/20 et 17/20** |
+| Retour vers la bouche du couloir | 20/20 | 8/20 |
+
+Le retour a payé la nouvelle règle de traque. C'est assumé : les deux âmes sont
+vues à l'aller, donc ce retour n'est plus un passage obligé — et il reste
+possible, là où il était mortel il y a deux tours.
+
+## Mourir et changer d'étage
+
+L'animation de mort était une téléportation d'une image à l'autre : on ne
+comprenait pas ce qui venait d'arriver. Et franchir un Seuil changeait le décor
+sans qu'on voie qu'on montait — alors que c'est le sujet du jeu.
+
+Les deux se ressemblent désormais, parce que c'est la même chose qui se passe :
+**la lumière quitte le corps et s'en va vers le haut.**
+
+- **Mourir** : le corps se vide de sa couleur, sa lumière monte (0,6 s), puis il
+  revient au point de reprise par une arrivée brève. Une seconde et demie en
+  tout, montre comprise — « la mort doit coûter des secondes, pas de la
+  patience », et c'est en test.
+- **Franchir un Seuil** : la vidange dans le portail (inchangée, 2,2 s), puis
+  l'envol (1,1 s, la colonne monte plus haut : il s'en va pour de bon), puis la
+  cage d'escalier.
+- **Arriver à l'étage suivant** : la lumière vient **du bas** et monte, traîne
+  comprise. Au premier étage seulement, elle tombe du plafond — « une lumière
+  qui s'éteint ne disparaît pas, elle tombe » — et s'offre le regard à gauche,
+  à droite, puis devant. Ailleurs, on a déjà vu la scène : elle va trois fois
+  plus vite et ne s'attarde pas.
+
+Le monde est figé pendant ces passages : ni Guets, ni règles. C'est vérifié.

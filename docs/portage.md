@@ -24,7 +24,7 @@ a changé — parce qu'un port silencieux est un port qu'on ne peut pas vérifie
 
 3. **Le cœur ne touche plus au DOM.** Le bandeau, la cage d'escalier et les
    animations de l'interface étaient appelés depuis les règles du jeu
-   (`montrerToast`, `majBoutons`, `montrerCage`, `elCaillou.classList`). Ce
+   (`montrerToast`, `majBoutons`, `montrerCage`, `elPierre.classList`). Ce
    sont maintenant des **états** (`partie.bandeau`, `partie.cage`) et des
    **compteurs** (`partie.signaux`), que `interface/hud.ts` et
    `interface/cage.ts` observent une fois par image. Le texte affiché et le
@@ -99,3 +99,9 @@ a changé — parce qu'un port silencieux est un port qu'on ne peut pas vérifie
   sont justement là.
 - Le mot « brandon » a été remplacé par « torche » partout, dans le jeu comme
   dans la doc. La fiction (des torches mortes que Falot reprend) est inchangée.
+- **Deuxième tour de tests utilisateurs** : « caillou » devient « pierre »
+  partout, les Guets veulent désormais éteindre le monde plutôt que reconnaître
+  une forme, leur lumière alerte et leur détection déclenche une traque, la
+  galerie du prologue a deux Guets, et mourir comme changer d'étage passent par
+  une animation de lumière qui s'en va. Tout est détaillé et mesuré dans
+  [`lux-niveau-1.md`](lux-niveau-1.md).

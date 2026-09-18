@@ -53,6 +53,8 @@ export function nouveauPerso(
     immobile: 0,
     curiosite: null,
     curieuxT: 0,
+    derniereVue: null,
+    bain: 0,
     // Tout est nommé dès la naissance, même ce qui ne servira qu'aux Guets :
     // un champ qui apparaît en cours de route se lit `undefined > 0` quelque
     // part, et ce genre de comparaison ne dit rien de bon.

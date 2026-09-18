@@ -17,10 +17,14 @@ import type { Ecran } from './ecran.js';
 import { carreArrondi } from './visages.js';
 
 export function dessinerVidange(ecran: Ecran, partie: Partie): void {
+  // La vidange au Seuil et l'envol (la mort, ou le départ vers l'étage
+  // suivant) sont la même image : la lumière quitte le corps et monte. On la
+  // peint une seule fois, pour les deux.
+  const passage = partie.vidange ?? partie.envol;
+  if (!passage) return;
   const { ctx, cam } = ecran;
   const { joueur } = partie;
-  const vidange = partie.vidange;
-  if (!vidange) return;
+  const vidange = passage;
   const k = clamp(vidange.t / vidange.duree, 0, 1);
   const jx = joueur.x - cam.x,
     jy = joueur.y - cam.y;
@@ -29,7 +33,7 @@ export function dessinerVidange(ecran: Ecran, partie: Partie): void {
   ctx.globalCompositeOperation = 'lighter';
 
   // la colonne : ce qui sort de lui et monte
-  const haut = D.taille * 5.5;
+  const haut = D.taille * (partie.envol ? 8.5 : 5.5);
   const col = ctx.createLinearGradient(jx, jy, jx, jy - haut);
   col.addColorStop(0, rgba(teinte, 0.34 * (1 - k * 0.5)));
   col.addColorStop(0.45, rgba(teinte, 0.12 * (1 - k * 0.5)));

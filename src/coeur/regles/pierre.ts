@@ -1,5 +1,5 @@
 /**
- * Le caillou. La seule arme du jeu, et elle ne brille pas.
+ * La pierre. La seule arme du jeu, et elle ne brille pas.
  *
  * « La pierre ne brille pas ; ce que Falot y laisse, si. » Là où elle tombe, ça
  * fait pendant quelques secondes une autre petite lumière seule dans le noir —
@@ -13,19 +13,19 @@
 import { CASE, D } from '../dimensions.js';
 import { EMOTIONS } from '../formes.js';
 import { TAU } from '../geometrie.js';
-import { aBonus, rangCaillou } from '../lectures.js';
+import { aBonus, rangPierre } from '../lectures.js';
 import { solide } from '../monde/grille.js';
 import { emettre, onde } from '../particules.js';
-import type { CaillouVol, Partie } from '../types.js';
+import type { Partie, PierreEnVol } from '../types.js';
 import { montrerToast } from '../voix.js';
 
-export function lancerCaillou(partie: Partie, angle?: number, portion?: number): void {
+export function lancerPierre(partie: Partie, angle?: number, portion?: number): void {
   const { joueur, zone } = partie;
-  if (joueur.galets <= 0) return;
-  if (!aBonus(joueur, 'galet')) joueur.galets--; // poche intarissable
+  if (joueur.pierres <= 0) return;
+  if (!aBonus(joueur, 'poche')) joueur.pierres--; // poche intarissable
   const a = angle === undefined ? joueur.regard : angle;
   const portee = CASE * (1.6 + (portion === undefined ? 1 : portion) * 4.4);
-  // il s'arrête au premier mur : un caillou ne traverse pas la pierre
+  // elle s'arrête au premier mur : une pierre ne traverse pas la roche
   let d = CASE * 0.4;
   while (
     d < portee &&
@@ -37,7 +37,7 @@ export function lancerCaillou(partie: Partie, angle?: number, portion?: number):
   )
     d += CASE * 0.2;
   d = Math.max(CASE * 0.6, d - CASE * 0.25);
-  partie.cailloux.push({
+  partie.pierres.push({
     x0: joueur.x,
     y0: joueur.y,
     x1: joueur.x + Math.cos(a) * d,
@@ -47,33 +47,33 @@ export function lancerCaillou(partie: Partie, angle?: number, portion?: number):
     t: 0,
     duree: 0.34 + d / (CASE * 16),
     hauteur: 0,
-    rang: rangCaillou(joueur),
+    rang: rangPierre(joueur),
   });
 }
 
-export function majCailloux(partie: Partie, dt: number): void {
+export function majPierres(partie: Partie, dt: number): void {
   for (let i = partie.traces.length - 1; i >= 0; i--) {
     partie.traces[i].t += dt;
     if (partie.traces[i].t >= partie.traces[i].duree) partie.traces.splice(i, 1);
   }
-  for (let i = partie.cailloux.length - 1; i >= 0; i--) {
-    const c = partie.cailloux[i];
+  for (let i = partie.pierres.length - 1; i >= 0; i--) {
+    const c = partie.pierres[i];
     c.t += dt;
     const k = Math.min(1, c.t / c.duree);
     c.x = c.x0 + (c.x1 - c.x0) * k;
     c.y = c.y0 + (c.y1 - c.y0) * k;
     c.hauteur = Math.sin(k * Math.PI) * CASE * 0.55; // l'arc de cercle
     if (k < 1) continue;
-    partie.cailloux.splice(i, 1);
+    partie.pierres.splice(i, 1);
     toucherLeSol(partie, c);
   }
 }
 
-// Le caillou retombe. Ce qu'il déclenche dépend du palier atteint, mais le
+// La pierre retombe. Ce qu'elle déclenche dépend du palier atteint, mais le
 // geste, lui, n'a jamais changé depuis la première seconde de jeu.
 export function toucherLeSol(
   partie: Partie,
-  c: Pick<CaillouVol, 'x1' | 'y1' | 'rang'>,
+  c: Pick<PierreEnVol, 'x1' | 'y1' | 'rang'>,
 ): void {
   const { zone } = partie;
   const r = c.rang;
@@ -90,9 +90,9 @@ export function toucherLeSol(
   if (r.couve)
     zone.braises.push({ x: c.x1, y: c.y1, r: CASE * 2.3, phase: partie.hasard() * TAU });
 
-  // Un caillou ne fait rien à la pierre saine. Sur une pierre déjà fendue, il
+  // Une pierre ne fait rien à la roche saine. Sur une roche déjà fendue, elle
   // finit le travail : c'est le seul moyen d'ouvrir ces passages-là, et ça
-  // donne au caillou un usage qui ne dépend d'aucune sentinelle.
+  // donne à la pierre un usage qui ne dépend d'aucune sentinelle.
   briserAutour(partie, c.x1, c.y1);
 
   for (const p of zone.persos) {
@@ -112,7 +112,7 @@ export function toucherLeSol(
       continue;
     }
     if (p.aveugle > 0) continue; // déjà étourdie
-    // Un caillou s'entend de loin. À cinq cases et demie, on le lançait
+    // Une pierre s'entend de loin. À cinq cases et demie, on la lançait
     // souvent sans que personne ne bouge, et le leurre passait pour inutile.
     if (d > CASE * 9) continue;
     // ELLE OUBLIE TOUT. Alerte, jauge, poursuite : la pierre efface tout ça et
@@ -131,8 +131,8 @@ export function toucherLeSol(
 
 /* ==================================================== rendu ============ */
 
-// La pierre fêlée cède quand un caillou tombe à côté d'elle. Le jet s'arrête
-// toujours AVANT le premier mur, donc viser la fissure fait tomber le caillou
+// La roche fêlée cède quand une pierre tombe à côté d'elle. Le jet s'arrête
+// toujours AVANT le premier mur, donc viser la fissure fait tomber la pierre
 // sur la case d'à côté : une case de tolérance suffit, et elle évite de
 // demander une précision au pixel.
 export function briserAutour(partie: Partie, x: number, y: number): void {

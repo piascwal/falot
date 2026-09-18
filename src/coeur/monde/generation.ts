@@ -327,6 +327,8 @@ export function genererZone(
           duree: 26,
           reste: 0,
           phase: rnd() * TAU,
+          ox,
+          oy,
         });
         break;
       }
@@ -335,7 +337,7 @@ export function genererZone(
     // MURS FÊLÉS. De la pierre d'un seul rang entre deux endroits déjà
     // atteignables, mais LOIN l'un de l'autre par le chemin normal. Les
     // casser ouvre un raccourci et jamais un passage obligatoire : la zone
-    // reste finissable par quelqu'un qui n'a pas compris le caillou.
+    // reste finissable par quelqu'un qui n'a pas compris la pierre.
     const fissures: Fissure[] = [];
     {
       const candidates: { cx: number; cy: number; gain: number }[] = [];

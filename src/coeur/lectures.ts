@@ -7,19 +7,19 @@
 import { CASE, D } from './dimensions.js';
 import {
   BONUS,
-  CAILLOU,
   FORMES,
   type Forme,
   HUMEURS,
   type Humeur,
   humeurSelon,
-  type RangCaillou,
+  PIERRE,
+  type RangPierre,
   type TypeLueur,
 } from './formes.js';
 import type { Joueur, Partie } from './types.js';
 
 export const forme = (j: Joueur): Forme => FORMES[j.niveau];
-export const rangCaillou = (j: Joueur): RangCaillou => CAILLOU[j.niveau];
+export const rangPierre = (j: Joueur): RangPierre => PIERRE[j.niveau];
 export const aBonus = (j: Joueur, k: TypeLueur): boolean => j.bonus === k && j.bonusT > 0;
 export const bonusActif = (j: Joueur) => (j.bonus ? BONUS[j.bonus] : null);
 
@@ -46,7 +46,7 @@ export const coneFaisceau = (j: Joueur): number => forme(j).cone;
 
 /**
  * Le joueur a peur des mêmes choses que ses âmes, plus une : sentir sa propre
- * lumière se faire manger. Et viser au caillou passe avant tout le reste :
+ * lumière se faire manger. Et viser à la pierre passe avant tout le reste :
  * c'est un geste volontaire, il mérite son visage à lui.
  *
  * L'ABRI PASSE AVANT TOUT. Se tenir dans la lumière d'une torche ou d'une

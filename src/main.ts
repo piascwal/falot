@@ -34,7 +34,7 @@ const ecran = creerEcran(canvas);
 const hud = creerHud();
 const cage = creerCage();
 
-brancherPointeur(canvas, hud.caillou, partie);
+brancherPointeur(canvas, hud.pierre, partie);
 brancherClavier(partie);
 
 window.addEventListener('resize', () => {

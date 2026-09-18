@@ -8,17 +8,18 @@
  * Rien ici ne touche au DOM : les animations de l'interface (le bouton qui bat,
  * la jauge qui tressaille) sont des COMPTEURS dans `partie.signaux`, que
  * l'interface observe. C'est ce qui permet de tester « le jeu signale le
- * caillou la première fois qu'on meurt » sans ouvrir un navigateur.
+ * pierre la première fois qu'on meurt » sans ouvrir un navigateur.
  */
 
 import { CASE, D } from '../dimensions.js';
 import { BONUS, EMOTIONS, FORMES } from '../formes.js';
 import { TAU } from '../geometrie.js';
-import { rangCaillou } from '../lectures.js';
+import { rangPierre } from '../lectures.js';
 import { solide } from '../monde/grille.js';
 import { emettre, flotter } from '../particules.js';
 import type { Lueur, Partie, Perso, Point } from '../types.js';
 import { montrerToast } from '../voix.js';
+import { lancerLEnvol } from './seuil.js';
 export function evoluer(partie: Partie): void {
   const { joueur } = partie;
   const suivant = FORMES[joueur.niveau + 1];
@@ -26,16 +27,16 @@ export function evoluer(partie: Partie): void {
   joueur.niveau++;
   // le palier élargit la poche : on la remplit tout de suite, sinon la
   // récompense ne se sent qu'au bout d'une recharge complète
-  joueur.galets = rangCaillou(joueur).reserve;
+  joueur.pierres = rangPierre(joueur).reserve;
   emettre(partie, joueur.x, joueur.y - D.taille * 0.7, suivant.couleur, 16, 90);
   // Le bandeau modal met le jeu en pause. Acceptable pour découvrir un verbe,
   // insupportable au milieu d'une escorte — et comme la forme repart à zéro à
   // chaque zone, on le reverrait à chaque fois. Une seule explication par
   // forme et par session ; ensuite un simple bandeau passager.
   // Plus de bandeau modal : il coupait le jeu pour expliquer ce que le bouton
-  // peut montrer tout seul. Le caillou prend la couleur de la forme, pulse, et
+  // peut montrer tout seul. La pierre prend la couleur de la forme, pulse, et
   // une ligne passagère nomme ce qu'il sait faire de plus.
-  partie.signaux.caillou++;
+  partie.signaux.pierre++;
   partie.signaux.forme++;
   montrerToast(partie, `${suivant.nom} — ${suivant.verbe.toLowerCase()}`);
 }
@@ -126,12 +127,11 @@ export function eteindre(partie: Partie): void {
     emettre(partie, p.x, p.y - D.taille * 0.8, '#8fd0ff', 8, 60);
   }
 
-  joueur.x = zone.depart.x;
-  joueur.y = zone.depart.y;
-  joueur.vx = joueur.vy = 0;
-  joueur.repit = 1.6;
-  partie.fil.push(null); // coupure : on ne relie pas la mort au seuil
-  partie.filDernier = { x: zone.depart.x, y: zone.depart.y };
+  // Il ne se téléporte plus : sa lumière le quitte et monte, puis il revient
+  // au point de reprise par une arrivée. Le retour au seuil se faisait d'une
+  // image à l'autre — brutal, et on ne comprenait pas ce qui venait d'arriver.
+  // `renaitre`, à la fin de l'envol, fait le reste.
+  lancerLEnvol(partie, 'mort');
   for (const p of zone.persos) {
     if (p.emotion !== EMOTIONS.COLERE) continue;
     p.x = p.baseX;
@@ -146,11 +146,11 @@ export function eteindre(partie: Partie): void {
   );
 
   // On ne donne jamais l'outil avant le problème. La toute première fois
-  // qu'un regard nous éteint, le bouton CAILLOU se signale — sans un mot
+  // qu'un regard nous éteint, le bouton PIERRE se signale — sans un mot
   // d'explication : il se met à battre, et c'est au joueur d'essayer.
   if (partie.premieres.mort) {
     partie.premieres.mort = false;
-    partie.signaux.caillou++;
+    partie.signaux.pierre++;
   }
 }
 
@@ -173,9 +173,9 @@ export function ramasser(partie: Partie, l: Lueur): void {
     gagnerEclat(partie, 4);
     return;
   }
-  if (l.type === 'galet') {
-    joueur.galets = rangCaillou(joueur).reserve;
-    joueur.caillouDispo = 0;
+  if (l.type === 'poche') {
+    joueur.pierres = rangPierre(joueur).reserve;
+    joueur.pierreDispo = 0;
     // et la poche reste intarissable quelques secondes : un bonus qu'on ne
     // sent pas n'est pas un bonus
     joueur.bonus = l.type;
