@@ -75,7 +75,7 @@ describe('mourir', () => {
 });
 
 describe('franchir un Seuil', () => {
-  it('se vide dans le portail, s’en va vers le haut, puis arrive par le bas', () => {
+  it('se vide dans le portail, s’en va vers le haut, puis MONTE', () => {
     const p = creerPartie({ grain: 'PASSAGE', etage: 1 });
     ouvrirLeSeuil(p);
 
@@ -88,29 +88,33 @@ describe('franchir un Seuil', () => {
     expect(p.numeroZone).toBe(1);
     jouer(p, 1.2);
 
-    // 3. l'étage suivant, la cage d'escalier, et une arrivée PAR LE BAS
-    expect(p.numeroZone).toBe(2);
-    expect(p.cage).toBe(2);
-    const arrivee = p.chute;
-    expect(arrivee).not.toBeNull();
-    expect(arrivee?.sens).toBe('bas');
+    // 3. la cage d'escalier : elle se JOUE, et l'étage suivant n'est pas
+    //    encore chargé — on est entre les deux, c'est tout l'intérêt
+    expect(p.puits?.arrivee).toBe(2);
+    expect(p.numeroZone).toBe(1);
     expect(p.montee).toHaveLength(1);
   });
 
-  it('repart Peureux, et la cage attend qu’on la referme', () => {
+  it('monte plus vite quand on pousse, et arrive PAR LE BAS à l’étage suivant', () => {
     const p = creerPartie({ grain: 'PASSAGE', etage: 1 });
-    p.joueur.eclat = 60;
-    p.joueur.sommet = 60;
-    p.joueur.niveau = 2;
     ouvrirLeSeuil(p);
     jouer(p, 3.6);
+    expect(p.puits).not.toBeNull();
+
+    // il dérive vers le haut même sans rien pousser
+    const seul = p.puits?.h ?? 0;
+    jouer(p, 1);
+    expect(p.puits?.h ?? 0).toBeGreaterThan(seul);
+
+    // et il grimpe pour de bon quand on pousse
+    p.entrees.touches.haut = true;
+    for (let i = 0; i < 600 && p.puits; i++) avancer(p, PAS);
+    expect(p.puits).toBeNull();
+    expect(p.numeroZone).toBe(2);
+    expect(p.chute?.sens).toBe('bas');
+    // et il repart Peureux : le Seuil lui a tout pris
     expect(p.joueur.niveau).toBe(0);
     expect(p.joueur.eclat).toBe(0);
-    // la cage gèle le monde jusqu'à ce que l'interface la referme
-    p.gele = true;
-    const y = p.joueur.y;
-    jouer(p, 0.5);
-    expect(p.joueur.y).toBe(y);
   });
 });
 

@@ -221,6 +221,24 @@ export interface MurmurePose extends Point {
   dit: boolean;
 }
 
+/**
+ * L'ascension entre deux étages : ce n'est pas un écran, c'est un passage qui
+ * se joue (voir `regles/puits.ts`).
+ */
+export interface Puits {
+  /** L'étage où l'on arrive. */
+  arrivee: number;
+  /** La hauteur montée, en étages : 0 au départ, 1 en haut. */
+  h: number;
+  /** La position dans la largeur de la cage, de −1 à +1. */
+  x: number;
+  vh: number;
+  vx: number;
+  t: number;
+  /** Une fois en haut : le temps que le noir se referme. */
+  sortie: number;
+}
+
 export interface Seuil extends Point {
   r: number;
   vue: boolean;
@@ -454,8 +472,8 @@ export interface Partie {
 
   /** Un écran plein arrête le monde. */
   gele: boolean;
-  /** L'étage dont la cage d'escalier est à montrer, ou `null`. */
-  cage: number | null;
+  /** L'ascension en cours entre deux étages, ou `null`. */
+  puits: Puits | null;
   /** Le prologue a été franchi au moins une fois (l'interface le persiste). */
   prologueFait: boolean;
   /**

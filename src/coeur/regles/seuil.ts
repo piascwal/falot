@@ -13,9 +13,9 @@
 import { CASE, D } from '../dimensions.js';
 import { clamp, ecartAngle, TAU } from '../geometrie.js';
 import { forme } from '../lectures.js';
-import { chargerZone } from '../monde/chargement.js';
 import { emettre, onde } from '../particules.js';
 import type { Partie } from '../types.js';
+import { lancerLePuits } from './puits.js';
 
 /** Le minutage de la scène d'ouverture, en secondes. */
 export const CHUTE = { tombe: 1.5, pose: 0.5, gauche: 0.8, droite: 0.8, fin: 0.45 };
@@ -253,10 +253,9 @@ export function majEnvol(partie: Partie, dt: number): void {
 
   partie.envol = null;
   if (envol.raison === 'seuil') {
-    chargerZone(partie, envol.suivante);
-    partie.cage = envol.suivante;
-    // il arrive par le bas : on monte d'un étage
-    lancerLaChute(partie, 'bas', false);
+    // La cage d'escalier n'est plus un écran qu'on referme : c'est une montée
+    // qu'on fait. L'étage suivant ne se charge qu'une fois arrivé en haut.
+    lancerLePuits(partie, envol.suivante);
     return;
   }
   renaitre(partie);

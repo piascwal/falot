@@ -42,6 +42,7 @@ import {
   tracerCone,
   tracerRond,
 } from './lumiere.js';
+import { dessinerPuits } from './puits.js';
 import { dessinerSol } from './sol.js';
 import { flecheVers, texteCerne } from './texte.js';
 import { dessinerTorche } from './torches.js';
@@ -77,6 +78,12 @@ function preparerRayons(
 }
 
 export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
+  // Entre deux étages, il n'y a plus de zone à dessiner : il n'y a que la cage
+  // d'escalier, et lui qui monte dedans.
+  if (partie.puits) {
+    dessinerPuits(ecran, partie, temps);
+    return;
+  }
   const { ctx, lctx, cam, W, H } = ecran;
   const { joueur, zone } = partie;
   const eclaires = partie.eclaires;

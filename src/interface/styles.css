@@ -228,6 +228,13 @@ canvas {
 }
 
 /* le bouton d'action : il n'y en a qu'un, et il ne change jamais */
+/* `display:flex` bat `[hidden]` : sans cette ligne, cacher la barre d'actions
+     pendant la montée ne cachait rien du tout. */
+.actions[hidden],
+.hud[hidden] {
+  display: none;
+}
+
 .actions {
   position: fixed;
   right: max(0.9rem, env(safe-area-inset-right));

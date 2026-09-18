@@ -20,6 +20,7 @@ import { majRegles } from './regles/monde.js';
 import { majPersos } from './regles/persos.js';
 import { majPierres } from './regles/pierre.js';
 import { majPortes } from './regles/portes.js';
+import { majPuits } from './regles/puits.js';
 import { majChute, majEnvol, majVidange } from './regles/seuil.js';
 import type { Entrees, Joueur, Partie, Perso, Zone } from './types.js';
 import { majVoix, nouveauBandeau } from './voix.js';
@@ -115,7 +116,7 @@ export function creerPartie(reglages: Reglages = {}): Partie {
     menace: false,
     craque: 0,
     gele: false,
-    cage: null,
+    puits: null,
     prologueFait: false,
     pouvoirs: { souffle: false, fanal: false },
     recadrer: false,
@@ -186,6 +187,16 @@ export function avancer(partie: Partie, dt: number = PAS): void {
     majParticules(partie, dt);
     majFlottants(partie, dt);
     partie.eclaires = propager(partie);
+    return;
+  }
+
+  if (partie.puits) {
+    // Il monte. Le monde d'en bas n'existe plus, celui d'en haut pas encore :
+    // il n'y a que la cage, et lui dedans.
+    majPuits(partie, dt);
+    majParticules(partie, dt);
+    majFlottants(partie, dt);
+    partie.eclaires = new Set();
     return;
   }
 

@@ -46,6 +46,8 @@ export function creerHud(): Hud {
   const elToast = el('toast');
   const elPierre = el<HTMLButtonElement>('pierre');
   const elSouffle = el<HTMLButtonElement>('souffle');
+  const elActions = el('actions');
+  const elHud = el('hud');
   const elPierreN = el('pierre-n');
   const elBonus = el('bonus');
   const elBonusNom = el('bonus-nom');
@@ -72,6 +74,15 @@ export function creerHud(): Hud {
       elBarre.style.width = `${clamp((joueur.eclat - bas) / (haut - bas), 0, 1) * 100}%`;
       elBarre.style.background = f.couleur;
       elZone.textContent = `ZONE ${zone.numero}`;
+
+      // Pendant la montée, il n'y a rien à lancer ni à souffler, et la jauge
+      // d'un étage qu'on vient de quitter ne veut plus rien dire : l'écran se
+      // vide, il ne reste que la cage. C'est le contraire exact de l'ancienne
+      // modale — on ne montre pas un bilan, on monte.
+      const enMontee = partie.puits !== null;
+      elActions.hidden = enMontee;
+      elHud.hidden = enMontee;
+      if (enMontee) return;
 
       // Le souffle n'existe que depuis que Falot s'en est souvenu. Un bouton
       // grisé aurait promis quelque chose sans le donner : il n'est pas là.

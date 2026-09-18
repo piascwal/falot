@@ -11,7 +11,7 @@
 <body>
 <canvas id="jeu"></canvas>
 
-<div class="hud">
+<div class="hud" id="hud">
   <!-- Lien absolu, et non plus « ../index.html » : le jeu vivait dans le repo du
        hub, il a son propre site maintenant. -->
   <a class="back" href="https://piascwal.github.io/hub/" aria-label="Retour au hub">←</a>
@@ -37,7 +37,7 @@
 
 
 
-<div class="actions">
+<div class="actions" id="actions">
   <!-- Le souffle n'apparaît qu'une fois que Falot s'en est souvenu (étage 3).
        Il se MAINTIENT : on le garde le temps d'un passage, on respire après. -->
   <button type="button" class="rond souffle" id="souffle" hidden>SOUFFLE</button>
@@ -64,18 +64,9 @@
   <b id="ouverture-2">Elle tombe.</b>
 </div>
 
-<!-- La cage d'escalier. Les Dessous sont un bâtiment : la lumière y tombe, et
-     sortir c'est monter. Cet écran n'est pas une barre de progression, c'est un
-     appel des noms — on y voit s'accumuler les âmes remontées, étage par étage,
-     et le noir au-dessus dont on ignore la hauteur. -->
-<div class="cage" id="cage">
-  <em id="cage-sur">Seuil franchi</em>
-  <strong id="cage-titre"></strong>
-  <div class="puits" id="puits"></div>
-  <p id="cage-bilan"></p>
-  <p class="recit" id="cage-recit"></p>
-  <button type="button" class="btn" id="cage-ok">Monter</button>
-</div>
+<!-- La cage d'escalier a disparu d'ici : l'ascension entre deux étages se
+     joue maintenant sur le canvas (voir `coeur/regles/puits.ts`). On ne sort
+     plus du jeu pour apprendre qu'on a progressé. -->
 
 <script type="module" src="./src/main.ts"></script>
 </body>
