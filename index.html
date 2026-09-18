@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Lux &amp; Paranoïa</title>
+<meta name="description" content="Aventure procédurale dans le noir : un petit peureux n'a qu'un caillou, et escorte des âmes jusqu'au portail sans croiser les regards rouges.">
+<meta name="theme-color" content="#08080e">
+<link rel="stylesheet" href="./src/interface/styles.css">
+</head>
+<body>
+<canvas id="jeu"></canvas>
+
+<div class="hud">
+  <a class="back" href="../index.html" aria-label="Retour au hub">←</a>
+  <span class="zone" id="zone">ZONE 1</span>
+  <span class="ames" id="ames" aria-label="âmes livrées"></span>
+  <!-- La jauge de confiance. Elle était un trait de 80 px sans légende : sur un
+       grand écran on ramassait des lueurs sans voir qu'on remplissait quoi que
+       ce soit, ni vers quoi. Elle dit maintenant d'où l'on part et où l'on va. -->
+  <span class="jauge" id="jauge">
+    <span class="jauge-mots">
+      <b class="forme" id="forme">Peureux</b>
+      <em class="suite" id="forme-suite"></em>
+    </span>
+    <span class="barre"><i id="barre"></i></span>
+    <!-- Le bonus en cours, juste en dessous et sur UNE seule ligne : son nom
+         coincé entre les deux barres semblait posé dessus. -->
+    <span class="bonus" id="bonus">
+      <b id="bonus-nom"></b>
+      <span class="barre" id="bonus-barre"><i id="bonus-jauge"></i></span>
+    </span>
+  </span>
+</div>
+
+
+
+<div class="actions">
+  <button type="button" class="rond on" id="caillou">CAILLOU<br><span id="caillou-n">1</span></button>
+</div>
+
+
+<div class="toast" id="toast"></div>
+
+<!-- L'écran-titre et l'écran noir d'ouverture. Ils ne servent qu'une fois par
+     partie : passé le premier Seuil, le jeu ne s'arrête plus. -->
+<div class="titre" id="titre">
+  <em>Les Dessous</em>
+  <strong>Lux &amp; Paranoïa</strong>
+  <p>Falot est la plus petite lampe d'ici. Il ne se souvient pas de qui il
+     éclairait — seulement que quelqu'un, quelque part, avait moins peur grâce
+     à lui.</p>
+  <button type="button" class="btn" id="titre-descendre">Descendre</button>
+  <button type="button" class="lien" id="titre-plus-haut" hidden>Passer le prologue — reprendre à l'étage 2</button>
+</div>
+
+<div class="ouverture" id="ouverture">
+  <b id="ouverture-1">Une lumière qui s'éteint ne disparaît pas.</b>
+  <b id="ouverture-2">Elle tombe.</b>
+</div>
+
+<!-- La cage d'escalier. Les Dessous sont un bâtiment : la lumière y tombe, et
+     sortir c'est monter. Cet écran n'est pas une barre de progression, c'est un
+     appel des noms — on y voit s'accumuler les âmes remontées, étage par étage,
+     et le noir au-dessus dont on ignore la hauteur. -->
+<div class="cage" id="cage">
+  <em id="cage-sur">Seuil franchi</em>
+  <strong id="cage-titre"></strong>
+  <div class="puits" id="puits"></div>
+  <p id="cage-bilan"></p>
+  <p class="recit" id="cage-recit"></p>
+  <button type="button" class="btn" id="cage-ok">Monter</button>
+</div>
+
+<script type="module" src="./src/main.ts"></script>
+</body>
+</html>

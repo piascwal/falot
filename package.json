@@ -1,0 +1,28 @@
+{
+  "name": "falot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Lux & Paranoïa — aventure procédurale dans le noir",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "types": "tsc --noEmit",
+    "test": "vitest run",
+    "test:regarde": "vitest",
+    "couverture": "vitest run --coverage",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "verifie": "npm run types && npm run lint && npm run test",
+    "comparer": "node outils/comparer.mjs"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.14",
+    "@vitest/coverage-v8": "^3.2.4",
+    "fast-check": "^4.3.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.12",
+    "vitest": "^3.2.4"
+  }
+}
