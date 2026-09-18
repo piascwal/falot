@@ -7,6 +7,8 @@
  */
 
 import { chargerZone } from '../coeur/monde/chargement.js';
+import { DERNIER_ETAGE } from '../coeur/monde/paliers.js';
+import { lancerLaFin } from '../coeur/regles/fin.js';
 import { lancerLaChute } from '../coeur/regles/seuil.js';
 import type { Partie } from '../coeur/types.js';
 
@@ -83,7 +85,26 @@ function ouvrir(partie: Partie): void {
   ];
 }
 
-/** L'écran-titre, et ses deux boutons. */
+/**
+ * RACCOURCI D'ESSAI : la fin, tout de suite.
+ *
+ * Elle arrive au bout de douze étages, et il faut bien pouvoir la regarder
+ * sans les refaire. On charge le dernier étage et on lance la scène : ce qu'on
+ * voit est exactement ce que voit quelqu'un qui y est arrivé en jouant — à une
+ * chose près, la cage d'escalier qui suit est vide, puisqu'on n'a rien remonté.
+ *
+ * Pour le fermer le jour de la publication : `hidden = true` sur le lien.
+ */
+export function voirLaFin(partie: Partie): void {
+  el('titre').classList.remove('on');
+  chargerZone(partie, DERNIER_ETAGE);
+  partie.gele = false;
+  partie.eclosion = 1;
+  partie.chute = null; // pas d'arrivée : on ne joue pas cet étage, on le finit
+  lancerLaFin(partie);
+}
+
+/** L'écran-titre, et ses boutons. */
 export function poserLEcranTitre(partie: Partie): void {
   partie.gele = true;
   el('titre').classList.add('on');
@@ -94,4 +115,5 @@ export function poserLEcranTitre(partie: Partie): void {
   (el('titre-plus-haut') as HTMLButtonElement).hidden = false;
   el('titre-descendre').addEventListener('click', () => descendre(partie, 1));
   el('titre-plus-haut').addEventListener('click', () => descendre(partie, 2));
+  el('titre-fin').addEventListener('click', () => voirLaFin(partie));
 }
