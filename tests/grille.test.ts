@@ -57,6 +57,8 @@ function plan(dessin: string[]): Zone {
     salles: [],
     numero: 0,
     grain: 'PLAN',
+    nom: '',
+    traits: [],
     lueurs: [],
     persos: [],
     torches: [],

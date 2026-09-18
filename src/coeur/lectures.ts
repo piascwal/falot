@@ -16,7 +16,8 @@ import {
   type RangPierre,
   type TypeLueur,
 } from './formes.js';
-import type { Joueur, Partie } from './types.js';
+import type { Trait } from './monde/paliers.js';
+import type { Joueur, Partie, Zone } from './types.js';
 
 export const forme = (j: Joueur): Forme => FORMES[j.niveau];
 export const rangPierre = (j: Joueur): RangPierre => PIERRE[j.niveau];
@@ -65,3 +66,10 @@ export const humeurDuJoueur = (partie: Partie): Humeur =>
           partie.menace || partie.joueur.vu > 0.15 || partie.joueur.souffle < 0.45,
           partie.joueur.niveau > 0,
         );
+
+/**
+ * Cet étage porte-t-il ce trait ? Les règles demandent ça, jamais un numéro
+ * d'étage : c'est ce qui permet au Puits sans fin de rejouer les traits en
+ * désordre sans qu'une seule règle ne change.
+ */
+export const aTrait = (zone: Zone, t: Trait): boolean => zone.traits.includes(t);

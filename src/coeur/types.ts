@@ -9,6 +9,7 @@
  */
 
 import type { Emotion, Humeur, RangPierre, TypeLueur } from './formes.js';
+import type { Pouvoir, Trait } from './monde/paliers.js';
 import type { Bandeau, Voix } from './voix.js';
 
 export interface Point {
@@ -232,6 +233,10 @@ export interface Zone {
   braises: Braise[];
   reprises: Reprise[];
   murmures: MurmurePose[];
+  /** Le nom de l'étage — « La cendre », « Le voile ». Dit par la cage. */
+  nom: string;
+  /** Ce que cet étage porte de neuf, ou de recombiné (voir `paliers.ts`). */
+  traits: Trait[];
   depart: Point;
   sortie: Seuil;
   /** Âmes à livrer pour que le Seuil cède. */
@@ -427,6 +432,11 @@ export interface Partie {
   cage: number | null;
   /** Le prologue a été franchi au moins une fois (l'interface le persiste). */
   prologueFait: boolean;
+  /**
+   * Ce dont Falot se souvient. Un pouvoir n'est pas de la lumière, c'est un
+   * geste : le Seuil ne le reprend pas. Posé au chargement de l'étage.
+   */
+  pouvoirs: Record<Pouvoir, boolean>;
   /** La caméra doit se recaler d'un coup, sans glisser. */
   recadrer: boolean;
   /** Qui éclaire, à ce pas-ci. Calculé une fois, lu par le rendu. */

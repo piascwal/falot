@@ -11,6 +11,7 @@ import { FORMES, PIERRE } from '../formes.js';
 import type { Partie } from '../types.js';
 import { ETAGES_ECRITS, zoneEcrite } from './ecrits.js';
 import { genererZone } from './generation.js';
+import { pouvoirs } from './paliers.js';
 
 export function chargerZone(partie: Partie, numero: number): void {
   const { joueur } = partie;
@@ -25,6 +26,9 @@ export function chargerZone(partie: Partie, numero: number): void {
     : genererZone(partie.grain, numero, Math.min(FORMES.length - 1, numero));
   if (!z) return;
   partie.zone = z;
+  // Ce dont il se souvient à cet étage. Le Seuil lui prend sa lumière, pas ses
+  // gestes : un pouvoir acquis ne se reperd plus.
+  partie.pouvoirs = pouvoirs(numero);
   const zone = z;
   if (numero === 1) partie.montee = []; // nouvelle aventure, nouvelle cage
   partie.numeroZone = numero;

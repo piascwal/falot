@@ -26,6 +26,7 @@ import type {
   Zone,
 } from '../types.js';
 import { distances } from './grille.js';
+import { palier } from './paliers.js';
 import { nouveauPerso } from './perso.js';
 
 interface EtageEcrit {
@@ -301,6 +302,9 @@ export function zoneEcrite(numero: number): Zone | null {
     braises: [],
     reprises,
     murmures,
+    nom: palier(numero)?.nom ?? `Étage ${numero}`,
+    // Un étage écrit porte sa leçon dans son plan, pas dans un trait de règle.
+    traits: [],
     depart: { x: (leDepart.cx + 0.5) * CASE, y: (leDepart.cy + 0.5) * CASE },
     sortie: {
       x: (leSeuil.cx + 0.5) * CASE,

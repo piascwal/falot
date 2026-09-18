@@ -23,6 +23,7 @@ import type {
   Zone,
 } from '../types.js';
 import { distances, type Plan } from './grille.js';
+import { palier, traitsEtage } from './paliers.js';
 import { nouveauPerso } from './perso.js';
 
 /** Le plan nu, avant qu'on y pose quoi que ce soit. */
@@ -88,6 +89,10 @@ export function genererZone(
   formeJoueur: number,
 ): Zone | null {
   const base = grainDepuisTexte(grainTexte);
+  // Ce que cet étage porte de neuf. Tiré à part, avec sa propre graine : les
+  // tirages du générateur sont un contrat, on n'en décale pas un seul.
+  const pal = palier(numero);
+  const traits = traitsEtage(numero, grainTexte);
   // types de lueurs disponibles à ce stade de la progression
   const types = (Object.keys(BONUS) as TypeLueur[]).filter(
     (k) => BONUS[k].forme <= formeJoueur,
@@ -411,7 +416,20 @@ export function genererZone(
       // reste du jeu les parcourt sans avoir à demander de quel type de zone
       // il s'agit.
       reprises: [],
-      murmures: [],
+      // Le murmure de l'étage : sa nouveauté, dite une fois, à l'entrée. Posé
+      // sur le départ, donc lu en se levant — jamais en travers du chemin.
+      murmures: pal?.murmure
+        ? [
+            {
+              x: (depart.cx + 0.5) * CASE,
+              y: (depart.cy + 0.5) * CASE,
+              texte: pal.murmure,
+              dit: false,
+            },
+          ]
+        : [],
+      nom: pal?.nom ?? `Puits — ${numero}`,
+      traits,
       depart: { x: (depart.cx + 0.5) * CASE, y: (depart.cy + 0.5) * CASE },
       // Le portail ne compte plus des lueurs mais des ÂMES : il faut lui
       // amener des bonhommes calmés. Les lueurs redeviennent ce qu'elles

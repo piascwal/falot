@@ -237,21 +237,22 @@ peut pas ouvrir un mur avec de la lumière.
 | Des phrases pâles posées dans le décor | D'autres sont passés ici. Ce qu'ils ont compris est resté sur place, comme le reste |
 | Un premier étage écrit à la main, les suivants tirés au sort | Le bas du puits a une forme ; au-dessus, plus personne ne sait |
 
-## À débattre
+## Ce qui est arrêté (les quatre questions)
 
-1. **La fin.** Falot franchit le dernier Seuil avec eux / il reste et devient la
-   lampe du Seuil, celle qui accueillera les suivants / il retrouve enfin qui il
-   éclairait, et c'est un Guet.
-   *Je penche pour la deuxième : la seule qui ne trahit pas la boucle.*
-2. **Falot sait-il ce qu'est un Guet ?** S'il le sait, le jeu devient une
-   tragédie — chaque âme perdue finira par fabriquer un nouveau Guet. S'il
-   l'ignore, c'est au joueur de le comprendre seul.
-   *Je penche pour l'ignorance : plus cruel, plus beau.*
-3. **Voit-on jamais le monde d'en haut ?** Une seule image à la toute fin — une
-   fenêtre, une rue au crépuscule, des lampes qu'on allume — ou jamais.
-   *Une seule image ; elle vaut d'autant plus qu'elle est unique.*
-4. **Le nom du monde.** « Les Dessous » ou « la Basse-Lumière ».
-   *Les Dessous. On peut le dire à voix haute.*
+Ces quatre points ont longtemps été « à débattre ». Ils sont tranchés, et le
+détail — la campagne, les douze étages, la fin — est dans
+[`lux-campagne.md`](lux-campagne.md).
+
+1. **La fin.** Falot **reste et devient la lampe du Seuil**. Il pousse les
+   siens dedans, puis s'y met à leur suite pour tenir la porte ouverte. La
+   lampe qu'il cherchait, c'était lui — et la première salle du jeu était
+   éclairée par un Falot d'avant.
+2. **Falot sait-il ce qu'est un Guet ?** **Non.** S'il savait qu'une âme perdue
+   finit par fabriquer un Guet, rester au Seuil serait un calcul ; il faut que
+   ce soit un geste.
+3. **Voit-on le monde d'en haut ?** **Une seule image, à la toute fin** : une
+   fenêtre, une rue au crépuscule, des lampes qu'on allume. Falot n'y est pas.
+4. **Le nom du monde.** **Les Dessous.**
 
 ## Point 2 — l'étage 1 (fait)
 
