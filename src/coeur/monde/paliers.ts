@@ -68,7 +68,7 @@ export const PALIERS: readonly Palier[] = [
     numero: 3,
     nom: 'Le souffle',
     neuf: 'souffle',
-    murmure: 'Tu peux te souffler toi-même. Tu ne verras plus rien — eux non plus.',
+    murmure: 'Souffle ta lumière : tu ne verras plus rien, eux non plus.',
   },
   {
     numero: 4,
@@ -80,38 +80,37 @@ export const PALIERS: readonly Palier[] = [
     numero: 5,
     nom: 'Le fanal',
     neuf: 'fanal',
-    murmure:
-      'Une torche se décroche. Aucun d’eux n’approche d’une flamme plus grande que lui.',
+    murmure: 'Une torche se décroche. Aucun d’eux n’approche d’une flamme plus grande.',
   },
   {
     numero: 6,
     nom: 'Le traqueur',
     neuf: 'traqueur',
-    murmure: 'Celui-là ne cherche pas au hasard : il refait ton chemin.',
+    murmure: 'Celui-là ne cherche pas : il refait ton chemin.',
   },
   {
     numero: 7,
     nom: 'Les farouches',
     neuf: 'farouches',
-    murmure: 'Certaines ont trop vu de lumière. Approche éteint, ou elles reculent.',
+    murmure: 'Elles ont trop vu de lumière. Approche éteint.',
   },
   {
     numero: 8,
     nom: 'Le voile',
     neuf: 'voile',
-    murmure: 'L’air est épais ici. Ta lumière n’ira pas loin.',
+    murmure: 'L’air est épais. Ta lumière n’ira pas loin.',
   },
   {
     numero: 9,
     nom: 'La pesée',
     neuf: 'pesee',
-    murmure: 'Cette porte tient tant qu’on pèse dessus. Quelqu’un doit rester.',
+    murmure: 'Cette porte tient tant qu’on pèse dessus.',
   },
   {
     numero: 10,
     nom: 'L’œil',
     neuf: 'oeil',
-    murmure: 'Celui-là ne balaye rien. Il voit tout ce qui est éclairé.',
+    murmure: 'Il ne balaye rien. Il voit ce qui est éclairé.',
   },
   {
     numero: 11,

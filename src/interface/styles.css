@@ -231,7 +231,8 @@ canvas {
 /* `display:flex` bat `[hidden]` : sans cette ligne, cacher la barre d'actions
      pendant la montée ne cachait rien du tout. */
 .actions[hidden],
-.hud[hidden] {
+.hud[hidden],
+.toast[hidden] {
   display: none;
 }
 

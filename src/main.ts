@@ -12,7 +12,13 @@ import { brancherClavier } from './entrees/clavier.js';
 import { brancherFanal, brancherPointeur, brancherSouffle } from './entrees/pointeur.js';
 import { creerHud } from './interface/hud.js';
 import { descendre, poserLEcranTitre, retenirPrologue } from './interface/ouverture.js';
-import { cadrer, creerEcran, redimensionner, surveillerCadence } from './rendu/ecran.js';
+import {
+  cadrer,
+  creerEcran,
+  redimensionner,
+  surveillerCadence,
+  veillerSurLEcran,
+} from './rendu/ecran.js';
 import { dessiner } from './rendu/scene.js';
 
 const canvas = document.getElementById('jeu') as HTMLCanvasElement | null;
@@ -37,10 +43,32 @@ brancherSouffle(hud.souffle, partie);
 brancherFanal(hud.fanal, partie);
 brancherClavier(partie);
 
-window.addEventListener('resize', () => {
+// L'horloge de la boucle. Déclarée ici parce que `replanter` la remet à zéro :
+// revenir d'une autre application ne doit pas donner plusieurs secondes de
+// retard à rattraper d'un coup.
+let dernier = performance.now();
+let reste = 0;
+
+function replanter(): void {
   redimensionner(ecran);
   cadrer(ecran, partie, true);
+  // On revient d'ailleurs : l'horloge a sauté. Sans cette remise à zéro, le
+  // premier pas d'après vaut plusieurs secondes de retard à rattraper.
+  dernier = performance.now();
+  reste = 0;
+}
+
+window.addEventListener('resize', replanter);
+window.addEventListener('orientationchange', replanter);
+// Revenir d'une autre application, ou d'un onglet mis en cache par le
+// navigateur : dans les deux cas le canevas peut avoir été vidé pendant qu'on
+// n'était pas là (voir `veillerSurLEcran`).
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) replanter();
 });
+window.addEventListener('pageshow', replanter);
+// Le navigateur a repris la mémoire du canevas et la rend : tout est à refaire.
+canvas.addEventListener('contextrestored', replanter);
 
 if (demande) {
   // on saute l'écran-titre, sinon il faudrait le cliquer à chaque essai
@@ -53,9 +81,6 @@ if (demande) {
 // Le prologue franchi est la seule chose que le jeu retient d'une session à
 // l'autre. Le cœur ne fait que lever le drapeau ; l'écriture est ici.
 let prologueRetenu = false;
-
-let dernier = performance.now();
-let reste = 0;
 
 function boucle(maintenant: number): void {
   requestAnimationFrame(boucle);
@@ -92,6 +117,9 @@ function corpsBoucle(maintenant: number): void {
     retenirPrologue();
   }
 
+  // L'écran a-t-il bougé sans nous le dire ? (téléphone mis de côté, barre
+  // d'adresse qui se replie, rotation faite ailleurs.)
+  if (veillerSurLEcran(ecran)) partie.recadrer = true;
   cadrer(ecran, partie, partie.recadrer);
   partie.recadrer = false;
   hud.maj(partie);

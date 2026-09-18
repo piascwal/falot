@@ -15,7 +15,7 @@
 import { clamp } from '../geometrie.js';
 import { DERNIER_ETAGE } from '../monde/paliers.js';
 import type { Partie } from '../types.js';
-import { lancerLePuits } from './puits.js';
+import { faireTaireLEtage, lancerLePuits } from './puits.js';
 
 /** La durée de chaque temps, en secondes, dans l'ordre où ils viennent. */
 export const TEMPS_FIN = { don: 3.4, lampe: 3, dehors: 7, puits: 3.4 } as const;
@@ -24,6 +24,7 @@ export const DUREE_FIN =
 
 export function lancerLaFin(partie: Partie): void {
   partie.fin = { t: 0 };
+  faireTaireLEtage(partie); // rien ne doit rester par-dessus la dernière image
   partie.joueur.vx = 0;
   partie.joueur.vy = 0;
 }

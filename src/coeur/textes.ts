@@ -33,63 +33,27 @@ export const REPLIQUES: Partial<Record<Emotion, readonly string[]>> = {
 // Ce que dit une âme qu'on ne peut pas ENCORE rallumer. Sans ça on tourne
 // autour d'elle en cherchant quoi faire, et l'échec n'apprend rien.
 export const ETEINTS: readonly string[] = [
-  "On m'a vidé de ma lumière. Il m'en faudrait un peu de la tienne — mais la tienne est trop petite.",
-  'Regarde-moi assez longtemps et je me rallumerai. Tu ne sais pas encore le faire.',
-  'Je ne peux pas marcher sans lumière. Reviens quand tu en auras assez.',
+  'On m’a vidé. Il m’en faudrait un peu de la tienne — elle est trop petite.',
+  'Regarde-moi assez longtemps et je me rallumerai.',
+  'Je ne peux pas marcher sans lumière. Reviens.',
 ];
 
-// Le récit de fond. La cage est un arrêt de toute façon : deux à quatre
-// phrases y passent sans rien coûter, et sur dix étages cela fait une
-// histoire complète. C'est le seul endroit du jeu où l'on s'autorise un
-// paragraphe.
+// Le récit de fond, une phrase ou deux par étage. Il se lit EN MONTANT, pas
+// à l'arrêt : un paragraphe se superposait au décor et ne se finissait
+// jamais. Une ligne qu'on attrape au passage vaut mieux qu'un texte qu'on
+// abandonne au milieu.
 export const RECIT_CAGE: Readonly<Record<number, string>> = {
-  2:
-    "Elles sont entrées avant toi. Un Seuil ne s'ouvre pas avec une clé : " +
-    "il s'ouvre quand assez de lumière se tient dedans — et cette lumière, " +
-    "c'était la tienne. Tu viens de tout lui donner. Tu ne te souviens déjà " +
-    'plus de ce que tu savais faire il y a un instant.',
-  3:
-    "Il n'y a pas de jour dans les Dessous, seulement des lampes et ce " +
-    "qu'elles montrent. Personne n'a construit cet endroit. On y a entassé " +
-    "ce qui ne servait plus, jusqu'à ce que ça ressemble à une prison.",
-  4:
-    "Les Guets ne montent pas derrière toi. Ils n'ont nulle part où aller, et " +
-    "ils ne veulent rien d'autre : éteindre le monde, une lumière après " +
-    "l'autre, et vider la tienne pendant qu'elle passe. Ce n'est pas toi " +
-    "qu'ils cherchent — c'est ce que tu portes. Une flamme trop grande pour " +
-    'eux les tient à distance ; tout le reste, ils viennent le prendre.',
-  5:
-    'Tu recommences petit à chaque étage, et ça ne te surprend plus. Ce que ' +
-    "le Seuil te prend, c'est la lumière ; ce qu'il te laisse, ce sont les " +
-    "gestes. Personne ne t'a jamais repris un geste.",
-  6:
-    "Certains d'entre eux ne cherchent plus au hasard. Ils ont compris qu'une " +
-    "lumière laisse une trace, et qu'il suffit de la remonter. Rien ne les " +
-    "presse : ils ont tout le temps qu'il te reste.",
-  7:
-    'Toutes ne veulent pas être rallumées. Il y en a qui ont vu de la lumière ' +
-    'de trop près, et qui reculent quand la tienne approche. Celles-là, il ' +
-    'faut venir les chercher dans le noir.',
-  8:
-    "L'air s'épaissit à mesure qu'on monte. Ta lumière n'y peut rien : elle " +
-    "porte moins loin, c'est tout. Les torches d'ici ne sont plus un " +
-    'confort, elles sont la carte.',
-  9:
-    'Une porte, ici, tient tant que quelque chose pèse dessus. Tu vas devoir ' +
-    "laisser quelqu'un derrière. Elle le sait avant toi — elles savent " +
-    'toujours avant toi.',
-  10:
-    "Celui de l'étage au-dessus ne balaye rien. Il voit tout ce qui est " +
-    "éclairé, d'un seul coup, et il attend que ça bouge. Tout ce que tu as " +
-    'appris à allumer, il va falloir le souffler.',
-  11:
-    'Ils ne se quittent plus. Tu ne peux plus en contourner un sans entrer ' +
-    "dans le champ de l'autre. Il n'y a plus rien de neuf à comprendre — il " +
-    'reste à savoir si tu sais le faire.',
-  12:
-    "C'est le dernier. Au-dessus, il n'y a plus d'étage : il y a une rue, des " +
-    "fenêtres, et des lampes que quelqu'un allume le soir. Le Seuil demande " +
-    "plus de lumière que tu n'en as jamais eu.",
+  2: 'Elles sont entrées avant toi. Ce que tu as donné au Seuil, tu ne l’as plus.',
+  3: 'Personne n’a bâti les Dessous. On y a entassé, jusqu’à ce que ça ressemble à une prison.',
+  4: 'Ils veulent éteindre le monde. Ce n’est pas toi qu’ils cherchent : c’est ce que tu portes.',
+  5: 'Le Seuil prend ta lumière. Jamais tes gestes.',
+  6: 'Certains ne cherchent plus au hasard : ils remontent ta trace.',
+  7: 'Toutes ne veulent pas de ta lumière. Certaines en ont trop vu.',
+  8: 'L’air s’épaissit. Ta lumière n’ira pas loin ; les torches feront la carte.',
+  9: 'Ici, une porte tient tant qu’on pèse dessus. Quelqu’un devra rester.',
+  10: 'Celui d’en haut ne balaye rien : il voit tout ce qui est éclairé.',
+  11: 'Ils ne se quittent plus.',
+  12: 'C’est le dernier. Au-dessus, il y a une rue, et des lampes qu’on allume.',
 };
 export const RECIT_PLUS_HAUT: readonly string[] = [
   'Tu ne comptes plus les étages. Elles, si.',

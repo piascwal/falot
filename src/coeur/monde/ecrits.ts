@@ -106,12 +106,12 @@ export const ETAGES_ECRITS: Readonly<Record<number, EtageEcrit>> = {
       ], // celui de l'escorte fait l'aller-retour du couloir
     ],
     murmures: {
-      '1': "En bas, un Guet. Ta pierre garde un peu de ta lumière : là où elle tombe, une lueur s'allume — et il ira l'éteindre, elle, pas toi.",
-      '2': "Un Guet veut éteindre le monde, et vider ta lumière. Mais il n'approche jamais d'une flamme plus grande que lui.",
-      '4': "Sortir, c'est monter. Mais un Seuil ne s'ouvre pas avec une clé : il cède quand assez d'âmes se tiennent dedans.",
-      '5': "Tant que la flamme tient, aucun Guet n'approche. Ni de toi, ni de ceux qui se serrent contre toi.",
+      '1': 'Ta pierre garde un peu de ta lumière. Là où elle tombe, il ira voir.',
+      '2': 'Un Guet veut vider ta lumière. Il n’approche pas d’une flamme plus grande.',
+      '4': 'Sortir, c’est monter. Un Seuil cède quand assez d’âmes s’y tiennent.',
+      '5': 'Tant que la flamme tient, aucun Guet n’approche.',
       '6': 'Le mur, juste en dessous, est fendu. Une pierre suffirait.',
-      '8': "Une torche éteinte au mur, laissée par qui passait avant toi. Ce qu'il te reste de lumière suffit à la rallumer.",
+      '8': 'Une torche éteinte. Ce qu’il te reste de lumière suffit à la reprendre.',
     },
     // Deux âmes, et les deux sont dans la même salle, au bout du couloir des
     // fragments. Elles ont d'abord été posées aux deux bouts du niveau : il

@@ -17,6 +17,7 @@ import { avancer, creerPartie, PAS } from '../src/coeur/partie.js';
 import { eteindre } from '../src/coeur/regles/progression.js';
 import { lancerLaChute, ouvrirLeSeuil } from '../src/coeur/regles/seuil.js';
 import type { Partie } from '../src/coeur/types.js';
+import { montrerToast } from '../src/coeur/voix.js';
 
 const jouer = (p: Partie, secondes: number) => {
   for (let i = 0; i < Math.round(secondes / PAS); i++) avancer(p, PAS);
@@ -115,6 +116,23 @@ describe('franchir un Seuil', () => {
     // et il repart Peureux : le Seuil lui a tout pris
     expect(p.joueur.niveau).toBe(0);
     expect(p.joueur.eclat).toBe(0);
+  });
+});
+
+describe('la cage d’escalier', () => {
+  it('fait taire l’étage qu’on quitte : deux textes ne se superposent plus', () => {
+    const p = creerPartie({ grain: 'PASSAGE', etage: 1 });
+    montrerToast(p, 'Une phrase de l’étage d’en bas');
+    avancer(p, PAS);
+    expect(p.bandeau.visible).toBe(true);
+    ouvrirLeSeuil(p);
+    jouer(p, 3.6);
+    expect(p.puits).not.toBeNull();
+    // le récit de la montée a la place pour lui seul
+    expect(p.bandeau.visible).toBe(false);
+    expect(p.bandeau.texte).toBe('');
+    expect(p.filVoix).toHaveLength(0);
+    expect(p.flottants).toHaveLength(0);
   });
 });
 

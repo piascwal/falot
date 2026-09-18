@@ -32,6 +32,22 @@ const SORTIE = 0.5;
 
 export function lancerLePuits(partie: Partie, arrivee: number): void {
   partie.puits = { arrivee, h: 0, x: 0, vh: 0, vx: 0, t: 0, sortie: 0 };
+  faireTaireLEtage(partie);
+}
+
+/**
+ * L'étage qu'on quitte se tait. Le bandeau ne disparaît jamais de lui-même —
+ * il pâlit et il reste, c'est voulu pendant qu'on joue — mais dans la cage il
+ * se retrouvait par-dessus le récit de la montée, deux textes au même endroit.
+ * Ce qu'il disait ne vaut plus : on a changé d'étage.
+ */
+export function faireTaireLEtage(partie: Partie): void {
+  partie.bandeau.visible = false;
+  partie.bandeau.pale = false;
+  partie.bandeau.texte = '';
+  partie.filVoix.length = 0;
+  partie.voixT = 0;
+  partie.flottants.length = 0;
 }
 
 export function majPuits(partie: Partie, dt: number): void {

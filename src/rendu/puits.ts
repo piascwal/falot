@@ -43,6 +43,10 @@ const corps = {
   cligne: 0,
 };
 
+/** Ce qu'on voit du récit, de 0 à 1, selon la hauteur atteinte. */
+const recitLu = (h: number) =>
+  clamp((h - 0.12) / 0.2, 0, 1) * clamp((0.78 - h) / 0.18, 0, 1);
+
 export function dessinerPuits(ecran: Ecran, partie: Partie, temps: number): void {
   const puits = partie.puits;
   if (!puits) return;
@@ -129,7 +133,9 @@ export function dessinerPuits(ecran: Ecran, partie: Partie, temps: number): void
 
     // La seule mention qu'on se permette, et une seule fois : au premier
     // palier que personne n'a jamais dépassé.
-    if (n === puits.arrivee + 1) {
+    // La mention attend que le récit ait fini de se lire : elle occupe la
+    // même bande que lui.
+    if (n === puits.arrivee + 1 && recitLu(puits.h) <= 0.02) {
       ctx.textAlign = 'center';
       ctx.font = 'italic 12px Georgia, serif';
       texteCerne(
@@ -147,12 +153,15 @@ export function dessinerPuits(ecran: Ecran, partie: Partie, temps: number): void
   const recit =
     RECIT_CAGE[puits.arrivee] ??
     RECIT_PLUS_HAUT[Math.abs(puits.arrivee - 5) % RECIT_PLUS_HAUT.length];
-  const lu = clamp((puits.h - 0.12) / 0.2, 0, 1) * clamp((0.95 - puits.h) / 0.2, 0, 1);
+  // Il se lit dans le premier tiers de la montée et s'efface AVANT que le
+  // palier d'arrivée n'entre dans sa bande : deux textes au même endroit, on
+  // n'en lit plus aucun.
+  const lu = recitLu(puits.h);
   if (recit && lu > 0.01) {
     ctx.textAlign = 'center';
     ctx.font = 'italic 15px Georgia, serif';
     const lignes = decouper(recit, Math.max(22, Math.floor(W / 11)));
-    const y0 = H * 0.24 - lignes.length * 11;
+    const y0 = H * 0.3 - lignes.length * 11;
     for (let i = 0; i < lignes.length; i++)
       texteCerne(
         ecran,

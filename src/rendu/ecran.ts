@@ -86,6 +86,40 @@ export function redimensionner(ecran: Ecran): void {
 }
 
 /**
+ * LE GARDE-FOU DE L'AFFICHAGE, appelé à chaque image.
+ *
+ * Sur téléphone, revenir d'une autre application cassait l'écran une fois sur
+ * trois. Trois causes, une seule réponse :
+ *
+ *   — le navigateur libère la mémoire d'un canevas laissé en arrière-plan.
+ *     Quand il revient, le contexte est REMIS À ZÉRO, transformation comprise :
+ *     tout se dessinait alors à l'échelle 1 au lieu de la densité de l'écran ;
+ *   — la barre d'adresse se replie ou se déplie pendant qu'on est ailleurs, et
+ *     l'événement `resize` qui va avec n'arrive pas toujours ;
+ *   — une rotation faite dans une autre application n'est jamais annoncée.
+ *
+ * On ne se fie donc à aucun événement : on compare, à chaque image, ce que le
+ * canevas EST à ce qu'il devrait être, et on repose la transformation. Deux
+ * lectures et une affectation — c'est moins cher que d'y penser.
+ */
+export function veillerSurLEcran(ecran: Ecran): boolean {
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+  const derive =
+    W !== ecran.W ||
+    H !== ecran.H ||
+    ecran.canvas.width !== Math.round(ecran.W * ecran.DPR) ||
+    ecran.lum.width !== Math.ceil(ecran.canvas.width * QLUM);
+  if (derive) {
+    redimensionner(ecran);
+    return true;
+  }
+  // la transformation ne survit pas à une remise à zéro du contexte
+  ecran.ctx.setTransform(ecran.DPR, 0, 0, ecran.DPR, 0, 0);
+  return false;
+}
+
+/**
  * La cadence se surveille TOUT LE TEMPS. Elle ne l'était qu'avec le doigt sur
  * le joystick : au clavier, ou pendant qu'on vise, une machine qui peine ne se
  * rattrapait jamais.

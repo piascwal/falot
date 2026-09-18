@@ -554,7 +554,7 @@ describe('la pesée (étage 9)', () => {
     let posees = 0;
     for (let i = 0; i < 12; i++) {
       const z = genererZone(`PESEE-${i}`, 9, 4);
-      if (!z || !z.dalles.length) continue;
+      if (!z?.dalles.length) continue;
       posees++;
       const dl = z.dalles[0];
       expect(dl.porte.scellee).toBe(true);

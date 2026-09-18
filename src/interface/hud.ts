@@ -87,6 +87,9 @@ export function creerHud(): Hud {
       const enMontee = partie.puits !== null || partie.fin !== null;
       elActions.hidden = enMontee;
       elHud.hidden = enMontee;
+      // Le bandeau vit hors du HUD : sans cette ligne, la phrase de l'étage
+      // qu'on vient de quitter se posait en travers du récit de la montée.
+      elToast.hidden = enMontee;
       if (enMontee) return;
 
       // Le souffle n'existe que depuis que Falot s'en est souvenu. Un bouton
