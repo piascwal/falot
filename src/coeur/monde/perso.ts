@@ -52,6 +52,7 @@ export function nouveauPerso(
     piste: -1,
     oeil: false,
     farouche: false,
+    pese: false,
     etape: 0,
     charge: 0,
     route: null,

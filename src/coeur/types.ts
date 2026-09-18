@@ -63,6 +63,8 @@ export interface Perso extends Corps {
   livre: boolean;
   /** Sa place dans la file du convoi. */
   rang: number;
+  /** Elle s'est posée sur une dalle et elle y reste : elle tient la porte. */
+  pese: boolean;
   /** A-t-il déjà dit qu'il était vide ? */
   aDit: boolean;
   /** A-t-il déjà payé son calmage ? Une âme ne rapporte qu'une fois. */
@@ -226,8 +228,24 @@ export interface Porte extends Case, Point {
   gond: 1 | -1;
   /** 0 fermée, 1 grande ouverte. Sous 0,5 elle est solide. */
   ouverte: number;
+  /** Scellée : elle n'obéit plus à qui s'approche, mais à une dalle. */
+  scellee: boolean;
   sens: number;
   phase: number;
+}
+
+/**
+ * LA PESÉE (étage 9). Une dalle qui commande une porte scellée : elle ne
+ * s'ouvre que tant que quelque chose pèse dessus. Falot peut y rester — et
+ * alors il ne passe pas — ou y laisser une âme, et revenir la chercher.
+ *
+ * La porte retombe LENTEMENT une fois la dalle relâchée : c'est ce qui laisse
+ * le temps de repasser avec celle qu'on était venu rechercher.
+ */
+export interface Dalle extends Case, Point {
+  porte: Porte;
+  /** Quelque chose pèse dessus, à cette image-ci. */
+  pesee: boolean;
 }
 
 export interface Fissure extends Case, Point {
@@ -287,6 +305,8 @@ export interface Zone {
   porteDe: (Porte | null)[][];
   fissures: Fissure[];
   fissureDe: (Fissure | null)[][];
+  /** Les dalles de pesée, et les portes qu'elles commandent (étage 9). */
+  dalles: Dalle[];
   /** Incrémenté dès que `solide` change : les ombres portées se recalculent. */
   versionPortes: number;
   braises: Braise[];

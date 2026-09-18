@@ -10,7 +10,8 @@ import { describe, expect, it } from 'vitest';
 import { CASE, PORTEE_VUE } from '../src/coeur/dimensions.js';
 import { EMOTIONS } from '../src/coeur/formes.js';
 import { porteeFaisceau, rayonHalo } from '../src/coeur/lectures.js';
-import { solideEn, vueLibre } from '../src/coeur/monde/grille.js';
+import { genererZone } from '../src/coeur/monde/generation.js';
+import { distances, solideEn, vueLibre } from '../src/coeur/monde/grille.js';
 import {
   DERNIER_ETAGE,
   PALIERS,
@@ -543,5 +544,80 @@ describe('le fanal (étage 5)', () => {
     prendreOuLacherLeFanal(p);
     for (let i = 0; i < 40; i++) avancer(p, PAS);
     expect(g.bain).toBeGreaterThan(0);
+  });
+});
+
+describe('la pesée (étage 9)', () => {
+  it('scelle une porte, et jamais un passage obligé', () => {
+    // La règle est celle des fissures : on peut toujours finir l'étage sans
+    // avoir rien compris à la dalle. Elle ouvre un chemin, elle n'en ferme pas.
+    let posees = 0;
+    for (let i = 0; i < 12; i++) {
+      const z = genererZone(`PESEE-${i}`, 9, 4);
+      if (!z || !z.dalles.length) continue;
+      posees++;
+      const dl = z.dalles[0];
+      expect(dl.porte.scellee).toBe(true);
+      const depart = {
+        cx: Math.floor(z.depart.x / CASE),
+        cy: Math.floor(z.depart.y / CASE),
+      };
+      const sortie = {
+        cx: Math.floor(z.sortie.x / CASE),
+        cy: Math.floor(z.sortie.y / CASE),
+      };
+      z.mur[dl.porte.cy][dl.porte.cx] = 1; // porte condamnée
+      const d = distances(z, depart);
+      z.mur[dl.porte.cy][dl.porte.cx] = 0;
+      expect(d[sortie.cy][sortie.cx], `graine ${i}`).toBeGreaterThanOrEqual(0);
+      expect(d[dl.cy][dl.cx], `dalle ${i}`).toBeGreaterThanOrEqual(0);
+    }
+    expect(posees, 'l’étage 9 scelle une porte quand il en trouve une').toBe(12);
+  });
+
+  it('tient la porte tant que quelque chose pèse dessus', () => {
+    const p = creerPartie({ grain: 'PESEE-3', etage: 9 });
+    const dl = p.zone.dalles[0];
+    expect(dl, 'l’étage 9 pose une dalle').toBeDefined();
+    // personne dessus : elle est fermée
+    for (let i = 0; i < 30; i++) avancer(p, PAS);
+    expect(dl.porte.ouverte).toBeLessThan(0.5);
+    // Falot monte dessus : elle s'ouvre
+    p.joueur.x = dl.x;
+    p.joueur.y = dl.y;
+    for (let i = 0; i < 40; i++) {
+      p.joueur.x = dl.x;
+      p.joueur.y = dl.y;
+      avancer(p, PAS);
+    }
+    expect(dl.pesee).toBe(true);
+    expect(dl.porte.ouverte).toBe(1);
+    // il s'en va : elle retombe, mais LENTEMENT — le temps de repasser
+    p.joueur.x = dl.x + CASE * 4;
+    for (let i = 0; i < 60; i++) avancer(p, PAS);
+    expect(dl.porte.ouverte).toBeGreaterThan(0.5);
+  });
+
+  it('laisse une âme du convoi s’y poser, et la reprend quand on revient', () => {
+    const p = creerPartie({ grain: 'PESEE-3', etage: 9 });
+    const dl = p.zone.dalles[0];
+    expect(dl, 'l’étage 9 pose une dalle').toBeDefined();
+    const q = ames(p)[0];
+    q.calme = true;
+    q.suit = true;
+    q.prime = true;
+    q.x = dl.x;
+    q.y = dl.y;
+    p.joueur.x = dl.x + CASE * 3;
+    p.joueur.y = dl.y;
+    avancer(p, PAS);
+    expect(q.pese).toBe(true);
+    // elle tient la porte alors que Falot est loin : c'est tout l'intérêt
+    for (let i = 0; i < 40; i++) avancer(p, PAS);
+    expect(dl.porte.ouverte).toBe(1);
+    // il revient la chercher
+    p.joueur.x = dl.x + CASE * 0.9;
+    avancer(p, PAS);
+    expect(q.pese).toBe(false);
   });
 });

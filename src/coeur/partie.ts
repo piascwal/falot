@@ -165,6 +165,7 @@ function zoneVide(): Zone {
     portes: [],
     porteDe: [[null]],
     fissures: [],
+    dalles: [],
     fissureDe: [[null]],
     versionPortes: 0,
     braises: [],

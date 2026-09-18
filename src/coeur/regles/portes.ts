@@ -14,8 +14,20 @@ import { clamp } from '../geometrie.js';
 import { emettre } from '../particules.js';
 import type { Partie, Point } from '../types.js';
 
+/** Ce qu'il faut de temps à une porte scellée pour retomber, une fois lâchée.
+ *  Assez pour repasser en courant avec celle qu'on était venu rechercher. */
+const RETOMBEE = 0.26;
+
 export function majPortes(partie: Partie, dt: number): void {
   const { joueur, zone } = partie;
+
+  // LA PESÉE. Une dalle chargée tient sa porte ouverte : Falot peut y rester —
+  // et alors il ne passe pas — ou y laisser une âme et revenir la chercher.
+  for (const dl of zone.dalles) {
+    dl.pesee =
+      Math.hypot(joueur.x - dl.x, joueur.y - dl.y) < CASE * 0.5 ||
+      zone.persos.some((q) => !q.livre && Math.hypot(q.x - dl.x, q.y - dl.y) < CASE * 0.5);
+  }
   // l'éboulement d'un mur fêlé : la pierre s'efface en un tiers de seconde
   for (const f of zone.fissures) {
     if (f.casse > 0 && f.casse < 1) f.casse = Math.min(1, f.casse + dt * 3);
@@ -45,9 +57,12 @@ export function majPortes(partie: Partie, dt: number): void {
       const ecart = pt.verticale ? plusProche.qui.x - pt.x : pt.y - plusProche.qui.y;
       pt.sens = ecart >= 0 ? 1 : -1;
     }
-    const proche = !!plusProche.qui;
+    // Une porte scellée n'écoute plus qui s'approche : elle écoute sa dalle.
+    const dalle = pt.scellee ? zone.dalles.find((d) => d.porte === pt) : undefined;
+    const proche = pt.scellee ? !!dalle?.pesee : !!plusProche.qui;
     const avant = pt.ouverte;
-    pt.ouverte = clamp(pt.ouverte + (proche ? 3.2 : -1.3) * dt, 0, 1);
+    const vitesse = proche ? 3.2 : pt.scellee ? -RETOMBEE : -1.3;
+    pt.ouverte = clamp(pt.ouverte + vitesse * dt, 0, 1);
     // franchir le seuil change ce qui est solide : les ombres portées des
     // torches et des braises doivent être recalculées
     if (avant < 0.5 !== pt.ouverte < 0.5) zone.versionPortes++;

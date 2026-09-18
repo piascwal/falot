@@ -17,10 +17,37 @@ import { ecartAngle } from '../geometrie.js';
 import { aBonus } from '../lectures.js';
 import { emettre } from '../particules.js';
 import type { Partie, Perso } from '../types.js';
+import { montrerToast } from '../voix.js';
 import { estEclaire } from './lumiere.js';
 
 export function suivre(partie: Partie, p: Perso, dt: number): void {
   const { joueur, zone } = partie;
+
+  // LA PESÉE. Une âme qui marche sur une dalle s'y arrête et n'en bouge plus :
+  // elle tient la porte. On la reprend en revenant la chercher — c'est tout ce
+  // que l'étage 9 demande, et ça se découvre en le voyant arriver.
+  if (zone.dalles.length) {
+    if (p.pese) {
+      const dl = zone.dalles.find((d) => Math.hypot(d.x - p.x, d.y - p.y) < CASE * 0.85);
+      // il revient la chercher : elle repart
+      if (!dl || Math.hypot(joueur.x - p.x, joueur.y - p.y) < CASE * 1.3) p.pese = false;
+      else {
+        p.vx *= 0.0001 ** dt;
+        p.vy *= 0.0001 ** dt;
+        p.regard +=
+          ecartAngle(p.regard, Math.atan2(joueur.y - p.y, joueur.x - p.x)) * 3 * dt;
+        return;
+      }
+    } else if (
+      zone.dalles.some((d) => Math.hypot(d.x - p.x, d.y - p.y) < CASE * 0.35) &&
+      Math.hypot(joueur.x - p.x, joueur.y - p.y) > CASE * 1.3
+    ) {
+      p.pese = true;
+      emettre(partie, p.x, p.y - D.taille * 0.7, '#c8b088', 6, 40);
+      montrerToast(partie, 'Elle reste sur la dalle — la porte tient tant qu’elle y est');
+      return;
+    }
+  }
   // Le portail aspire : sans ça un suiveur gardait son espacement derrière le
   // joueur et n'entrait jamais dans le rayon de livraison, même collé dessus.
   // Le portail aspire quoi qu'il arrive, même une fois le quota atteint : une

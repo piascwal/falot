@@ -13,6 +13,7 @@ import { BONUS, EMOTIONS, type TypeLueur } from '../formes.js';
 import { TAU } from '../geometrie.js';
 import type {
   Case,
+  Dalle,
   Fissure,
   Lueur,
   Perso,
@@ -193,6 +194,7 @@ export function genererZone(
         // le couloir est horizontal -> le battant barre verticalement
         verticale: c.couloirH,
         ouverte: 0,
+        scellee: false,
         sens: 1,
         // Un couloir tiré au sort fait une case de large : les deux côtés
         // perpendiculaires sont de la pierre, le gond tient donc toujours.
@@ -434,6 +436,52 @@ export function genererZone(
       for (const q of persos) if (q.emotion !== EMOTIONS.COLERE) q.farouche = true;
     }
 
+    // LA PESÉE. Une porte scellée, et la dalle qui la commande. On ne scelle
+    // JAMAIS un passage obligé : la règle est la même que pour les fissures —
+    // le Seuil doit rester atteignable avec cette porte condamnée, sinon
+    // laisser une âme derrière soi deviendrait un piège au lieu d'un choix.
+    const dalles: Dalle[] = [];
+    if (traits.includes('pesee') && portes.length) {
+      const ordre = [...portes];
+      for (let k = ordre.length - 1; k > 0; k--) {
+        const j = Math.floor(rnd() * (k + 1));
+        [ordre[k], ordre[j]] = [ordre[j], ordre[k]];
+      }
+      for (const pt of ordre) {
+        // on la condamne le temps de poser la question, puis on la rouvre
+        z.mur[pt.cy][pt.cx] = 1;
+        const sans = distances(z, depart);
+        z.mur[pt.cy][pt.cx] = 0;
+        if (sans[leSeuil.cy][leSeuil.cx] < 0) continue; // c'est un passage obligé
+        // la dalle : à portée de la porte, du côté par où l'on arrive
+        let posee: Case | null = null;
+        for (let r = 2; r <= 5 && !posee; r++) {
+          for (let cy = pt.cy - r; cy <= pt.cy + r && !posee; cy++) {
+            for (let cx = pt.cx - r; cx <= pt.cx + r; cx++) {
+              if (cx < 0 || cy < 0 || cx >= z.cols || cy >= z.lignes) continue;
+              if (Math.abs(cx - pt.cx) + Math.abs(cy - pt.cy) !== r) continue;
+              if (z.mur[cy][cx] || porteDe[cy][cx] || sans[cy][cx] < 0) continue;
+              if (cx === depart.cx && cy === depart.cy) continue;
+              if (cx === leSeuil.cx && cy === leSeuil.cy) continue;
+              posee = { cx, cy };
+              break;
+            }
+          }
+        }
+        if (!posee) continue;
+        pt.scellee = true;
+        dalles.push({
+          cx: posee.cx,
+          cy: posee.cy,
+          x: (posee.cx + 0.5) * CASE,
+          y: (posee.cy + 0.5) * CASE,
+          porte: pt,
+          pesee: false,
+        });
+        break;
+      }
+    }
+
     // LA CENDRE. Une ou deux salles entières où le sol a brûlé : il faut les
     // traverser lentement. Posée en DERNIER, et seulement si l'étage porte le
     // trait : les tirages du générateur sont un contrat, et un étage sans
@@ -473,6 +521,7 @@ export function genererZone(
       porteDe,
       fissures,
       fissureDe,
+      dalles,
       versionPortes: 0,
       braises: [],
       // Réservés aux étages écrits à la main. Vides ici, mais présents : le

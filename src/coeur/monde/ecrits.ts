@@ -181,6 +181,7 @@ export function zoneEcrite(numero: number): Zone | null {
           y,
           verticale: c === '|',
           ouverte: 0,
+          scellee: false,
           sens: 1,
           gond: 1, // posé plus bas, quand toute la grille est lue
           phase: rnd() * TAU,
@@ -298,6 +299,7 @@ export function zoneEcrite(numero: number): Zone | null {
     porteDe,
     fissures: fissuresPosees,
     fissureDe,
+    dalles: [],
     versionPortes: 0,
     braises: [],
     reprises,

@@ -87,6 +87,22 @@ export function dessinerSol(
   }
   ctx.stroke();
 
+  // --- les dalles de pesée ---
+  // Un carré creusé dans le sol, et son cadre qui s'allume quand quelque chose
+  // pèse dessus. Rien d'autre : on comprend en marchant dessus et en voyant la
+  // porte bouger, pas en lisant une consigne.
+  for (const dl of zone.dalles) {
+    if (dl.cx < c0x - 1 || dl.cx > c1x + 1 || dl.cy < c0y - 1 || dl.cy > c1y + 1) continue;
+    const x = dl.cx * CASE - cam.x,
+      y = dl.cy * CASE - cam.y;
+    const m = CASE * 0.18;
+    ctx.fillStyle = dl.pesee ? 'rgba(200,176,136,0.20)' : 'rgba(255,255,255,0.05)';
+    ctx.fillRect(x + m, y + m, CASE - m * 2, CASE - m * 2);
+    ctx.strokeStyle = dl.pesee ? 'rgba(200,176,136,0.75)' : 'rgba(200,176,136,0.34)';
+    ctx.lineWidth = dl.pesee ? 2.4 : 1.6;
+    ctx.strokeRect(x + m, y + m, CASE - m * 2, CASE - m * 2);
+  }
+
   // --- les murs fêlés : de la pierre, mais fendue ---
   // Deux fentes claires et un peu de poussière : assez pour qu'on le remarque
   // en passant le halo dessus, pas assez pour que ça ressemble à un objet à
