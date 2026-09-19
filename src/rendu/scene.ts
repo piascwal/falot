@@ -31,7 +31,7 @@ import { decouper } from '../coeur/texte.js';
 import type { Partie, Perso } from '../coeur/types.js';
 import { type Ecran, QLUM } from './ecran.js';
 import { dessinerFin } from './fin.js';
-import { dessinerManche, dessinerVisee } from './gestes.js';
+import { dessinerFantomeManche, dessinerManche, dessinerVisee } from './gestes.js';
 import {
   percerCone,
   percerDisque,
@@ -877,6 +877,7 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
   }
 
   dessinerVidange(ecran, partie);
+  dessinerFantomeManche(ecran, partie, temps);
   dessinerManche(ecran, partie);
   dessinerVisee(ecran, partie);
 }

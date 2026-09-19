@@ -133,7 +133,7 @@ export function creerPartie(reglages: Reglages = {}): Partie {
     // À quoi servent les petites choses jaunes ? On ne l'avait jamais dit. La
     // première fois, une phrase le nomme ; ensuite, chaque ramassage fait
     // monter un « +4 » vers la barre du haut.
-    premieres: { lueur: true, mort: true, seuil: false },
+    premieres: { lueur: true, mort: true, seuil: false, main: false },
     // La règle attachée à une espèce ne se dit qu'une fois : répétée à chaque
     // âme, elle redevient la modale intrusive qu'on a retirée.
     regleDite: {},

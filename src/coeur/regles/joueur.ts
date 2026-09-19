@@ -56,6 +56,11 @@ export function majJoueur(partie: Partie, dt: number): void {
     joueur.vy += entrees.manche.dy * accel * dt;
   }
 
+  // Il a poussé quelque chose : il a compris. Le fantôme de manche n'a plus
+  // rien à dire, et il ne revient jamais.
+  if (!partie.premieres.main && (kx || ky || entrees.manche.actif))
+    partie.premieres.main = true;
+
   const frottement = 0.0009 ** dt;
   joueur.vx *= frottement;
   joueur.vy *= frottement;

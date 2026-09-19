@@ -17,6 +17,53 @@ import type { Ecran } from './ecran.js';
 /** Rayon du joystick flottant, en pixels d'écran. */
 export const RAYON_MANCHE = 56;
 
+/**
+ * LE FANTÔME DE MANCHE.
+ *
+ * Le joystick naît sous le doigt, où qu'on le pose. C'est agréable une fois
+ * qu'on le sait, et indevinable avant : en test, des joueurs sont restés
+ * plantés au réveil sans comprendre qu'on pouvait bouger. On leur montre donc
+ * le geste, une fois, dans la langue du jeu — un cercle, un point qui glisse,
+ * rien d'écrit — jusqu'à ce qu'ils poussent quelque chose.
+ *
+ * Il ne s'affiche qu'au tout début du tout premier étage : passé le premier
+ * pas, il n'existe plus de la partie.
+ */
+export function dessinerFantomeManche(ecran: Ecran, partie: Partie, temps: number): void {
+  if (partie.premieres.main || partie.numeroZone !== 1) return;
+  if (partie.chute || partie.eclosion < 0.9 || partie.gele) return;
+  const { ctx, W, H } = ecran;
+  const ox = W * 0.5;
+  const oy = H - Math.min(H * 0.22, 150);
+  // un battement lent : deux secondes pour montrer le geste, une pour souffler
+  const cycle = (temps % 3) / 3;
+  const glisse = clampEntre(cycle / 0.66, 0, 1);
+  const vu = 0.5 + 0.5 * Math.sin(temps * 1.6);
+  ctx.save();
+  ctx.strokeStyle = `rgba(255,255,255,${0.1 + 0.06 * vu})`;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(ox, oy, RAYON_MANCHE, 0, TAU);
+  ctx.stroke();
+  // le doigt : il part du centre et tire vers la droite, puis recommence
+  const d = Math.sin(glisse * Math.PI) * RAYON_MANCHE * 0.8;
+  const px = ox + d;
+  const g = ctx.createRadialGradient(px, oy, 0, px, oy, 24);
+  g.addColorStop(0, `rgba(255,233,168,${0.3 + 0.2 * vu})`);
+  g.addColorStop(1, 'rgba(255,233,168,0)');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(px, oy, 24, 0, TAU);
+  ctx.fill();
+  ctx.strokeStyle = `rgba(255,233,168,${0.4 + 0.2 * vu})`;
+  ctx.beginPath();
+  ctx.arc(px, oy, 13, 0, TAU);
+  ctx.stroke();
+  ctx.restore();
+}
+
+const clampEntre = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
+
 export function dessinerManche(ecran: Ecran, partie: Partie): void {
   const { ctx } = ecran;
   const manche = partie.entrees.manche;

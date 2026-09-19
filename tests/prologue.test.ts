@@ -124,52 +124,14 @@ function surToutesLesRondes(essai: Omit<Essai, 'decalage'>): number {
   return passes;
 }
 
-describe('le prologue — la première salle', () => {
-  it('ne se quitte pas sans casser un mur : le pierre sert avant le premier Guet', () => {
+describe('le prologue — la salle du réveil', () => {
+  it('ouvre tout le niveau sans rien casser : on se réveille, on marche', () => {
+    // La salle avait deux murs fêlés qu'il fallait ouvrir à la pierre pour
+    // sortir. En test, personne ne comprenait ce qu'on lui demandait : on
+    // apprenait une mécanique avant d'avoir appris à marcher. La leçon de la
+    // pierre est restée, mais là où elle sert — devant un Guet.
     const z = zoneEcrite(1)!;
-    const d = distances(z, {
-      cx: Math.floor(z.depart.x / CASE),
-      cy: Math.floor(z.depart.y / CASE),
-    });
-    // Le Seuil, les âmes, les lueurs : rien n'est atteignable tant qu'on n'a
-    // pas ouvert une fente. C'est la seule zone du jeu où une fissure est un
-    // passage OBLIGÉ — en procédural, elle n'ouvre jamais qu'un raccourci.
-    const atteignable = (q: Point) =>
-      d[Math.floor(q.y / CASE)]?.[Math.floor(q.x / CASE)] >= 0;
-    expect(atteignable(z.sortie)).toBe(false);
-    expect(ames(z).some(atteignable)).toBe(false);
-    expect(z.lueurs.some(atteignable)).toBe(false);
-  });
-
-  it('a ses deux issues fêlées, et les deux se cassent depuis le réveil', () => {
-    const p = creerPartie({ grain: 'PROLOGUE', etage: 1 });
-    p.chute = null;
-    p.eclosion = 1;
-    expect(p.zone.fissures.length).toBeGreaterThanOrEqual(2);
-    for (const f of p.zone.fissures) {
-      expect(cases(f, p.zone.depart)).toBeLessThan(2.5);
-      expect(p.zone.mur[f.cy][f.cx]).toBe(1);
-    }
-    // on casse les deux depuis la case de départ, sans bouger
-    for (const f of [...p.zone.fissures]) {
-      p.joueur.pierres = 1;
-      lancerPierre(p, Math.atan2(f.y - p.joueur.y, f.x - p.joueur.x), 0);
-      for (let i = 0; i < 120; i++) avancer(p, PAS);
-      expect(p.zone.mur[f.cy][f.cx]).toBe(0);
-    }
-  });
-
-  it('ne donne rien dans sa niche : c’est un cul-de-sac, pas une récompense', () => {
-    const z = zoneEcrite(1)!;
-    // La poche de pierres qui s'y trouvait annonçait « intarissable, lance sans
-    // compter » — une phrase de bonus au milieu d'une leçon sur les murs. La
-    // niche ne prouve plus qu'une chose : on casse des murs.
-    expect(z.lueurs.every((l) => l.type === 'eclat')).toBe(true);
-  });
-
-  it('ouvre tout le niveau une fois les fentes cassées', () => {
-    const z = zoneEcrite(1)!;
-    for (const f of z.fissures) z.mur[f.cy][f.cx] = 0;
+    expect(z.fissures).toHaveLength(0);
     const d = distances(z, {
       cx: Math.floor(z.depart.x / CASE),
       cy: Math.floor(z.depart.y / CASE),
@@ -180,6 +142,42 @@ describe('le prologue — la première salle', () => {
     for (const l of z.lueurs) expect(atteignable(l)).toBe(true);
     for (const q of z.persos) expect(atteignable(q)).toBe(true);
     for (const r of z.reprises) expect(atteignable(r)).toBe(true);
+  });
+
+  it('donne de quoi ouvrir le faisceau avant d’avoir vu un Guet', () => {
+    // C'est la salle qui doit payer le premier palier : arriver Peureux
+    // devant le premier Guet, c'est arriver sans rien à essayer.
+    const z = zoneEcrite(1)!;
+    const guetLePlusHaut = Math.min(...guets(z).map((g) => Math.floor(g.y / CASE)));
+    const avant = z.lueurs.filter((l) => Math.floor(l.y / CASE) < guetLePlusHaut);
+    expect(avant.length * 4).toBeGreaterThanOrEqual(FORMES[1].seuil);
+  });
+
+  it('est éclairée par des torches, et rien d’autre', () => {
+    // « Plein de torches » : c'est ce qui fait comprendre en trois secondes
+    // qu'on est dans un bâtiment noir où seule la lumière qu'on rallume
+    // existe. Elles sont sur les deux parois, et écartées.
+    const z = zoneEcrite(1)!;
+    const salle = z.torches.filter((t) => t.y < c(0, 7).y);
+    expect(salle.length).toBeGreaterThanOrEqual(5);
+    const hautes = salle.filter((t) => t.oy < 0).length;
+    const basses = salle.filter((t) => t.oy > 0).length;
+    expect(hautes).toBeGreaterThanOrEqual(2);
+    expect(basses).toBeGreaterThanOrEqual(2);
+    // et chacune est accrochée à un mur : c'est ce qui la dessine tournée
+    for (const t of z.torches) expect(Math.abs(t.ox) + Math.abs(t.oy)).toBe(1);
+  });
+
+  it('dit comment on marche, dès le réveil et dans la fiction', () => {
+    const z = zoneEcrite(1)!;
+    const main = z.murmures.find((m) => m.texte.toLowerCase().includes('main'));
+    expect(main, 'la première phrase parle de la main qui porte la lampe').toBeDefined();
+    if (!main) return;
+    expect(cases(main, z.depart)).toBeLessThan(1.4);
+  });
+
+  it('n’y cache aucun bonus : ses lueurs sont toutes de simples lueurs', () => {
+    expect(zoneEcrite(1)!.lueurs.every((l) => l.type === 'eclat')).toBe(true);
   });
 });
 
@@ -287,6 +285,24 @@ describe('le prologue — les deux âmes', () => {
   });
 });
 
+describe('le prologue — la main', () => {
+  it('montre le geste tant que personne n’a rien poussé, et jamais après', () => {
+    const p = creerPartie({ grain: 'MAIN', etage: 1 });
+    p.chute = null;
+    p.eclosion = 1;
+    expect(p.premieres.main).toBe(false);
+    avancer(p, PAS);
+    expect(p.premieres.main).toBe(false);
+    // le premier geste l'efface, et il ne revient pas
+    p.entrees.touches.droite = true;
+    avancer(p, PAS);
+    expect(p.premieres.main).toBe(true);
+    p.entrees.touches.droite = false;
+    for (let i = 0; i < 60; i++) avancer(p, PAS);
+    expect(p.premieres.main).toBe(true);
+  });
+});
+
 describe('le prologue — ce qui n’a pas changé', () => {
   it('demande deux âmes, et il y en a trois sur le plan', () => {
     const z = zoneEcrite(1)!;
@@ -315,18 +331,6 @@ describe('le prologue — ce qui n’a pas changé', () => {
       expect(m.texte.toLowerCase()).not.toContain('brandon');
     }
     expect(z.murmures.some((m) => m.texte.toLowerCase().includes('torche'))).toBe(true);
-  });
-
-  it('montre deux torches dans la salle des torches, et bien écartées', () => {
-    const z = zoneEcrite(1)!;
-    // Une seule ne suffisait pas à faire comprendre qu'on les rallume en
-    // passant : il en faut deux, sur deux murs, assez loin l'une de l'autre
-    // pour qu'on ne les prenne pas pour un décor unique.
-    const salle = z.torches.filter((t) => t.y < c(0, 8).y);
-    expect(salle).toHaveLength(2);
-    expect(cases(salle[0], salle[1])).toBeGreaterThan(4);
-    // et chacune est accrochée à un mur : c'est ce qui la dessine tournée
-    for (const t of z.torches) expect(Math.abs(t.ox) + Math.abs(t.oy)).toBe(1);
   });
 
   it('garde le halo assez large pour voir les deux voies du couloir', () => {

@@ -547,7 +547,18 @@ export interface Partie {
   signaux: { pierre: number; jauge: number; forme: number };
 
   /** Ce qui ne se dit qu'une fois. */
-  premieres: { lueur: boolean; mort: boolean; seuil: boolean };
+  premieres: {
+    lueur: boolean;
+    mort: boolean;
+    seuil: boolean;
+    /**
+     * LA MAIN. Le joystick naît sous le doigt, où qu'on le pose : personne ne
+     * le devine tout seul. Tant que le joueur n'a rien poussé de la partie, on
+     * montre un fantôme de manche au bas de l'écran. Au premier mouvement, il
+     * disparaît pour de bon.
+     */
+    main: boolean;
+  };
   regleDite: Partial<Record<Emotion, boolean>>;
   /** Le bouton pierre ne se signale que trois fois par partie. */
   nudgePierre: number;

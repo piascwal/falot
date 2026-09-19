@@ -111,27 +111,38 @@ pertinente, jamais en travers du chemin.
 
 ## Les salles
 
-Dix intentions, environ six salles, **moins de quatre minutes**. Si ça dépasse,
-la salle de la torche est la première à sacrifier.
+Huit intentions, cinq salles, **moins de quatre minutes**. La première salle en
+porte quatre à elle seule, et c'est voulu : on apprend en marchant.
 
-### 1. Le réveil
-Une pièce minuscule, fermée, rien que Falot et son halo.
-**Enseigne** : on se déplace, et on ne voit que ce qu'on éclaire.
+### 1. Le réveil — une seule salle, et tout y est
+Une salle large, bien trop grande pour un halo d'une case et demie, coupée par
+deux blocs de pierre. **Dix torches** : cinq brûlent déjà au plafond, cinq sont
+mortes le long du mur du bas et se reprennent en passant devant. Neuf lueurs
+traînent entre les deux.
+**Enseigne**, dans cet ordre et sans une question posée :
+1. on se déplace, et on ne voit que ce qu'on éclaire ;
+2. on est dans un bâtiment noir où seule la lumière qu'on allume existe — c'est
+   ce que disent les torches, de loin, avant même qu'on les atteigne ;
+3. une torche morte se reprend en passant ;
+4. les lueurs remplissent quelque chose, et **au bout de la salle on a le
+   faisceau** (neuf lueurs, 36 d'éclat, le palier est à 26).
 
-### 2. Le couloir des lueurs
-Trois ou quatre lueurs en enfilade, visibles de loin parce qu'elles brillent.
-On les ramasse, le « +4 » monte vers la barre, la barre tressaille.
-**Enseigne** : ces petites choses jaunes servent à quelque chose.
+> **Trois salles sont devenues une.** Le réveil était une pièce de trois cases
+> avec deux murs fêlés à ouvrir à la pierre, puis un couloir de lueurs, puis
+> une salle de torches. En test, personne ne comprenait qu'il fallait casser un
+> mur — on demandait une mécanique avant d'avoir appris à marcher — et on
+> arrivait devant le premier Guet encore Peureux, c'est-à-dire sans rien à
+> essayer. Les fentes ont disparu ; la leçon de la pierre est restée là où elle
+> sert, devant un Guet.
 
-> Déplacé plus tôt que dans le croquis d'origine. Il faut savoir ce que sont les
-> fragments **avant** que le jeu demande de faire des choix.
+> **La main.** Le joystick naît sous le doigt, où qu'on le pose : agréable une
+> fois qu'on le sait, indevinable avant. Deux choses le disent maintenant, et
+> les deux sont dans la fiction — un murmure au réveil (« Pose ta main sur le
+> noir, et tire : il va où tu vas. ») et un fantôme de manche dessiné en bas de
+> l'écran, un cercle et un point qui glisse, qui disparaît pour de bon au
+> premier mouvement.
 
-### 3. La salle de la torche
-Une salle trop grande pour le halo. Une torche au mur ; en passant devant, elle
-s'allume et la salle apparaît d'un coup.
-**Enseigne** : les torches se rallument, et la lumière révèle le terrain.
-
-### 4. Le premier Guet
+### 2. Le premier Guet
 Un couloir traversé par un rouge en ronde. Il faut passer.
 
 La première tentative échoue : on est vu, on s'éteint, on se rallume à l'entrée
@@ -146,7 +157,7 @@ Deux solutions valables, et c'est ce qui en fait une bonne salle :
 - se tenir près de la torche allumée de la salle précédente, car **une torche
   allumée rend invisible** (vérifié dans le code : `abri` coupe la détection).
 
-### 5. Le Frileux qu'on ne peut pas encore aider
+### 3. Le Frileux qu'on ne peut pas encore aider
 Un bleu dans un renfoncement. On approche, il fuit. On l'éclaire, rien ne se
 passe — **et c'est exact** : sans faisceau, `propager` sort avant d'éclairer
 qui que ce soit, donc personne n'est calmable à la forme Peureux.
@@ -161,7 +172,7 @@ Une phrase passagère, pour que l'échec informe au lieu d'inquiéter :
 > de ne jamais découvrir qu'on le peut ; et en inversant l'ordre, il retiendrait
 > l'inverse. Il en faut **deux**, et le second après les fragments.
 
-### 6. Le Seuil qui réclame
+### 4. Le Seuil qui réclame
 On atteint le portail. Son anneau est vide : **deux âmes demandées, zéro
 livrée.** On ne peut pas partir.
 
@@ -174,12 +185,12 @@ livrée.** On ne peut pas partir.
 > Le portail qui réclame une âme produit exactement le même détour, avec une
 > règle qui servira toute la partie.
 
-### 7. La montée en confiance
+### 5. La montée en confiance
 Un passage latéral, assez de lueurs pour atteindre Curieux. Le bouton change de
 couleur, pulse, gagne son aura.
 **Enseigne** : l'éclat ouvre des formes, et les formes ouvrent la pierre.
 
-### 8. Le second Frileux — la révélation
+### 6. Le second Frileux — la révélation
 Dans le couloir qui suit la montée, **un deuxième Frileux**, tout de suite
 après les fragments. On l'éclaire, et cette fois **le corps se remplit par le
 bas**, du contour sombre au vert plein. Il suit.
@@ -188,7 +199,7 @@ bas**, du contour sombre au vert plein. Il suit.
 par contraste avec l'échec de la salle 5 — quinze secondes plus tôt on ne
 pouvait pas, maintenant on peut.
 
-### 8 bis. Retourner chercher le premier
+### 6 bis. Retourner chercher le premier
 Le Seuil réclame **deux** âmes. On en a une. Le premier Frileux est toujours là,
 en arrière — et on sait désormais quoi faire de lui.
 
@@ -196,7 +207,7 @@ en arrière — et on sait désormais quoi faire de lui.
 derrière**. C'est le sujet du jeu tout entier, enseigné par la géographie sans
 une ligne de texte.
 
-### 9. Le passage à deux
+### 7. Le passage à deux
 Un couloir, un rouge, et cette fois un suiveur derrière soi. La jauge du rouge
 monte **deux fois plus vite** — mesuré, 0,17 par corps exposé et par
 demi-seconde.
@@ -205,7 +216,7 @@ demi-seconde.
 > Un seul rouge, pas deux. Un premier examen doit être réussissable du premier
 > coup par quelqu'un qui a compris.
 
-### 10. Le Seuil, rempli
+### 8. Le Seuil, rempli
 On livre. L'anneau se complète, Falot se vide de sa lumière, la cage d'escalier
 s'ouvre pour la première fois — avec le premier vrai texte du récit.
 
@@ -275,12 +286,12 @@ Elle vit dans `poc/lux-paranoia.html`, sous `ETAGES_ECRITS`.
 
 ```
 #########################
-##############.......T.##     1  la salle des torches : une au nord…
-##...#########.........##
-##.@.%o.o.o.o.*8.......##     3  le réveil : ses DEUX issues sont fêlées
-##.6.#########.........##
-###%##########.........##     5  la seconde fente, sous la salle du réveil
-##...#########..T.2....##     6  … et l'autre au sud ; à gauche, la niche vide
+##.t...t...t...t...t...##     1  LA SALLE DU RÉVEIL : cinq torches allumées
+##.....##.....##.......##     2  deux blocs de pierre : la vue est coupée
+##7@.o.##.o.o.##.o...o.##     3  le réveil, la main, et les lueurs
+##.....##.....##.......##     4
+##..o.....8o.....o...o.##     5  neuf lueurs : de quoi ouvrir le faisceau
+##...T...T...T...T...T.##     6  cinq torches ÉTEINTES, qu'on reprend en passant
 ##################*######
 ##################=######     8  entrée de la galerie, colonne 18
 ############......1....##     9

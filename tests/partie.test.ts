@@ -247,7 +247,9 @@ describe('un Guet', () => {
   });
 
   it('franchit un mur qu’on a cassé : une fissure ouverte est un couloir', () => {
-    const p = creerPartie({ grain: 'GUET', etage: 1 });
+    // Le prologue n'a plus de mur fêlé : on prend un étage tiré au sort, où
+    // une fissure n'ouvre jamais qu'un raccourci.
+    const p = creerPartie({ grain: 'GUET', etage: 3 });
     const f = p.zone.fissures[0];
     expect(solideEn(p.zone, f.x, f.y)).toBe(true);
     p.zone.mur[f.cy][f.cx] = 0;
@@ -361,7 +363,7 @@ describe('la mort', () => {
 
 describe('le pierre', () => {
   it('ouvre un mur fêlé quand il tombe à côté', () => {
-    const p = creerPartie({ grain: 'FENTE' });
+    const p = creerPartie({ grain: 'FENTE', etage: 2 });
     const f = p.zone.fissures[0];
     expect(p.zone.mur[f.cy][f.cx]).toBe(1);
     p.joueur.x = f.x;

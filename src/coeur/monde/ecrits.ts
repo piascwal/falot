@@ -52,12 +52,18 @@ export const ETAGES_ECRITS: Readonly<Record<number, EtageEcrit>> = {
   1: {
     carte: [
       '#########################', //  0
-      '##############.......T.##', //  1   la salle des torches : une au nord…
-      '##...#########.........##', //  2
-      '##.@.%o.o.o.o.*8.......##', //  3   le réveil : ses DEUX issues sont fêlées
-      '##.6.#########.........##', //  4
-      '###%##########.........##', //  5   la pierre fendue, sous la salle du réveil
-      '##...#########..T.2....##', //  6   … et l'autre au sud ; à gauche, la niche vide
+      // LA SALLE DU RÉVEIL. Une seule pièce, large, et six torches éteintes
+      // sur ses parois : on s'y perd, on en rallume une, puis une autre, et
+      // on comprend en trois secondes où l'on est — un bâtiment dans le noir,
+      // et rien d'autre que ce qu'on allume. Les deux blocs de pierre au
+      // milieu coupent la vue : sans eux la salle se lit d'un seul coup d'œil
+      // et il n'y a plus rien à explorer.
+      '##.t...t...t...t...t...##', //  1
+      '##.....##.....##.......##', //  2
+      '##7@.o.##.o.o.##.o...o.##', //  3   le réveil, et la main qui le porte
+      '##.....##.....##.......##', //  4
+      '##..o.....8o.....o...o.##', //  5   huit lueurs : de quoi ouvrir le faisceau
+      '##...T...T...T...T...T.##', //  6
       '##################*######', //  7
       '##################=######', //  8
       '############......1....##', //  9   ce que fait la pierre, dit une fois
@@ -107,10 +113,13 @@ export const ETAGES_ECRITS: Readonly<Record<number, EtageEcrit>> = {
     ],
     murmures: {
       '1': 'Ta pierre garde un peu de ta lumière. Là où elle tombe, il ira voir.',
+      // La toute première phrase du jeu, et la seule qui parle au joueur
+      // plutôt qu'à Falot. Elle est dans la fiction : une lampe ne marche
+      // pas, on la porte. La main qui la tient, c'est la tienne.
+      '7': 'Pose ta main sur le noir, et tire : il va où tu vas.',
       '2': 'Une âme restée éteinte trop longtemps. Elle ne retrouvera personne.',
       '4': 'Sortir, c’est monter. Un Seuil cède quand assez d’âmes s’y tiennent.',
       '5': 'Tant que la flamme tient, aucun Guet n’approche.',
-      '6': 'Le mur, juste en dessous, est fendu. Une pierre suffirait.',
       '8': 'Une torche éteinte. Ce qu’il te reste de lumière suffit à la reprendre.',
     },
     // Deux âmes, et les deux sont dans la même salle, au bout du couloir des
@@ -139,7 +148,7 @@ export function zoneEcrite(numero: number): Zone | null {
 
   const mur: number[][] = [];
   const lueurs: Lueur[] = [];
-  const torches: Case[] = [];
+  const torches: (Case & { vive: boolean })[] = [];
   const portes: Porte[] = [];
   const reprises: Reprise[] = [];
   const murmures: MurmurePose[] = [];
@@ -169,7 +178,10 @@ export function zoneEcrite(numero: number): Zone | null {
         lueurs.push({ x, y, type: 'eclat', prise: false, vue: false, phase: rnd() * TAU });
       else if (c === 'g')
         lueurs.push({ x, y, type: 'poche', prise: false, vue: false, phase: rnd() * TAU });
-      else if (c === 'T') torches.push({ cx, cy });
+      // « T » éteinte, « t » ALLUMÉE au réveil. Une torche éteinte est
+      // invisible dans le noir : la salle du réveil en a besoin d'allumées
+      // pour se montrer, et d'éteintes pour apprendre qu'on les reprend.
+      else if (c === 'T' || c === 't') torches.push({ cx, cy, vive: c === 't' });
       else if (c === 'b') bleus.push({ cx, cy });
       else if (c === 'r') rouges.push({ cx, cy });
       else if (c === '*') reprises.push({ x, y, pris: false });
@@ -239,7 +251,7 @@ export function zoneEcrite(numero: number): Zone | null {
 
   // Une torche se fixe à une paroi : on cherche le mur voisin et on décale le
   // torche vers lui, exactement comme le fait le générateur.
-  const torchesPosees = torches.map(({ cx, cy }) => {
+  const torchesPosees = torches.map(({ cx, cy, vive }) => {
     const cotes = [
       [1, 0],
       [-1, 0],
@@ -256,7 +268,7 @@ export function zoneEcrite(numero: number): Zone | null {
       y: (cy + 0.5 + oy * 0.36) * CASE,
       r: CASE * 2.1,
       duree: 26,
-      reste: 0,
+      reste: vive ? 26 : 0,
       phase: rnd() * TAU,
       ox,
       oy,
