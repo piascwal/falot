@@ -254,10 +254,12 @@ export function dessinerTete(
     const t = Math.sin(temps * 18 + (p.tremble || 0)) * demi * 0.03;
     ctx.ellipse(0, by + t, bl * 0.3, bl * 0.4, 0, 0, TAU);
   } else if (inquiet) {
-    // sage, à peine tombante : le visage dit l'inquiétude par les sourcils,
-    // la bouche ne fait que ne pas la contredire
-    ctx.moveTo(-bl * 0.34, by - bl * 0.04);
-    ctx.quadraticCurveTo(0, by + bl * 0.1, bl * 0.34, by - bl * 0.04);
+    // PAS CONTENT. C'est le visage de départ, celui qu'on voit le plus : il
+    // doit dire d'un coup d'œil « je n'ai rien demandé à être ici », sans
+    // qu'aucun mot ne le dise. Courte et franchement tombante — la version
+    // sage d'avant ne se lisait pas à douze pixels de haut.
+    ctx.moveTo(-bl * 0.28, by + bl * 0.14);
+    ctx.quadraticCurveTo(0, by - bl * 0.16, bl * 0.28, by + bl * 0.14);
   } else if (acharne) {
     ctx.moveTo(-bl * 0.4, by + bl * 0.1); // trait serré, un rien tombant
     ctx.quadraticCurveTo(0, by - bl * 0.12, bl * 0.4, by + bl * 0.1);
