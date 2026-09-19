@@ -52,33 +52,31 @@ Le joueur, lui, le comprend en trois endroits et jamais par un panneau :
 
 ## La fin
 
-**Falot ne sort pas. Il reste, et il devient la lampe du Seuil.**
+**Falot sort, et il retombe.**
 
-Au douzième étage, le portail demande plus de lumière qu'il n'en a. Il a tout
-donné, onze fois ; il n'a plus rien à donner qu'une chose. Il pousse les siens
-dedans, et il se met dedans à leur suite — non pas pour passer, mais pour
-tenir la porte ouverte. Le Seuil s'allume et ne s'éteint plus.
+Les âmes qu'il remonte sont le bonheur des gens d'en haut. Au bout, on les voit
+toutes retrouver le leur : la rue au crépuscule, les silhouettes qui
+s'allument une par une. Lui aussi trouve le sien — un homme seul, à l'écart des
+autres. L'homme le reconnaît. Ils se rapprochent, un fil de lumière commence à
+se tendre entre eux, et **au moment de se lier, il oublie.**
 
-Et c'est là qu'on comprend deux choses à la fois :
+Alors Falot retombe, tout en bas, et le jeu recommence à l'étage 1. Ce n'est
+pas un mode déverrouillé ni une récompense : c'est le sujet. Il ne se souvient
+déjà plus d'avoir échoué, et il reste des âmes à remonter.
 
-- **la lampe qu'il cherchait, c'était lui** — il n'y avait rien à retrouver en
-  haut, il fallait accepter d'être ce qu'il était : une petite lumière que
-  d'autres regardent en passant ;
-- **la première salle du jeu était éclairée par quelqu'un**. Un Falot avant lui
-  tenait déjà cette porte-là. C'est pour ça qu'on a pu commencer.
+Ce qu'on ne dit jamais, et qu'on comprend : **cet homme malade, qui oublie tout
+et que personne ne regarde, est le seul à tenir le bonheur des autres allumé.**
 
-> Une seule image du monde d'en haut, à la toute fin, et une seule : une
-> fenêtre, une rue au crépuscule, des lampes qu'on allume les unes après les
-> autres. On ne montre pas Falot dedans. Il n'y est pas.
+> Quatre phrases en tout dans la scène. « Chacune retrouve le sien. » « Le sien
+> le reconnaît. » « Il a oublié. » « Alors il redescend. Il en reste à
+> remonter. » Le reste est dans l'image.
 
-Les trois autres questions de la bible se répondent d'elles-mêmes à partir de
-là, et sont désormais arrêtées :
+### Ce que les Guets deviennent dans cette version
 
-| Question | Réponse | Pourquoi |
-|---|---|---|
-| Falot sait-il ce qu'est un Guet ? | **Non** | S'il savait qu'une âme perdue fabrique un Guet, rester au Seuil serait un calcul. Il faut que ce soit un geste |
-| Voit-on le monde d'en haut ? | **Une seule image, à la fin** | Elle ne vaut que si elle est unique |
-| Le nom du monde | **Les Dessous** | On peut le dire à voix haute |
+Une âme restée éteinte trop longtemps finit par comprendre que son humain ne la
+reconnaîtra plus. Elle se venge — de la lumière, de celles qui montent encore,
+de celui qui les pousse. **Ce qui te poursuit, c'est ce que tes âmes
+deviendront si tu les laisses en bas.**
 
 ## Les douze étages
 

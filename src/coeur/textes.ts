@@ -45,7 +45,7 @@ export const ETEINTS: readonly string[] = [
 export const RECIT_CAGE: Readonly<Record<number, string>> = {
   2: 'Elles sont entrées avant toi. Ce que tu as donné au Seuil, tu ne l’as plus.',
   3: 'Personne n’a bâti les Dessous. On y a entassé, jusqu’à ce que ça ressemble à une prison.',
-  4: 'Ils veulent éteindre le monde. Ce n’est pas toi qu’ils cherchent : c’est ce que tu portes.',
+  4: 'Ils ont attendu trop longtemps. Maintenant ils en veulent à tout ce qui brille.',
   5: 'Le Seuil prend ta lumière. Jamais tes gestes.',
   6: 'Certains ne cherchent plus au hasard : ils remontent ta trace.',
   7: 'Toutes ne veulent pas de ta lumière. Certaines en ont trop vu.',
@@ -63,18 +63,18 @@ export const RECIT_PLUS_HAUT: readonly string[] = [
 ];
 
 /**
- * LA FIN. Falot ne sort pas : il reste, et il devient la lampe du Seuil.
+ * LA FIN. Falot sort, et il retombe.
  *
- * Tout le jeu répète qu'il donne ce qu'il vient de retrouver ; la dernière
- * fois, il n'a plus que lui-même à donner. La lampe qu'il cherchait depuis le
- * premier étage, c'était lui — et la première salle du jeu était éclairée
- * parce qu'un autre avant lui tenait déjà cette porte-là.
+ * Les âmes qu'il remonte sont le bonheur des gens d'en haut : chacune finit
+ * par retrouver le sien, et on les voit le faire. Lui aussi y arrive — son
+ * humain le reconnaît, ils se rapprochent, et au moment de se lier, l'homme
+ * oublie. Il n'y a personne à blâmer, et il reste des âmes à remonter.
+ *
+ * Quatre phrases en tout. Le reste est dans l'image.
  */
 export const FIN = {
-  refus: 'Il en faut plus. Il ne reste que toi.',
-  don: 'Il pousse les siens dedans, et il entre à leur suite.',
-  lampe: 'La lampe qu’il cherchait, c’était lui.',
-  avant: 'La première salle, tout en bas, était éclairée. Quelqu’un tenait déjà la porte.',
-  dehors: 'En haut, c’est le soir. Quelqu’un allume les lampes, une par une.',
-  puits: 'Le Puits sans fin s’ouvre. Redescends, si tu veux.',
+  retrouvailles: 'Chacune retrouve le sien.',
+  retrouve: 'Le sien le reconnaît.',
+  oubli: 'Il a oublié.',
+  chute: 'Alors il redescend. Il en reste à remonter.',
 } as const;

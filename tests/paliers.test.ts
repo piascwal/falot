@@ -326,7 +326,9 @@ describe('la fin (étage 12)', () => {
     expect(p.vidange, 'il ne franchit pas').toBe(null);
   });
 
-  it('s’achève sur le Puits sans fin, tous pouvoirs gardés', () => {
+  it('le fait retomber tout en bas, et ça recommence', () => {
+    // Son humain oublie : il n'y a rien à déverrouiller au bout, il y a la
+    // même descente. C'est le sujet du jeu, pas une récompense.
     const p = creerPartie({ grain: 'FIN', etage: DERNIER_ETAGE });
     p.zone.sortie.ames = p.zone.requis;
     p.joueur.x = p.zone.sortie.x;
@@ -335,8 +337,8 @@ describe('la fin (étage 12)', () => {
     for (let i = 0; i < Math.round((DUREE_FIN + 1) / PAS); i++) avancer(p, PAS);
     expect(p.fin).toBe(null);
     expect(p.finVue).toBe(true);
-    expect(p.puits?.arrivee).toBe(DERNIER_ETAGE + 1);
-    expect(pouvoirs(DERNIER_ETAGE + 1)).toEqual({ souffle: true, fanal: true });
+    expect(p.numeroZone).toBe(1);
+    expect(p.montee).toHaveLength(0); // il ne remonte rien de ce qu'il a fait
   });
 
   it('ne se rejoue pas : une fois vue, le douzième se franchit comme les autres', () => {

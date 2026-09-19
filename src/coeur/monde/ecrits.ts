@@ -107,7 +107,7 @@ export const ETAGES_ECRITS: Readonly<Record<number, EtageEcrit>> = {
     ],
     murmures: {
       '1': 'Ta pierre garde un peu de ta lumière. Là où elle tombe, il ira voir.',
-      '2': 'Un Guet veut vider ta lumière. Il n’approche pas d’une flamme plus grande.',
+      '2': 'Une âme restée éteinte trop longtemps. Elle ne retrouvera personne.',
       '4': 'Sortir, c’est monter. Un Seuil cède quand assez d’âmes s’y tiennent.',
       '5': 'Tant que la flamme tient, aucun Guet n’approche.',
       '6': 'Le mur, juste en dessous, est fendu. Une pierre suffirait.',

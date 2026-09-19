@@ -50,23 +50,25 @@ Il leur reste un filet de lumière devant eux. Ils suivent n'importe où, sans
 condition, et ils éclairent la route. Ce qui veut dire qu'ils vous dénoncent
 aussi.
 
-### Les Guets (rouges) — un regard resté sur place
+### Les Guets (rouges) — des âmes qui ne remonteront plus
 
 > **Le nom se dit dans le jeu.** Il était écrit ici et nulle part ailleurs : on
 > pouvait jouer des heures sans que les rouges aient un nom. Les murmures de
-> l'étage 1, les textes de formes et la cage d'escalier disent désormais
-> « un Guet ».
+> l'étage 1 et la cage d'escalier disent désormais « un Guet ».
 
-Quand on fixe une lumière assez longtemps pour qu'elle renonce, le regard ne
-part pas avec elle. Il reste. Il continue de chercher. **Il n'y a personne
-derrière.**
+Un Guet a été une âme comme celles qu'on remonte. Il est resté éteint trop
+longtemps, et il a fini par le comprendre : **son humain ne le reconnaîtra
+plus.** Personne ne viendra, et il n'y a plus rien à attendre.
 
-Et il ne sait pas ce qu'il cherche. Il ne voit pas les corps — il ne distingue
-qu'une lueur du noir autour d'elle, et il attend **la forme de ce qui est tombé
-avant lui** : une petite lumière seule. Voir *Les deux lumières*, plus bas.
+Alors il se venge. Pas de toi en particulier — de la lumière. De celles qui
+montent encore, de celui qui les pousse, de tout ce qui a l'air d'y croire. Il
+veut éteindre ce qui brille, parce qu'il ne brillera plus.
 
-On ne tue donc pas un Guet : il n'y a rien à tuer. On peut seulement l'aveugler
-un instant, ou lui donner quelque chose de mieux à regarder.
+C'est ce qui rend l'escorte insupportable au bon sens du terme : **ce qui te
+poursuit, c'est ce que tes âmes deviendront si tu les laisses en bas.**
+
+On ne tue donc pas un Guet : il n'y a rien à tuer, il est déjà perdu. On peut
+l'aveugler un instant, ou lui donner quelque chose de mieux à regarder.
 
 *Aujourd'hui une porte fermée l'arrête net. C'est une commodité de jeu — un abri
 qui ne coûte pas de lumière — et pas une règle du monde : on pourra la lever
@@ -250,18 +252,21 @@ peut pas ouvrir un mur avec de la lumière.
 ## Ce qui est arrêté (les quatre questions)
 
 Ces quatre points ont longtemps été « à débattre ». Ils sont tranchés, et le
-détail — la campagne, les douze étages, la fin — est dans
+détail — la campagne, les étages, la fin — est dans
 [`lux-campagne.md`](lux-campagne.md).
 
-1. **La fin.** Falot **reste et devient la lampe du Seuil**. Il pousse les
-   siens dedans, puis s'y met à leur suite pour tenir la porte ouverte. La
-   lampe qu'il cherchait, c'était lui — et la première salle du jeu était
-   éclairée par un Falot d'avant.
-2. **Falot sait-il ce qu'est un Guet ?** **Non.** S'il savait qu'une âme perdue
-   finit par fabriquer un Guet, rester au Seuil serait un calcul ; il faut que
-   ce soit un geste.
-3. **Voit-on le monde d'en haut ?** **Une seule image, à la toute fin** : une
-   fenêtre, une rue au crépuscule, des lampes qu'on allume. Falot n'y est pas.
+1. **La fin.** Falot **sort, et il retombe**. Les âmes qu'il remonte sont le
+   bonheur des gens d'en haut : chacune retrouve le sien, et on les voit le
+   faire. Lui aussi y arrive — son humain le reconnaît, ils se rapprochent, et
+   au moment de se lier, **l'homme oublie**. Alors il retombe tout en bas, et
+   ça recommence. Cet homme malade, moqué, qui ne se souvient de rien, est le
+   seul à tenir le bonheur des autres allumé — et on ne le dit jamais.
+2. **Falot sait-il ce qu'est un Guet ?** **Non.** S'il savait qu'une âme
+   abandonnée finit par devenir ça, remonter serait un calcul ; il faut que ce
+   soit un geste.
+3. **Voit-on le monde d'en haut ?** **Oui, une fois** : la rue au crépuscule,
+   les gens qui se rallument, et lui. C'est la scène de fin, et elle ne sert
+   qu'une fois.
 4. **Le nom du monde.** **Les Dessous.**
 
 ## Point 2 — l'étage 1 (fait)
