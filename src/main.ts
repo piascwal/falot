@@ -12,6 +12,7 @@ import { brancherClavier } from './entrees/clavier.js';
 import { brancherFanal, brancherPointeur, brancherSouffle } from './entrees/pointeur.js';
 import { creerHud } from './interface/hud.js';
 import { descendre, poserLEcranTitre, retenirPrologue } from './interface/ouverture.js';
+import { retenirBilan, retenirLaFin } from './interface/sauvegarde.js';
 import {
   cadrer,
   creerEcran,
@@ -75,12 +76,15 @@ if (demande) {
   montrerToast(partie, etage > 1 ? `Départ direct à l'étage ${etage}` : 'Départ direct');
   cadrer(ecran, partie, true);
 } else {
-  poserLEcranTitre(partie);
+  // `?debug` ouvre tous les étages dans la grille de l'écran-titre
+  poserLEcranTitre(partie, reglages.has('debug'));
 }
 
 // Le prologue franchi est la seule chose que le jeu retient d'une session à
 // l'autre. Le cœur ne fait que lever le drapeau ; l'écriture est ici.
 let prologueRetenu = false;
+let bilanRetenu = 0;
+let finRetenue = false;
 
 function boucle(maintenant: number): void {
   requestAnimationFrame(boucle);
@@ -115,6 +119,22 @@ function corpsBoucle(maintenant: number): void {
   if (partie.prologueFait && !prologueRetenu) {
     prologueRetenu = true;
     retenirPrologue();
+  }
+
+  // LA PROGRESSION. Le cœur ne connaît pas le stockage : il pose un bilan, et
+  // c'est ici qu'on le range. Un bilan par étage traversé, jamais deux fois.
+  if (partie.bilan && partie.bilan.etage !== bilanRetenu) {
+    bilanRetenu = partie.bilan.etage;
+    const b = partie.bilan;
+    retenirBilan(
+      b.etage,
+      { lumiere: b.lumiere, ames: b.ames, amesTotal: b.amesTotal, morts: b.morts },
+      b.suivante,
+    );
+  }
+  if (partie.finVue && !finRetenue) {
+    finRetenue = true;
+    retenirLaFin();
   }
 
   // L'écran a-t-il bougé sans nous le dire ? (téléphone mis de côté, barre

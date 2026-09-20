@@ -487,6 +487,63 @@ canvas {
   display: none;
 }
 
+/* LA GRILLE DES ÉTAGES. Un carré par étage, son numéro, et ce qu'on y a laissé :
+     une barre de lumière, et une pastille quand il est sans faute. */
+.etages {
+  display: grid;
+  grid-template-columns: repeat(4, 56px);
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+}
+.etages[hidden] {
+  display: none;
+}
+.etages button {
+  position: relative;
+  width: 56px;
+  height: 52px;
+  border-radius: 10px;
+  border: 1px solid rgba(232, 232, 240, 0.16);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(232, 232, 240, 0.7);
+  font:
+    700 0.95rem / 1 ui-sans-serif,
+    system-ui,
+    sans-serif;
+  cursor: pointer;
+  padding: 0;
+}
+.etages button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.etages button.fait {
+  border-color: rgba(255, 233, 168, 0.4);
+  color: #ffe9a8;
+}
+.etages button.parfait {
+  border-color: rgba(168, 240, 200, 0.75);
+  color: #a8f0c8;
+}
+/* la part de lumière, en bas du carré */
+.etages i {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 7px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+.etages i::before {
+  content: "";
+  display: block;
+  height: 100%;
+  width: var(--part, 0%);
+  background: currentColor;
+}
+
 /* Le seul arrêt qu'on s'autorise avant la première image : deux lignes, pas
      de bouton, ça s'efface tout seul. Inside, Limbo, Journey ouvrent ainsi. */
 .ouverture {

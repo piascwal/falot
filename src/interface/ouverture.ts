@@ -8,9 +8,11 @@
 
 import { chargerZone } from '../coeur/monde/chargement.js';
 import { DERNIER_ETAGE } from '../coeur/monde/paliers.js';
+import { sansFaute } from '../coeur/regles/bilan.js';
 import { lancerLaFin } from '../coeur/regles/fin.js';
 import { lancerLaChute } from '../coeur/regles/seuil.js';
 import type { Partie } from '../coeur/types.js';
+import { lireProgression } from './sauvegarde.js';
 
 const el = (id: string): HTMLElement => {
   const e = document.getElementById(id);
@@ -104,8 +106,47 @@ export function voirLaFin(partie: Partie): void {
   lancerLaFin(partie);
 }
 
+/**
+ * LA GRILLE DES ÉTAGES. Douze carrés : ce qu'on a éclairé de chacun, et un
+ * cadre vert pour ceux qu'on a faits sans faute. On peut y repartir d'où l'on
+ * veut — c'est le tableau de progression et le raccourci de mise au point, et
+ * les deux méritaient le même écran.
+ *
+ * Un étage qu'on n'a jamais atteint reste fermé : sauter à l'étage 9 sans
+ * l'avoir mérité, c'est se gâcher le jeu sans le savoir. `?debug` dans
+ * l'adresse les ouvre tous — c'est l'outil de mise au point.
+ */
+function poserLaGrille(partie: Partie, tout: boolean): void {
+  const grille = el('etages');
+  const bouton = el('titre-etages') as HTMLButtonElement;
+  bouton.addEventListener('click', () => {
+    grille.hidden = !grille.hidden;
+    bouton.textContent = grille.hidden ? 'Choisir un étage' : 'Masquer les étages';
+  });
+  const progres = lireProgression();
+  for (let n = 1; n <= DERNIER_ETAGE; n++) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = String(n);
+    const trace = progres.etages[n];
+    if (trace) {
+      b.classList.add('fait');
+      if (sansFaute(trace)) b.classList.add('parfait');
+      const barre = document.createElement('i');
+      barre.style.setProperty('--part', `${Math.round(trace.lumiere * 100)}%`);
+      b.appendChild(barre);
+      b.title = `${Math.round(trace.lumiere * 100)} % de lumière, ${trace.ames}/${trace.amesTotal} âmes, pris ${trace.morts} fois`;
+    }
+    // `?debug` ouvre tout : pendant qu'on construit, on veut aller voir
+    // l'étage 10 sans avoir fait les neuf autres.
+    b.disabled = !tout && n > Math.max(1, progres.atteint);
+    b.addEventListener('click', () => descendre(partie, n));
+    grille.appendChild(b);
+  }
+}
+
 /** L'écran-titre, et ses boutons. */
-export function poserLEcranTitre(partie: Partie): void {
+export function poserLEcranTitre(partie: Partie, tout = false): void {
   partie.gele = true;
   el('titre').classList.add('on');
   // Le saut reste visible en permanence. La règle « débloqué après une première
@@ -116,4 +157,5 @@ export function poserLEcranTitre(partie: Partie): void {
   el('titre-descendre').addEventListener('click', () => descendre(partie, 1));
   el('titre-plus-haut').addEventListener('click', () => descendre(partie, 2));
   el('titre-fin').addEventListener('click', () => voirLaFin(partie));
+  poserLaGrille(partie, tout);
 }
