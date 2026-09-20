@@ -289,6 +289,23 @@ export interface Puits {
   sortie: number;
 }
 
+/**
+ * LE BILAN D'UN ÉTAGE. Trois chiffres, et le plan entier vu de haut : ce qu'on
+ * a éclairé, ce qu'on a remonté, ce qu'on a payé. C'est ce qui donne envie de
+ * refaire un étage pour de bon plutôt que de le traverser.
+ */
+export interface Bilan {
+  t: number;
+  etage: number;
+  /** La part du plancher qu'on a éclairée, de 0 à 1. */
+  lumiere: number;
+  ames: number;
+  amesTotal: number;
+  morts: number;
+  /** Ce que l'étage suivant vaudra : gardé pour lancer la montée après. */
+  suivante: number;
+}
+
 export interface Seuil extends Point {
   r: number;
   vue: boolean;
@@ -325,6 +342,13 @@ export interface Zone {
    */
   cendre: number[][];
   cendres: Case[];
+  /**
+   * LE PLANCHER QU'ON A ÉCLAIRÉ, case par case. Marqué une fois pour toutes
+   * dès qu'une lumière le touche — la sienne, une torche, une âme rallumée.
+   * C'est la matière du bilan de fin d'étage, et la seule chose du jeu qu'on
+   * puisse vouloir finir à cent pour cent.
+   */
+  vues: number[][];
   /** Le nom de l'étage — « La cendre », « Le voile ». Dit par la cage. */
   nom: string;
   /** Ce que cet étage porte de neuf, ou de recombiné (voir `paliers.ts`). */
@@ -528,6 +552,10 @@ export interface Partie {
   puits: Puits | null;
   /** La fin, si elle est en train d'arriver. */
   fin: { t: number } | null;
+  /** Le bilan de l'étage qu'on vient de quitter, ou `null`. */
+  bilan: Bilan | null;
+  /** Combien de fois un Guet nous a eus sur cet étage. */
+  morts: number;
   /** La fin a été vue : le Puits sans fin est ouvert. */
   finVue: boolean;
   /** Le prologue a été franchi au moins une fois (l'interface le persiste). */

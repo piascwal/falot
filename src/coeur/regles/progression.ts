@@ -97,6 +97,7 @@ function solLibrePres(
 
 export function eteindre(partie: Partie): void {
   const { joueur, zone } = partie;
+  partie.morts++; // le bilan de l'étage le dira
   // L'éclat n'est JAMAIS repris : la progression ne se perd pas, sinon la
   // mort punit deux fois. Et c'est un bandeau qui s'efface, pas une fenêtre à
   // valider : ça casserait le rythme.

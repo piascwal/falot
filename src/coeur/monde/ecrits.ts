@@ -321,6 +321,7 @@ export function zoneEcrite(numero: number): Zone | null {
     traits: [],
     cendre: mur.map((rang) => rang.map(() => 0)),
     cendres: [],
+    vues: mur.map((rang) => rang.map(() => 0)),
     depart: { x: (leDepart.cx + 0.5) * CASE, y: (leDepart.cy + 0.5) * CASE },
     sortie: {
       x: (leSeuil.cx + 0.5) * CASE,

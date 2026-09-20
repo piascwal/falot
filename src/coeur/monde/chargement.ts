@@ -34,6 +34,7 @@ export function chargerZone(partie: Partie, numero: number): void {
   if (numero === 1) partie.montee = []; // nouvelle aventure, nouvelle cage
   partie.numeroZone = numero;
   partie.priseCount = 0;
+  partie.morts = 0; // le compte des prises est celui de CET étage
   partie.premieres.seuil = false; // chaque Seuil redit ce qu'il attend
   partie.chute = null;
   partie.eclosion = 1;

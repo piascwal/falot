@@ -14,6 +14,7 @@ import { describe, expect, it } from 'vitest';
 import { CASE } from '../src/coeur/dimensions.js';
 import { EMOTIONS } from '../src/coeur/formes.js';
 import { avancer, creerPartie, PAS } from '../src/coeur/partie.js';
+import { DUREE_BILAN } from '../src/coeur/regles/bilan.js';
 import { eteindre } from '../src/coeur/regles/progression.js';
 import { lancerLaChute, ouvrirLeSeuil } from '../src/coeur/regles/seuil.js';
 import type { Partie } from '../src/coeur/types.js';
@@ -89,7 +90,11 @@ describe('franchir un Seuil', () => {
     expect(p.numeroZone).toBe(1);
     jouer(p, 1.2);
 
-    // 3. la cage d'escalier : elle se JOUE, et l'étage suivant n'est pas
+    // 3. le bilan de l'étage qu'on vient de finir, vu de haut
+    expect(p.bilan?.etage).toBe(1);
+    jouer(p, DUREE_BILAN + 0.2);
+
+    // 4. la cage d'escalier : elle se JOUE, et l'étage suivant n'est pas
     //    encore chargé — on est entre les deux, c'est tout l'intérêt
     expect(p.puits?.arrivee).toBe(2);
     expect(p.numeroZone).toBe(1);
@@ -99,7 +104,7 @@ describe('franchir un Seuil', () => {
   it('monte plus vite quand on pousse, et arrive PAR LE BAS à l’étage suivant', () => {
     const p = creerPartie({ grain: 'PASSAGE', etage: 1 });
     ouvrirLeSeuil(p);
-    jouer(p, 3.6);
+    jouer(p, 3.6 + DUREE_BILAN + 0.2); // vidange, envol, bilan, puis la montée
     expect(p.puits).not.toBeNull();
 
     // il dérive vers le haut même sans rien pousser
@@ -126,7 +131,7 @@ describe('la cage d’escalier', () => {
     avancer(p, PAS);
     expect(p.bandeau.visible).toBe(true);
     ouvrirLeSeuil(p);
-    jouer(p, 3.6);
+    jouer(p, 3.6 + DUREE_BILAN + 0.2); // vidange, envol, bilan, puis la montée
     expect(p.puits).not.toBeNull();
     // le récit de la montée a la place pour lui seul
     expect(p.bandeau.visible).toBe(false);

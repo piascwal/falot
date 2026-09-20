@@ -62,6 +62,7 @@ function plan(dessin: string[]): Zone {
     traits: [],
     cendre: mur.map((r) => r.map(() => 0)),
     cendres: [],
+    vues: mur.map((r) => r.map(() => 0)),
     lueurs: [],
     persos: [],
     torches: [],

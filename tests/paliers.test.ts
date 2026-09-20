@@ -22,9 +22,11 @@ import {
   traitsEtage,
 } from '../src/coeur/monde/paliers.js';
 import { avancer, creerPartie, PAS } from '../src/coeur/partie.js';
+import { lancerLeBilan, partEclairee, sansFaute } from '../src/coeur/regles/bilan.js';
 import { prendreOuLacherLeFanal } from '../src/coeur/regles/fanal.js';
 import { DUREE_FIN } from '../src/coeur/regles/fin.js';
 import { SOUFFLE_MAX } from '../src/coeur/regles/joueur.js';
+import { eteindre } from '../src/coeur/regles/progression.js';
 import type { Partie, Perso, PointRonde } from '../src/coeur/types.js';
 
 const guets = (p: Partie) => p.zone.persos.filter((q) => q.emotion === EMOTIONS.COLERE);
@@ -671,5 +673,58 @@ describe('le souffle — ce qu’il coûte', () => {
     p.joueur.souffleReste = 0.2;
     chargerZone(p, 4);
     expect(p.joueur.souffleReste).toBe(SOUFFLE_MAX);
+  });
+});
+
+describe('le bilan d’un étage', () => {
+  it('compte ce qu’on a éclairé, remonté et payé', () => {
+    const p = creerPartie({ grain: 'BILAN', etage: 4 });
+    p.chute = null;
+    p.eclosion = 1;
+    // rien d'éclairé au départ, et le halo marque en avançant
+    expect(partEclairee(p.zone)).toBe(0);
+    avancer(p, PAS);
+    const apres = partEclairee(p.zone);
+    expect(apres).toBeGreaterThan(0);
+
+    // une mort compte, et le bilan la reprend
+    p.morts = 0;
+    eteindre(p);
+    expect(p.morts).toBe(1);
+    p.zone.sortie.ames = 2;
+    lancerLeBilan(p, 5);
+    expect(p.bilan?.etage).toBe(4);
+    expect(p.bilan?.morts).toBe(1);
+    expect(p.bilan?.ames).toBe(2);
+    expect(p.bilan?.lumiere).toBeCloseTo(apres, 5);
+    expect(p.bilan?.amesTotal).toBeGreaterThan(0);
+  });
+
+  it('se passe d’un geste, mais pas tout de suite', () => {
+    const p = creerPartie({ grain: 'BILAN', etage: 4 });
+    lancerLeBilan(p, 5);
+    p.entrees.touches.haut = true;
+    avancer(p, PAS);
+    expect(p.bilan, 'il a le temps de s’écrire').not.toBe(null);
+    for (let i = 0; i < Math.round(1.3 / PAS); i++) avancer(p, PAS);
+    expect(p.bilan).toBe(null);
+    expect(p.puits?.arrivee).toBe(5);
+  });
+
+  it('ne dit « sans faute » que si rien n’est resté dans le noir', () => {
+    expect(sansFaute({ lumiere: 1, ames: 3, amesTotal: 3, morts: 0 })).toBe(true);
+    expect(sansFaute({ lumiere: 0.99, ames: 3, amesTotal: 3, morts: 0 })).toBe(false);
+    expect(sansFaute({ lumiere: 1, ames: 2, amesTotal: 3, morts: 0 })).toBe(false);
+    expect(sansFaute({ lumiere: 1, ames: 3, amesTotal: 3, morts: 1 })).toBe(false);
+  });
+
+  it('repart de zéro à chaque étage', () => {
+    const p = creerPartie({ grain: 'BILAN', etage: 4 });
+    p.morts = 3;
+    for (let i = 0; i < 40; i++) avancer(p, PAS);
+    expect(partEclairee(p.zone)).toBeGreaterThan(0);
+    chargerZone(p, 5);
+    expect(p.morts).toBe(0);
+    expect(partEclairee(p.zone)).toBe(0);
   });
 });

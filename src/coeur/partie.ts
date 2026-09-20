@@ -14,6 +14,7 @@ import { grainDepuisTexte, mulberry32 } from './alea.js';
 import { PIERRE } from './formes.js';
 import { chargerZone } from './monde/chargement.js';
 import { majFlottants, majParticules } from './particules.js';
+import { majBilan, marquerVues } from './regles/bilan.js';
 import { majFin } from './regles/fin.js';
 import { majJoueur, SOUFFLE_MAX } from './regles/joueur.js';
 import { propager, souffler } from './regles/lumiere.js';
@@ -123,6 +124,8 @@ export function creerPartie(reglages: Reglages = {}): Partie {
     puits: null,
     fin: null,
     finVue: false,
+    bilan: null,
+    morts: 0,
     prologueFait: false,
     pouvoirs: { souffle: false, fanal: false },
     recadrer: false,
@@ -160,6 +163,7 @@ function zoneVide(): Zone {
     traits: [],
     cendre: [[0]],
     cendres: [],
+    vues: [[0]],
     lueurs: [],
     persos: [],
     torches: [],
@@ -194,6 +198,15 @@ export function avancer(partie: Partie, dt: number = PAS): void {
     majParticules(partie, dt);
     majFlottants(partie, dt);
     partie.eclaires = propager(partie);
+    return;
+  }
+
+  if (partie.bilan) {
+    // L'étage est fini : on le regarde de haut. Rien ne tourne pendant ce
+    // temps, il n'y a plus rien à jouer en bas.
+    majBilan(partie, dt);
+    majFlottants(partie, dt);
+    partie.eclaires = new Set();
     return;
   }
 
@@ -242,6 +255,8 @@ export function avancer(partie: Partie, dt: number = PAS): void {
 
   majPortes(partie, dt);
   majJoueur(partie, dt);
+  // ce qu'on éclaire reste éclairé : c'est la matière du bilan de fin d'étage
+  marquerVues(partie);
   // qui éteint sa lumière, avant de savoir qui éclaire quoi
   souffler(partie);
   const eclaires = propager(partie);

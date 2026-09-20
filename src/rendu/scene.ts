@@ -29,6 +29,7 @@ import { vueLibre } from '../coeur/monde/grille.js';
 import { estEclaire } from '../coeur/regles/lumiere.js';
 import { decouper } from '../coeur/texte.js';
 import type { Partie, Perso } from '../coeur/types.js';
+import { dessinerBilan } from './bilan.js';
 import { type Ecran, QLUM } from './ecran.js';
 import { dessinerFin } from './fin.js';
 import { dessinerFantomeManche, dessinerManche, dessinerVisee } from './gestes.js';
@@ -83,6 +84,11 @@ function preparerRayons(
 }
 
 export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
+  // Le bilan : l'étage qu'on vient de finir, vu de haut.
+  if (partie.bilan) {
+    dessinerBilan(ecran, partie, temps);
+    return;
+  }
   // La fin : il n'y a plus de monde à dessiner, il n'y a plus que ce qu'il
   // devient.
   if (partie.fin) {

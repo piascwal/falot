@@ -1,0 +1,112 @@
+/**
+ * LE BILAN D'UN ÉTAGE.
+ *
+ * Traverser un étage et le FAIRE sont deux choses différentes, et rien ne le
+ * disait : on franchissait le Seuil, on montait, on recommençait. Trois
+ * chiffres suffisent à faire la différence — ce qu'on a éclairé, ce qu'on a
+ * remonté, ce qu'on a payé — et le plan entier vu de haut pour montrer les
+ * salles qu'on n'a jamais allumées.
+ *
+ * Ce fichier compte. `rendu/bilan.ts` montre.
+ */
+
+import { CASE } from '../dimensions.js';
+import { EMOTIONS } from '../formes.js';
+import { rayonHalo } from '../lectures.js';
+import type { Partie, Zone } from '../types.js';
+import { lancerLePuits } from './puits.js';
+
+/** Le temps que le bilan s'installe avant qu'on puisse le passer. */
+const POSE = 1.1;
+/** Et celui au bout duquel il s'en va tout seul. */
+const DUREE_BILAN = 9;
+
+/** Marque comme vue toute case dans un rayon donné. */
+function marquerAutour(zone: Zone, x: number, y: number, r: number): void {
+  const c0x = Math.max(0, Math.floor((x - r) / CASE));
+  const c1x = Math.min(zone.cols - 1, Math.floor((x + r) / CASE));
+  const c0y = Math.max(0, Math.floor((y - r) / CASE));
+  const c1y = Math.min(zone.lignes - 1, Math.floor((y + r) / CASE));
+  for (let cy = c0y; cy <= c1y; cy++)
+    for (let cx = c0x; cx <= c1x; cx++) {
+      if (zone.mur[cy][cx]) continue;
+      const dx = (cx + 0.5) * CASE - x;
+      const dy = (cy + 0.5) * CASE - y;
+      if (dx * dx + dy * dy <= r * r) zone.vues[cy][cx] = 1;
+    }
+}
+
+/**
+ * CE QU'ON A ÉCLAIRÉ RESTE ÉCLAIRÉ. Appelé une fois par image : le halo de
+ * Falot, chaque torche qui brûle, chaque braise, chaque âme rallumée. On ne
+ * lance aucun rayon — une case derrière un mur sera marquée si elle est dans
+ * le rayon, et c'est très bien : le bilan dit où l'on est passé avec de la
+ * lumière, pas ce qu'on a vu au pixel près.
+ */
+export function marquerVues(partie: Partie): void {
+  const { zone, joueur } = partie;
+  if (!joueur.eteint) marquerAutour(zone, joueur.x, joueur.y, rayonHalo(partie));
+  for (const t of zone.torches) if (t.reste > 0) marquerAutour(zone, t.x, t.y, t.r * 0.8);
+  for (const b of zone.braises) marquerAutour(zone, b.x, b.y, b.r * 0.8);
+  for (const q of zone.persos)
+    if (q.calme && !q.eteint && !q.livre) marquerAutour(zone, q.x, q.y, CASE * 1.1);
+}
+
+/** La part du plancher qu'on a éclairée, de 0 à 1. */
+export function partEclairee(zone: Zone): number {
+  let sol = 0;
+  let vues = 0;
+  for (let cy = 0; cy < zone.lignes; cy++)
+    for (let cx = 0; cx < zone.cols; cx++) {
+      if (zone.mur[cy][cx]) continue;
+      sol++;
+      if (zone.vues[cy][cx]) vues++;
+    }
+  return sol ? vues / sol : 0;
+}
+
+export function lancerLeBilan(partie: Partie, suivante: number): void {
+  const { zone } = partie;
+  // Toutes les âmes de l'étage, livrées ou non : c'est le dénominateur, et
+  // c'est ce qui rend un étage « fini » ou seulement traversé.
+  const amesTotal = zone.persos.filter((q) => q.emotion !== EMOTIONS.COLERE).length;
+  partie.bilan = {
+    t: 0,
+    etage: zone.numero,
+    lumiere: partEclairee(zone),
+    ames: zone.sortie.ames,
+    amesTotal,
+    morts: partie.morts,
+    suivante,
+  };
+}
+
+export function majBilan(partie: Partie, dt: number): void {
+  const bilan = partie.bilan;
+  if (!bilan) return;
+  const { touches, manche, visee } = partie.entrees;
+  bilan.t += dt;
+  // On le passe d'un geste, mais pas avant qu'il ait fini de s'écrire.
+  const presse =
+    touches.haut ||
+    touches.bas ||
+    touches.gauche ||
+    touches.droite ||
+    manche.actif ||
+    visee.actif;
+  if (bilan.t < POSE) return;
+  if (bilan.t < DUREE_BILAN && !presse) return;
+  const suivante = bilan.suivante;
+  partie.bilan = null;
+  lancerLePuits(partie, suivante);
+}
+
+/** Un étage parfait : tout éclairé, toutes les âmes, jamais pris. */
+export const sansFaute = (b: {
+  lumiere: number;
+  ames: number;
+  amesTotal: number;
+  morts: number;
+}): boolean => b.lumiere > 0.995 && b.ames >= b.amesTotal && b.morts === 0;
+
+export { DUREE_BILAN, POSE };

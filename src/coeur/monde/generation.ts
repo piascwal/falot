@@ -544,6 +544,7 @@ export function genererZone(
       traits,
       cendre,
       cendres,
+      vues: z.mur.map((rang) => rang.map(() => 0)),
       depart: { x: (depart.cx + 0.5) * CASE, y: (depart.cy + 0.5) * CASE },
       // Le portail ne compte plus des lueurs mais des ÂMES : il faut lui
       // amener des bonhommes calmés. Les lueurs redeviennent ce qu'elles

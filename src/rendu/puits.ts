@@ -43,6 +43,25 @@ const corps = {
   cligne: 0,
 };
 
+/** Un Seuil : un rond de lumière, au milieu de la cage. */
+function portail(ecran: Ecran, x: number, y: number, r: number, force: number): void {
+  if (force <= 0.01) return;
+  const { ctx } = ecran;
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r * 3.2);
+  g.addColorStop(0, `rgba(255,233,168,${0.32 * force})`);
+  g.addColorStop(0.5, `rgba(255,233,168,${0.1 * force})`);
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(x, y, r * 3.2, 0, TAU);
+  ctx.fill();
+  ctx.strokeStyle = `rgba(255,233,168,${0.55 * force})`;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, TAU);
+  ctx.stroke();
+}
+
 /** Ce qu'on voit du récit, de 0 à 1, selon la hauteur atteinte. */
 const recitLu = (h: number) =>
   clamp((h - 0.12) / 0.2, 0, 1) * clamp((0.78 - h) / 0.18, 0, 1);
@@ -171,6 +190,38 @@ export function dessinerPuits(ecran: Ecran, partie: Partie, temps: number): void
         `rgba(232,232,240,${0.52 * lu})`,
         3.5,
       );
+  }
+
+  // --- LES DEUX SEUILS ---
+  // Celui qu'il quitte, en bas, et celui où il entre, en haut. Sans eux la
+  // montée était un couloir sans portes : on ne voyait pas d'où l'on venait
+  // ni où l'on allait, juste quelqu'un qui grimpe.
+  portail(ecran, ex(0), ey(0), CASE * 0.62, clamp(1 - puits.h * 1.6, 0, 1));
+  portail(ecran, ex(0), ey(-ETAGE), CASE * 0.62, clamp(puits.h * 1.4 - 0.15, 0, 1));
+
+  // --- LES ÂMES QUI LE SUIVENT ---
+  // Celles qu'il vient de livrer montent derrière lui, à la queue leu leu.
+  // Elles ne sont pas un décor : c'est le compte exact de ce qu'il remonte,
+  // et c'est la seule raison pour laquelle il grimpe.
+  const livrees = partie.montee.find((m) => m.etage === puits.arrivee - 1)?.ames ?? 0;
+  for (let i = 0; i < Math.min(livrees, 6); i++) {
+    // chacune traîne un peu plus que la précédente, et ondule
+    const retard = (i + 1) * 0.055;
+    const hy = Math.max(0, puits.h - retard);
+    const ax = ex(puits.x * (LARGE - D.taille * 0.9) * (1 - retard * 3));
+    const ay = ey(-hy * ETAGE) + D.taille * 1.1;
+    const onde = Math.sin(temps * 2.2 + i * 1.3) * D.taille * 0.35;
+    const g = ctx.createRadialGradient(ax + onde, ay, 0, ax + onde, ay, 20);
+    g.addColorStop(0, rgba(RALLUME, 0.5));
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(ax + onde, ay, 20, 0, TAU);
+    ctx.fill();
+    ctx.fillStyle = rgba(RALLUME, 0.9);
+    ctx.beginPath();
+    ctx.arc(ax + onde, ay, 2.6, 0, TAU);
+    ctx.fill();
   }
 
   // --- Falot, et sa lumière ---
