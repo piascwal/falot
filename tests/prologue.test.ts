@@ -12,7 +12,7 @@
  *   - le couloir de l'escorte, large d'une case, était 0/20 : on ne peut pas
  *     croiser un Guet qui le bouche, et le pierre n'étourdit qu'à partir
  *     d'Ardent — hors budget du prologue ;
- *   - une fois la première âme livrée, repartir la chercher à l'est était
+ *   - une fois la première lumière livrée, repartir la chercher à l'est était
  *     0/20 et mortel, ce qui poussait le joueur à remonter tout l'étage.
  */
 
@@ -30,7 +30,7 @@ const c = (cx: number, cy: number): Point => ({
   y: (cy + 0.5) * CASE,
 });
 const cases = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y) / CASE;
-const ames = (z: Zone) => z.persos.filter((p) => p.emotion !== EMOTIONS.COLERE);
+const lumieres = (z: Zone) => z.persos.filter((p) => p.emotion !== EMOTIONS.COLERE);
 const guets = (z: Zone) => z.persos.filter((p) => p.emotion === EMOTIONS.COLERE);
 
 /** Pousse le joystick vers un point du monde, comme un doigt le ferait. */
@@ -48,7 +48,7 @@ function pousser(p: Partie, vers: Point): void {
 interface Essai {
   /** Où l'on part, puis les points de passage. */
   voie: Point[];
-  /** Combien d'âmes calmées suivent le joueur. */
+  /** Combien de lumières calmées suivent le joueur. */
   convoi?: number;
   /** Déphasage de la ronde des Guets, en pas de simulation. */
   decalage: number;
@@ -75,7 +75,7 @@ function piloter({ voie, convoi = 0, decalage, ruse }: Essai): {
   p.joueur.y = voie[0].y;
   p.joueur.vx = p.joueur.vy = 0;
   p.joueur.repit = 0;
-  const suiveurs = ames(p.zone).slice(0, convoi);
+  const suiveurs = lumieres(p.zone).slice(0, convoi);
   for (const [i, q] of suiveurs.entries()) {
     q.calme = true;
     q.suit = true;
@@ -217,12 +217,12 @@ describe('le prologue — le couloir de l’escorte', () => {
     expect(surToutesLesRondes({ voie: bas, convoi: 2 })).toBeGreaterThanOrEqual(14);
   });
 
-  it('se refait dans l’autre sens : aller rechercher la seconde âme est possible', () => {
+  it('se refait dans l’autre sens : aller rechercher la seconde lumière est possible', () => {
     // Avant l'élargissement, ce trajet était 0/20 et mortel — le joueur
     // remontait donc tout l'étage plutôt que de revenir ici. Il est retombé à
     // 8/20 depuis qu'un Guet détecté se rend sur place : c'est le prix de la
     // nouvelle règle, et c'est voulu. Ce qui compte est que ça ne soit plus
-    // une impasse — et de toute façon les deux âmes sont vues à l'aller, donc
+    // une impasse — et de toute façon les deux lumières sont vues à l'aller, donc
     // ce retour n'est plus un passage obligé.
     expect(surToutesLesRondes({ voie: [...bas].reverse() })).toBeGreaterThanOrEqual(5);
   });
@@ -239,13 +239,13 @@ describe('le prologue — le couloir de l’escorte', () => {
     const joignable = (q: Point) =>
       sien[Math.floor(q.y / CASE)]?.[Math.floor(q.x / CASE)] >= 0;
     expect(joignable(z.sortie)).toBe(false);
-    for (const a of ames(z)) {
+    for (const a of lumieres(z)) {
       if (cases(a, guet) > 6) expect(joignable(a)).toBe(false);
     }
   });
 });
 
-describe('le prologue — les deux âmes', () => {
+describe('le prologue — les deux lumières', () => {
   it('sont toutes les deux vues au premier passage vers l’est', () => {
     const z = zoneEcrite(1)!;
     // Le trajet d'aller : la bouche ouest du couloir jusqu'à la dernière lueur.
@@ -254,15 +254,15 @@ describe('le prologue — les deux âmes', () => {
       trajet.push(c(cx, 21));
       trajet.push(c(cx, 22));
     }
-    // Les deux âmes du secteur du Seuil. La troisième, le Frileux de l'étage
+    // Les deux lumières du secteur du Seuil. La troisième, le Frileux de l'étage
     // du dessus, est volontairement à l'écart : c'est la démonstration qu'il
     // te manque quelque chose, et personne n'oblige à y retourner.
-    const duSecteur = ames(z).filter((a) => a.y > c(0, 18).y);
+    const duSecteur = lumieres(z).filter((a) => a.y > c(0, 18).y);
     expect(duSecteur).toHaveLength(2);
     for (const a of duSecteur) {
       const plusPres = Math.min(...trajet.map((t) => cases(t, a)));
       // Deux cases : on leur passe devant. Au fond de la salle de droite —
-      // où la seconde âme était posée — c'était sept.
+      // où la seconde lumière était posée — c'était sept.
       expect(plusPres).toBeLessThanOrEqual(2);
     }
   });
@@ -270,7 +270,7 @@ describe('le prologue — les deux âmes', () => {
   it('en garde une hors de portée tant qu’on est Peureux', () => {
     const z = zoneEcrite(1)!;
     // La dernière lueur est à l'EST du Guet : on ne devient Curieux qu'après
-    // avoir traversé, et c'est là que la première âme se rallume.
+    // avoir traversé, et c'est là que la première lumière se rallume.
     const lueurEst = Math.max(...z.lueurs.map((l) => Math.floor(l.x / CASE)));
     const guet = guets(z).find((q) => cases(q, c(14, 21)) < 1.5)!;
     const rondeEst = Math.max(...guet.ronde.map((r) => r.cx));
@@ -304,10 +304,10 @@ describe('le prologue — la main', () => {
 });
 
 describe('le prologue — ce qui n’a pas changé', () => {
-  it('demande deux âmes, et il y en a trois sur le plan', () => {
+  it('demande deux lumières, et il y en a trois sur le plan', () => {
     const z = zoneEcrite(1)!;
     expect(z.requis).toBe(2);
-    expect(ames(z).length).toBeGreaterThanOrEqual(3);
+    expect(lumieres(z).length).toBeGreaterThanOrEqual(3);
   });
 
   it('pose une reprise par salle traversée', () => {

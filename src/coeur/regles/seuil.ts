@@ -72,7 +72,7 @@ export function ouvrirLeSeuil(partie: Partie): void {
   const { joueur, zone, entrees } = partie;
   if (partie.vidange) return;
   if (partie.numeroZone === 1) partie.prologueFait = true;
-  partie.montee.push({ etage: partie.numeroZone, ames: zone.sortie.ames });
+  partie.montee.push({ etage: partie.numeroZone, lumieres: zone.sortie.lumieres });
   partie.vidange = {
     t: 0,
     duree: 2.2,

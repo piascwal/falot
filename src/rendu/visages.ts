@@ -6,7 +6,7 @@
  * les SOURCILS qui portent l'expression — la peur, c'est les pointes
  * intérieures relevées et l'œil grand ouvert ; l'acharnement, l'inverse exact.
  *
- * C'est la même fonction pour le joueur et pour les âmes. Une émotion vient de
+ * C'est la même fonction pour le joueur et pour les lumières. Une émotion vient de
  * ce qui arrive, pas d'un palier de progression.
  */
 
@@ -39,14 +39,14 @@ export function carreArrondi(
 // l'acharnement, l'inverse exact, pointes intérieures baissées et œil plissé.
 // Tant que le peureux portait des sourcils d'intrigué, aucune bouche ne
 // pouvait rattraper ça — il avait l'air plus inquiet sans bouche du tout.
-// `recharge` va de 0 à 1 pendant qu'on rallume une âme. On lui verse la
+// `recharge` va de 0 à 1 pendant qu'on rallume une lumière. On lui verse la
 // lumière dans le corps, par le bas, comme on remplit une lampe : un simple
 // contour sombre au départ, plein et vert à l'arrivée. Sans ça le passage se
 // faisait d'un coup et on ne voyait pas qu'on était en train de réussir.
 /**
  * L'OMBRE. Une tache sous le corps, et le personnage cesse d'être posé sur le
  * sol : il flotte. C'est le même truc que dans un jeu de plateforme, et il ne
- * coûte qu'un dégradé — mais sans elle, une âme et un mur se lisent sur le
+ * coûte qu'un dégradé — mais sans elle, une lumière et un mur se lisent sur le
  * même plan.
  */
 export function dessinerOmbre(ecran: Ecran, p: Corps, taille: number, opacite = 1): void {

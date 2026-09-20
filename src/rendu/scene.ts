@@ -162,11 +162,11 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
   }
 
   // --- sortie ---
-  // Un anneau qui se REMPLIT, plus une encoche par âme demandée : on doit
+  // Un anneau qui se REMPLIT, plus une encoche par lumière demandée : on doit
   // pouvoir lire « il m'en manque une » d'un seul coup d'œil, sans compter.
   // La phrase passagère d'une livraison ne suffisait pas, elle s'efface.
-  const ouverte = zone.sortie.ames >= zone.requis;
-  const part = clamp(zone.sortie.ames / zone.requis, 0, 1);
+  const ouverte = zone.sortie.lumieres >= zone.requis;
+  const part = clamp(zone.sortie.lumieres / zone.requis, 0, 1);
   const pulse = 1 + Math.sin(temps * 3) * 0.07;
   const R = zone.sortie.r * pulse;
   ctx.save();
@@ -186,7 +186,7 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
     ctx.stroke();
     ctx.lineCap = 'butt';
   }
-  // les encoches : une par âme demandée, pour compter sans lire
+  // les encoches : une par lumière demandée, pour compter sans lire
   ctx.strokeStyle = 'rgba(8,8,14,0.85)';
   ctx.lineWidth = 2.5;
   for (let i = 0; i < zone.requis; i++) {
@@ -204,19 +204,19 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
   ctx.fill();
   // Le compte, écrit SUR le portail. L'anneau dit déjà « il en manque », mais
   // il ne dit pas de quoi : on peut rester devant sans comprendre qu'on le
-  // charge avec des âmes. Deux chiffres suffisent à nommer la règle.
+  // charge avec des lumières. Deux chiffres suffisent à nommer la règle.
   ctx.textAlign = 'center';
   ctx.font = '700 15px system-ui, sans-serif';
   texteCerne(
     ecran,
-    ouverte ? 'ENTRE' : `${zone.sortie.ames} / ${zone.requis}`,
+    ouverte ? 'ENTRE' : `${zone.sortie.lumieres} / ${zone.requis}`,
     0,
     -R - 12,
     ouverte ? '#ffe9a8' : 'rgba(255,233,168,0.82)',
   );
   if (!ouverte) {
     ctx.font = '600 9px system-ui, sans-serif';
-    texteCerne(ecran, 'ÂMES', 0, -R - 25, 'rgba(255,233,168,0.42)', 2.5);
+    texteCerne(ecran, 'LUMIÈRES', 0, -R - 25, 'rgba(255,233,168,0.42)', 2.5);
   }
   ctx.restore();
 
@@ -261,12 +261,12 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
         (a.emotion === EMOTIONS.COLERE ? 1 : 0) - (b.emotion === EMOTIONS.COLERE ? 1 : 0),
     );
   for (const p of ordre) {
-    // Une âme qui a soufflé sa lumière GARDE SA COULEUR : elle est toujours
+    // Une lumière qui s'est soufflée GARDE SA COULEUR : elle est toujours
     // rallumée, elle cache seulement sa lueur. Ce qui disparaît, c'est le halo
     // et le trou qu'il faisait dans la nuit — pas elle.
     const couleur = p.calme ? RALLUME : COULEURS[p.emotion];
     const repere = p.emotion === EMOTIONS.COLERE && (p.alerte > 0 || p.charge > 0.04);
-    // une âme en train d'être rallumée : on voit le niveau monter en elle
+    // une lumière en train d'être rallumée : on voit le niveau monter en elle
     const recharge =
       p.emotion === EMOTIONS.COLERE
         ? 0
@@ -311,7 +311,7 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
     ctx.restore();
   }
 
-  // --- le joueur : exactement la règle des âmes, pas une autre ---
+  // --- le joueur : exactement la règle des lumières, pas une autre ---
   // Il court : acharné. Il marche : intrigué. Un rouge cherche, ou on le
   // tient dans un faisceau : peur. Son niveau de forme n'y change rien —
   // une émotion vient de ce qui arrive, pas d'un palier de progression.
@@ -324,7 +324,7 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
   // puis il gonfle depuis rien quand la lumière touche le sol.
   // SOUFFLÉ, IL N'A PLUS DE CORPS — sauf si quelque chose d'autre l'éclaire.
   // Dans une torche ou dans un faisceau, on le voit en entier, mais VIDÉ de
-  // sa couleur, exactement comme une âme qu'on n'a pas encore rallumée : ce
+  // sa couleur, exactement comme une lumière qu'on n'a pas encore rallumée : ce
   // n'est plus sa lumière qui le montre, c'est celle des autres.
   const vuParAutrui = joueur.eteint && eclaireParAutrui(partie, joueur.x, joueur.y);
   if (partie.eclosion > 0.02 && vuParAutrui) {

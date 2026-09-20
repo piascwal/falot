@@ -91,7 +91,7 @@ export function dessinerBilan(ecran: Ecran, partie: Partie, temps: number): void
     }
   ctx.globalCompositeOperation = 'source-over';
 
-  // le Seuil, et les âmes qui y sont entrées
+  // le Seuil, et les lumières qui y sont entrées
   const s = zone.sortie;
   const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, CASE * 2.4);
   g.addColorStop(0, 'rgba(255,233,168,0.5)');
@@ -100,7 +100,7 @@ export function dessinerBilan(ecran: Ecran, partie: Partie, temps: number): void
   ctx.beginPath();
   ctx.arc(s.x, s.y, CASE * 2.4, 0, TAU);
   ctx.fill();
-  // et les âmes restées en bas : de petites lumières éteintes, une par âme
+  // et les lumières restées en bas : de petites lueurs éteintes, une par lumière
   for (const q of zone.persos) {
     if (q.livre || q.emotion === EMOTIONS.COLERE) continue;
     ctx.fillStyle = q.calme ? rgba(RALLUME, 0.9) : 'rgba(143,208,255,0.45)';
@@ -137,9 +137,9 @@ export function dessinerBilan(ecran: Ecran, partie: Partie, temps: number): void
   ligne(
     ecran,
     y0 + 44,
-    'Âmes remontées',
-    `${bilan.ames} / ${bilan.amesTotal}`,
-    bilan.amesTotal ? bilan.ames / bilan.amesTotal : 1,
+    'Lumières remontées',
+    `${bilan.lumieres} / ${bilan.lumieresTotal}`,
+    bilan.lumieresTotal ? bilan.lumieres / bilan.lumieresTotal : 1,
     RALLUME,
     vu,
   );

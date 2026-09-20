@@ -36,7 +36,7 @@ veut. On ajoute une seule phrase, et tout tient :
 
 > **Il cherche la lampe qu'il était.**
 
-Falot ne remonte pas pour sortir. Il remonte parce qu'en bas, chaque âme qu'il
+Falot ne remonte pas pour sortir. Il remonte parce qu'en bas, chaque lumière qu'il
 rallume lui rend un morceau de ce qu'il savait faire — et qu'il espère, au
 bout, se reconnaître. C'est un mobile qu'on peut dire en une phrase, qui
 explique pourquoi il ramasse, pourquoi il escorte, et pourquoi il recommence
@@ -46,36 +46,63 @@ Le joueur, lui, le comprend en trois endroits et jamais par un panneau :
 
 - **les murmures** posés dans le décor, qui parlent d'une lampe qui manquait
   en haut ;
-- **la cage d'escalier**, où les âmes qu'il a poussées devant lui s'accumulent
+- **la cage d'escalier**, où les lumières qu'il a poussées devant lui s'accumulent
   pendant que lui redescend à zéro ;
 - **la dernière salle**, où il comprend enfin, et nous avec lui.
 
 ## La fin
 
-**Falot sort, et il retombe.**
+**Il les remonte toutes, et il ne rejoint jamais la sienne.**
 
-Les âmes qu'il remonte sont le bonheur des gens d'en haut. Au bout, on les voit
-toutes retrouver le leur : la rue au crépuscule, les silhouettes qui
-s'allument une par une. Lui aussi trouve le sien — un homme seul, à l'écart des
-autres. L'homme le reconnaît. Ils se rapprochent, un fil de lumière commence à
-se tendre entre eux, et **au moment de se lier, il oublie.**
+Ce ne sont pas des âmes, et ce n'est pas le bonheur des gens : **ce sont des
+lumières**, exactement celles du premier paragraphe de la bible — celles qui
+tombent quand quelqu'un débranche une veilleuse, souffle une flamme, cesse d'y
+croire. Ce qu'on remonte, c'est ça, et rien d'autre. Le jeu mélangeait deux
+récits ; il n'en reste qu'un.
 
-Alors Falot retombe, tout en bas, et le jeu recommence à l'étage 1. Ce n'est
-pas un mode déverrouillé ni une récompense : c'est le sujet. Il ne se souvient
-déjà plus d'avoir échoué, et il reste des âmes à remonter.
+Cinq temps, sans un bouton :
 
-Ce qu'on ne dit jamais, et qu'on comprend : **cet homme malade, qui oublie tout
-et que personne ne regarde, est le seul à tenir le bonheur des autres allumé.**
+1. **L'escorte.** Falot, en bleu, mène son convoi vers le haut. La dernière
+   fois qu'on le voit faire ce qu'il a fait douze fois.
+2. **Le fil.** Elles le quittent et prennent un fil — le sien, celui qu'il
+   laisse derrière lui en jouant — qui se sépare en quatre.
+3. **Les quatre.** L'écran se coupe en quatre, et chacune va allumer quelque
+   chose : *un enfant qui allume sa veilleuse, un couple qui allume une bougie
+   à table, un lampadaire qui allume un piéton sous la pluie, un phare qui
+   éclaire un bateau au large.* Une seule phrase : « Quelque part, quelqu'un a
+   moins peur. »
+4. **La sienne.** Sa fenêtre. Elle l'attend, elle est là — et **plus il
+   s'approche, moins il l'éclaire.** Le cône se raccourcit à mesure, la pièce
+   s'éteint, et collé à la vitre il n'éclaire plus rien du tout. Alors il
+   recule, la fenêtre se rallume, et il tient la distance.
+5. **La chute.** Il redescend, et sa fenêtre reste allumée derrière lui.
 
-> Quatre phrases en tout dans la scène. « Chacune retrouve le sien. » « Le sien
-> le reconnaît. » « Il a oublié. » « Alors il redescend. Il en reste à
-> remonter. » Le reste est dans l'image.
+### Pourquoi il ne peut pas la rejoindre
+
+Parce qu'il **est** la lumière. Une lumière se tient toujours à l'autre bout
+de son faisceau : elle éclaire ce qu'elle n'atteint pas, et ce qu'elle atteint,
+elle ne l'éclaire plus.
+
+Ce n'est pas un refus, pas un oubli, pas une punition — c'est ce qu'éclairer
+veut dire, et **c'est la règle que le joueur apprend depuis le premier
+étage** : ce qui est posé t'efface, ce que tu portes te trahit. Une torche au
+mur éclaire la salle ; celle qu'on tient ne protège personne. Douze étages
+durant, il apprend que la lumière qu'on garde ne sert à rien. Au bout, la même
+règle lui prend la seule chose qu'il voulait.
+
+C'est aussi pour ça que la quatrième scène est **un phare** : c'est la seule
+des quatre où la lumière ne rencontre jamais celui qu'elle sauve. Le plan
+d'avant dit tout haut ce que le plan d'après lui fait.
+
+Et il redescend, parce qu'il en reste à remonter. Ce n'est ni un mode
+déverrouillé ni une récompense : c'est le sujet. **Il choisit la distance**, et
+la fenêtre est allumée *parce qu'il est reparti.*
 
 ### Ce que les Guets deviennent dans cette version
 
-Une âme restée éteinte trop longtemps finit par comprendre que son humain ne la
+Une lumière restée éteinte trop longtemps finit par comprendre que son humain ne la
 reconnaîtra plus. Elle se venge — de la lumière, de celles qui montent encore,
-de celui qui les pousse. **Ce qui te poursuit, c'est ce que tes âmes
+de celui qui les pousse. **Ce qui te poursuit, c'est ce que tes lumières
 deviendront si tu les laisses en bas.**
 
 ## Les douze étages
@@ -91,9 +118,9 @@ la règle d'or du projet : la situation enseigne, le texte confirme au mieux.
 | 4 | **La cendre** | Un sol qui craque : traverser vite fait du bruit, marcher lentement non | Une salle entièrement cendrée, un Guet au centre, et la sortie à l'opposé |
 | 5 | **Le fanal** | On peut **décrocher une torche et la porter** : aucun Guet n'approche d'une flamme plus grande que lui, mais on est vu de partout | Une salle trop vaste pour son halo, trois Guets, une torche au mur |
 | 6 | **Le traqueur** | Un Guet qui ne patrouille pas : il **suit ton fil** | On le voit reprendre exactement le chemin qu'on vient de faire. Il faut apprendre à couper son propre fil |
-| 7 | **Les farouches** | Des âmes qui **fuient une lumière trop vive** : il faut s'approcher éteint | Une salle où chaque âme recule d'autant qu'on avance. Le souffle de l'étage 3 est la réponse |
+| 7 | **Les farouches** | Des lumières qui **fuient une lumière trop vive** : il faut s'approcher éteint | Une salle où chaque lumière recule d'autant qu'on avance. Le souffle de l'étage 3 est la réponse |
 | 8 | **Le voile** | La portée est **divisée par deux** sur tout l'étage | Les torches cessent d'être un confort et deviennent la carte |
-| 9 | **La pesée** | Une dalle qu'il faut charger : **laisser une âme dessus** pour tenir une porte ouverte | Une porte qui se referme dès qu'on la lâche, et un convoi qu'on croyait indivisible |
+| 9 | **La pesée** | Une dalle qu'il faut charger : **laisser une lumière dessus** pour tenir une porte ouverte | Une porte qui se referme dès qu'on la lâche, et un convoi qu'on croyait indivisible |
 | 10 | **L'œil** | Un Guet qui ne balaye pas : il voit **toute la salle éclairée** | Une salle et ses torches. Chacune qu'on reprend éclaire pour toujours, donc dénonce pour toujours. On traverse soufflé, en laissant le mur noir derrière soi |
 | 11 | **La meute** | Les Guets patrouillent **à deux**, et se relaient | Tout ce qui précède, sans nouveauté de règle : l'étage de la maîtrise |
 | 12 | **Le dernier Seuil** | Le portail demande plus que ce qu'on a | La fin |
@@ -128,7 +155,7 @@ sont celles du code, pas des intentions.
 | 4 | La cendre | Au-dessus de **165 px/s** (environ la moitié de la vitesse de pointe), le sol craque toutes les 0,4 s et s'entend à **6 cases**. Ça attire, ça n'efface rien — l'inverse d'une pierre |
 | 5 | Le fanal | Torche décrochée à **1,3 case**, portée jusqu'à ce qu'elle meure. Elle éloigne les Guets et **n'est pas un abri** : elle baigne de lumière tout ce qui passe à sa portée |
 | 6 | Le traqueur | Il remonte le fil du plus ancien au plus récent, à **330** (contre 430 en ronde), et il accroche la trace la plus récente à **2,5 cases**. Un fil coupé l'arrête là |
-| 7 | Les farouches | Toutes les âmes de l'étage. Elles reculent tant qu'on brille à moins de **3,4 cases** ; elles se rallument si l'on vient à **1,15 case**, éteint |
+| 7 | Les farouches | Toutes les lumières de l'étage. Elles reculent tant qu'on brille à moins de **3,4 cases** ; elles se rallument si l'on vient à **1,15 case**, éteint |
 | 8 | Le voile | Halo et faisceau à **0,55**. Ce que voient les Guets ne change pas |
 | 9 | La pesée | Une porte scellée et sa dalle. La porte retombe en **~4 s** une fois lâchée. Jamais un passage obligé : vérifié plan par plan |
 | 10 | L'œil | Pas de cône, pas de dos : il voit à **5 cases** tout ce qui est **éclairé**. Une torche allumée le dénonce au lieu de le cacher : il faut passer soufflé, et loin de ce qui brûle |
@@ -165,7 +192,7 @@ au sort alors que c'est la fin.
 ## Le bilan de fin d'étage
 
 Avant la cage, l'étage se dézoome et se raconte en trois chiffres, sur le
-canvas et sans bouton : **la part du monde mise en lumière**, **les âmes
+canvas et sans bouton : **la part du monde mise en lumière**, **les lumières
 sauvées sur le nombre total**, **le nombre de fois où un Guet nous a pris**.
 Un étage sans faute se dit d'un mot, et la progression retient la meilleure
 valeur de chaque colonne (`interface/sauvegarde.ts`).

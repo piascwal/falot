@@ -24,13 +24,13 @@ import {
 import { avancer, creerPartie, PAS } from '../src/coeur/partie.js';
 import { lancerLeBilan, partEclairee, sansFaute } from '../src/coeur/regles/bilan.js';
 import { prendreOuLacherLeFanal } from '../src/coeur/regles/fanal.js';
-import { DUREE_FIN } from '../src/coeur/regles/fin.js';
+import { DUREE_FIN, tempsFin } from '../src/coeur/regles/fin.js';
 import { SOUFFLE_MAX } from '../src/coeur/regles/joueur.js';
 import { eteindre } from '../src/coeur/regles/progression.js';
 import type { Partie, Perso, PointRonde } from '../src/coeur/types.js';
 
 const guets = (p: Partie) => p.zone.persos.filter((q) => q.emotion === EMOTIONS.COLERE);
-const ames = (p: Partie) => p.zone.persos.filter((q) => q.emotion !== EMOTIONS.COLERE);
+const lumieres = (p: Partie) => p.zone.persos.filter((q) => q.emotion !== EMOTIONS.COLERE);
 
 /** Un Guet planté, qui ne bouge plus et que rien ne gêne. */
 function poser(g: Perso, x: number, y: number, regard = 0): void {
@@ -135,7 +135,7 @@ describe('l’appel (étage 2)', () => {
     faceAFace(p, a);
     // le second regarde ailleurs, à deux cases du premier : il n'a rien vu
     poser(b, a.x + CASE * 1.5, a.y, Math.PI);
-    for (const q of ames(p)) {
+    for (const q of lumieres(p)) {
       q.x = -CASE * 40;
       q.y = -CASE * 40;
     }
@@ -189,14 +189,14 @@ describe('le souffle (étage 3)', () => {
 
   it('coûte la vue, et le pouvoir de rallumer', () => {
     const p = creerPartie({ grain: 'SOUFFLE', etage: 3 });
-    const q = ames(p)[0];
+    const q = lumieres(p)[0];
     q.x = p.joueur.x + CASE * 1.2;
     q.y = p.joueur.y;
     p.joueur.regard = 0;
     p.entrees.souffle = true;
     avancer(p, PAS);
     expect(p.joueur.eteint).toBe(true);
-    // il n'éclaire plus personne : une âme dans son axe reste éteinte
+    // il n'éclaire plus personne : une lumière dans son axe reste éteinte
     expect(p.eclaires.has(q)).toBe(false);
     expect(q.calme).toBe(false);
   });
@@ -321,8 +321,8 @@ describe('le traqueur (étage 6)', () => {
 describe('la fin (étage 12)', () => {
   it('ne laisse pas passer : le dernier Seuil demande plus que ce qu’on a', () => {
     const p = creerPartie({ grain: 'FIN', etage: DERNIER_ETAGE });
-    // on lui livre ses âmes, et on entre comme onze fois avant
-    p.zone.sortie.ames = p.zone.requis;
+    // on lui livre ses lumières, et on entre comme onze fois avant
+    p.zone.sortie.lumieres = p.zone.requis;
     p.joueur.x = p.zone.sortie.x;
     p.joueur.y = p.zone.sortie.y;
     avancer(p, PAS);
@@ -330,11 +330,23 @@ describe('la fin (étage 12)', () => {
     expect(p.vidange, 'il ne franchit pas').toBe(null);
   });
 
+  it('passe par ses cinq temps, dans l’ordre, sans en sauter un', () => {
+    // L'escorte, le fil, les quatre scènes, la sienne, la chute. C'est le
+    // seul endroit du jeu où l'ordre EST le propos : les lumières allument
+    // quelque chose avant qu'on comprenne qu'il n'aura jamais la sienne.
+    const vus: string[] = [];
+    for (let t = 0; t < DUREE_FIN; t += 0.25) {
+      const e = tempsFin(t).etape;
+      if (vus[vus.length - 1] !== e) vus.push(e);
+    }
+    expect(vus).toEqual(['escorte', 'fil', 'quatre', 'sienne', 'chute']);
+  });
+
   it('le fait retomber tout en bas, et ça recommence', () => {
-    // Son humain oublie : il n'y a rien à déverrouiller au bout, il y a la
-    // même descente. C'est le sujet du jeu, pas une récompense.
+    // Il ne peut pas rejoindre ce qu'il éclaire : il n'y a rien à
+    // déverrouiller au bout, il y a la même descente. C'est le sujet.
     const p = creerPartie({ grain: 'FIN', etage: DERNIER_ETAGE });
-    p.zone.sortie.ames = p.zone.requis;
+    p.zone.sortie.lumieres = p.zone.requis;
     p.joueur.x = p.zone.sortie.x;
     p.joueur.y = p.zone.sortie.y;
     avancer(p, PAS);
@@ -348,7 +360,7 @@ describe('la fin (étage 12)', () => {
   it('ne se rejoue pas : une fois vue, le douzième se franchit comme les autres', () => {
     const p = creerPartie({ grain: 'FIN', etage: DERNIER_ETAGE });
     p.finVue = true;
-    p.zone.sortie.ames = p.zone.requis;
+    p.zone.sortie.lumieres = p.zone.requis;
     p.joueur.x = p.zone.sortie.x;
     p.joueur.y = p.zone.sortie.y;
     avancer(p, PAS);
@@ -464,7 +476,7 @@ describe('la meute (étage 11)', () => {
 describe('les farouches (étage 7)', () => {
   it('reculent devant un faisceau au lieu de se rallumer', () => {
     const p = creerPartie({ grain: 'FAROUCHE', etage: 7 });
-    const q = ames(p).find((a) => a.farouche);
+    const q = lumieres(p).find((a) => a.farouche);
     if (!q) throw new Error('pas de farouche à l’étage 7');
     p.joueur.x = q.x - CASE * 1.6;
     p.joueur.y = q.y;
@@ -478,7 +490,7 @@ describe('les farouches (étage 7)', () => {
 
   it('se laissent reprendre par un Falot éteint, tout près', () => {
     const p = creerPartie({ grain: 'FAROUCHE', etage: 7 });
-    const q = ames(p).find((a) => a.farouche);
+    const q = lumieres(p).find((a) => a.farouche);
     if (!q) throw new Error('pas de farouche');
     p.entrees.souffle = true;
     for (let i = 0; i < 200; i++) {
@@ -607,11 +619,11 @@ describe('la pesée (étage 9)', () => {
     expect(dl.porte.ouverte).toBeGreaterThan(0.5);
   });
 
-  it('laisse une âme du convoi s’y poser, et la reprend quand on revient', () => {
+  it('laisse une lumière du convoi s’y poser, et la reprend quand on revient', () => {
     const p = creerPartie({ grain: 'PESEE-3', etage: 9 });
     const dl = p.zone.dalles[0];
     expect(dl, 'l’étage 9 pose une dalle').toBeDefined();
-    const q = ames(p)[0];
+    const q = lumieres(p)[0];
     q.calme = true;
     q.suit = true;
     q.prime = true;
@@ -722,13 +734,13 @@ describe('le bilan d’un étage', () => {
     p.morts = 0;
     eteindre(p);
     expect(p.morts).toBe(1);
-    p.zone.sortie.ames = 2;
+    p.zone.sortie.lumieres = 2;
     lancerLeBilan(p, 5);
     expect(p.bilan?.etage).toBe(4);
     expect(p.bilan?.morts).toBe(1);
-    expect(p.bilan?.ames).toBe(2);
+    expect(p.bilan?.lumieres).toBe(2);
     expect(p.bilan?.lumiere).toBeCloseTo(apres, 5);
-    expect(p.bilan?.amesTotal).toBeGreaterThan(0);
+    expect(p.bilan?.lumieresTotal).toBeGreaterThan(0);
   });
 
   it('se passe d’un geste, mais pas tout de suite', () => {
@@ -743,10 +755,12 @@ describe('le bilan d’un étage', () => {
   });
 
   it('ne dit « sans faute » que si rien n’est resté dans le noir', () => {
-    expect(sansFaute({ lumiere: 1, ames: 3, amesTotal: 3, morts: 0 })).toBe(true);
-    expect(sansFaute({ lumiere: 0.99, ames: 3, amesTotal: 3, morts: 0 })).toBe(false);
-    expect(sansFaute({ lumiere: 1, ames: 2, amesTotal: 3, morts: 0 })).toBe(false);
-    expect(sansFaute({ lumiere: 1, ames: 3, amesTotal: 3, morts: 1 })).toBe(false);
+    expect(sansFaute({ lumiere: 1, lumieres: 3, lumieresTotal: 3, morts: 0 })).toBe(true);
+    expect(sansFaute({ lumiere: 0.99, lumieres: 3, lumieresTotal: 3, morts: 0 })).toBe(
+      false,
+    );
+    expect(sansFaute({ lumiere: 1, lumieres: 2, lumieresTotal: 3, morts: 0 })).toBe(false);
+    expect(sansFaute({ lumiere: 1, lumieres: 3, lumieresTotal: 3, morts: 1 })).toBe(false);
   });
 
   it('repart de zéro à chaque étage', () => {

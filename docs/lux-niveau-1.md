@@ -68,7 +68,7 @@ Objection juste : sans un peu de texte, personne ne comprendra les Dessous, les
 Éteints ni les Guets. « Pas de panneaux » ne veut pas dire « pas de mots ». Il
 faut simplement que les mots ne coûtent jamais un clic.
 
-**Le canal principal : ce que disent les âmes qu'on rallume.**
+**Le canal principal : ce que disent les lumières qu'on rallume.**
 
 Quand un Éteint se rallume, il dit **une phrase** au-dessus de sa tête avant de
 se mettre à suivre — deux secondes, pas de bouton, pendant qu'on continue à
@@ -102,7 +102,7 @@ pertinente, jamais en travers du chemin.
 
 | Canal | Ce qu'il raconte | Coût |
 |---|---|---|
-| Les âmes rallumées | qui sont les Éteints, ce qu'ils ont vécu | aucun |
+| Les lumières rallumées | qui sont les Éteints, ce qu'ils ont vécu | aucun |
 | La cage d'escalier | où l'on est, ce qu'on a fait, ce qui reste | un arrêt déjà prévu |
 | Les murmures | le bâtiment, les Guets, ceux qui sont passés avant | aucun |
 | L'écran noir d'ouverture | trois mots | le seul arrêt qu'on s'autorise |
@@ -173,7 +173,7 @@ Une phrase passagère, pour que l'échec informe au lieu d'inquiéter :
 > l'inverse. Il en faut **deux**, et le second après les fragments.
 
 ### 4. Le Seuil qui réclame
-On atteint le portail. Son anneau est vide : **deux âmes demandées, zéro
+On atteint le portail. Son anneau est vide : **deux lumières demandées, zéro
 livrée.** On ne peut pas partir.
 
 > **C'est ici que je m'écarte le plus du croquis.** L'idée d'une « porte bloquée
@@ -182,7 +182,7 @@ livrée.** On ne peut pas partir.
 > quiconque n'est pas un Guet. Un niveau d'introduction doit enseigner les vraies
 > règles, pas des exceptions.
 >
-> Le portail qui réclame une âme produit exactement le même détour, avec une
+> Le portail qui réclame une lumière produit exactement le même détour, avec une
 > règle qui servira toute la partie.
 
 ### 5. La montée en confiance
@@ -200,7 +200,7 @@ par contraste avec l'échec de la salle 5 — quinze secondes plus tôt on ne
 pouvait pas, maintenant on peut.
 
 ### 6 bis. Retourner chercher le premier
-Le Seuil réclame **deux** âmes. On en a une. Le premier Frileux est toujours là,
+Le Seuil réclame **deux** lumières. On en a une. Le premier Frileux est toujours là,
 en arrière — et on sait désormais quoi faire de lui.
 
 **Enseigne** : le Seuil compte, et **on retourne chercher ceux qu'on a laissés
@@ -250,13 +250,13 @@ torche → « apaisé ».
 L'asymétrie est tranchée : **ce n'est pas un statut, c'est une position.** Le
 joueur et chaque suiveur posent la même question depuis l'endroit où ils se
 trouvent. Celui qui est dans la lumière est couvert ; celui qui dépasse reste
-prenable — et son visage le dit, puisque l'apaisement s'affiche âme par âme.
+prenable — et son visage le dit, puisque l'apaisement s'affiche sur chacun, une lumière après l'autre.
 
 Cela transforme un abri en **problème de placement** plutôt qu'en interrupteur :
 avec quatre suiveurs et une braise, il faut que tout le monde tienne dedans.
 C'est exactement l'arbitrage que le jeu cherche partout ailleurs.
 
-Mesuré sur 60 images, une braise couvrant le joueur et une âme sur deux : l'âme
+Mesuré sur 60 images, une braise couvrant le joueur et un personnage sur deux : la lumière
 du dedans est comptée à l'abri 60 fois sur 60 et porte le visage apaisé, celle
 du dehors 0 fois et porte la peur, et la sentinelle ne voit **qu'un corps sur
 les trois présents**.
@@ -307,8 +307,8 @@ Elle vit dans `poc/lux-paranoia.html`, sous `ETAGES_ECRITS`.
 ##....*.########......###
 ##......##5T####......###    20  l'alcôve de la torche, au-dessus du couloir
 ##..S...|o.o..r|o*....###    21  le couloir de l'escorte, ligne du haut
-##....4.|......|.b....###    22  sa ligne du bas, et la 2e âme à sa bouche
-##......####.b##......###    23  la 1re âme, dans sa poche sous le couloir
+##....4.|......|.b....###    22  sa ligne du bas, et la 2e lumière à sa bouche
+##......####.b##......###    23  la 1re lumière, dans sa poche sous le couloir
 #########################
 ```
 
@@ -324,14 +324,14 @@ dont on cherche l'usage — il a servi avant qu'on ait vu le moindre ennemi.
 
 **Le parcours.** Réveil, couloir des lueurs, salle de la torche, galerie du
 premier Guet, salle d'un Frileux — qu'on ne peut pas encore sauver —, couloir
-calme, Seuil qui réclame deux âmes. Puis le couloir des fragments, gardé par le
-second Guet. La première âme est dans un renfoncement **sur ce couloir même**,
+calme, Seuil qui réclame deux lumières. Puis le couloir des fragments, gardé par le
+second Guet. La première lumière est dans un renfoncement **sur ce couloir même**,
 sous le nez du Guet ; la seconde au fond de la dernière salle. On ramène la
 première, **le portail affiche 1/2**, et c'est là seulement qu'on comprend qu'il
 se charge. On repart chercher l'autre, et le retour repasse devant le même
 Guet.
 
-> **Corrigé deux fois, après essai à la manette.** Les deux âmes étaient
+> **Corrigé deux fois, après essai à la manette.** Les deux lumières étaient
 > d'abord aux deux bouts du niveau, pour que le Seuil oblige à revenir chercher
 > la première : à la manette ce demi-tour **ne se devine pas**, rien sur le
 > chemin ne le demande. Elles ont donc été mises côte à côte dans la dernière
@@ -368,7 +368,7 @@ passage latéral — exactement là où le niveau en a besoin, et jamais avant.
 | Les Guets restent chez eux | 0 des 2 n'atteint le Seuil ou le premier Frileux, portes fermées |
 | Les murmures se déclenchent au passage | 4 sur 4, et 0 avant d'y passer |
 | La reprise déplace le départ | mort après un point de reprise → renaissance exactement dessus |
-| Le Seuil réclame deux âmes | avec 1 livrée il reste fermé ; avec 2 la vidange part et l'étage 2 se charge |
+| Le Seuil réclame deux lumières | avec 1 livrée il reste fermé ; avec 2 la vidange part et l'étage 2 se charge |
 
 ### Combien de temps ça fait
 
@@ -402,9 +402,9 @@ appliquait sans jamais les dire.
 | Ce qui manquait | Ce qui a été fait |
 |---|---|
 | À quoi sert la pierre | Un murmure dès la première salle, un autre avant la galerie du Guet, le bouton qui bat quand un regard commence à te tenir — et surtout **les murs fêlés** (voir plus bas) |
-| Qu'on charge le portail avec des âmes | Le compte est écrit **sur le portail** (« ÂMES — 1 / 2 », « ENTRE » quand il cède), une phrase le dit à la première approche, le murmure du Seuil l'explique |
+| Qu'on charge le portail avec des lumières | Le compte est écrit **sur le portail** (« LUMIÈRES — 1 / 2 », « ENTRE » quand il cède), une phrase le dit à la première approche, le murmure du Seuil l'explique |
 | Qu'on remplit une jauge qui change de forme | La barre passe de 80 à 148 px, gagne un contour et une légende : **PEUREUX → CURIEUX**. Toute la jauge sursaute au ramassage |
-| Que le portail se charge à plusieurs âmes | Les deux âmes sont séparées : on en livre une, on lit « 1/2 », on repart |
+| Que le portail se charge à plusieurs lumières | Les deux lumières sont séparées : on en livre une, on lit « 1/2 », on repart |
 | La torche était un abri, et le murmure parlait d'autre chose | Il disait *« d'autres sont passés avant toi »* — fidèle à la bible, mais inutile à cet endroit. Il dit maintenant les deux : *« Quelqu'un est passé avant toi, et a laissé ça allumé. Tant que la flamme tient, les regards glissent sur toi. »* |
 | Le bandeau passager jurait avec le reste | Il tenait dans une pastille à bord coloré, sur une ligne, et débordait de l'écran d'un téléphone dès cinq mots. Il a désormais la voix des murmures : de l'écriture sur le noir, calée sous le bandeau d'état, qui passe à la ligne |
 
@@ -466,7 +466,7 @@ suffit à les reprendre.
 > le trajet naturel vers la sortie de la salle l'allume désormais.
 >
 > C'est ce réglage qui a fait rougir le test de l'abri : le joueur y rallumait
-> une torche à 0,66 case de l'âme qu'on voulait laisser dehors, et l'abri
+> une torche à 0,66 case de la lumière qu'on voulait laisser dehors, et l'abri
 > couvrait tout — correctement. Le jeu avait raison, c'est la mesure qui
 > était devenue fausse.
 
@@ -489,7 +489,7 @@ détourne d'un leurre qui lui ressemble plus que toi.
 
 ### Les paroles font la queue
 
-Deux âmes rallumées coup sur coup avaient chacune quelque chose à dire, et on
+Deux lumières rallumées coup sur coup avaient chacune quelque chose à dire, et on
 n'en lisait aucune. Une seule phrase tient l'écran à la fois ; les autres
 attendent leur tour (trois au plus, au-delà tant pis). Une réplique **suit
 celui qui parle** au lieu de rester figée où il était — sans ça, quand le convoi
@@ -517,7 +517,7 @@ le bandeau de l'éclat et le récit du quatrième étage disent « un Guet ».
 |---|---|
 | Ça saccadait | Voir ci-dessous : ce n'était aucune fonctionnalité, c'était le nombre de pixels |
 | Les fissures brillaient dans le noir | Elles ne s'éclairent plus toutes seules. En échange, **la lumière mord plus profond dans une pierre déjà fendue** (0,95 case au lieu de 0,2) : le réseau entier se lit dès que le halo l'atteint, et rien du tout quand il ne l'atteint pas |
-| On tourne autour de la première âme sans comprendre | Elle parle : *« On m'a vidé de ma lumière. Il m'en faudrait un peu de la tienne — mais la tienne est trop petite. »* Une fois, et seulement tant qu'on n'a pas de faisceau, c'est-à-dire tant que c'est vrai |
+| On tourne autour de la première lumière sans comprendre | Elle parle : *« On m'a vidé de ma lumière. Il m'en faudrait un peu de la tienne — mais la tienne est trop petite. »* Une fois, et seulement tant qu'on n'a pas de faisceau, c'est-à-dire tant que c'est vrai |
 | Le Guet était dans un croisement : on ne pouvait pas lancer par-dessus un mur | Ce n'est plus un couloir mais une **salle de 44 cases**. Le Guet la balaye en entier sur trois points ; il y a enfin de la place pour envoyer une pierre d'un côté et passer de l'autre |
 | On ne voyait pas qu'un Guet avait entendu | Il porte un **point d'interrogation** au-dessus de la tête, et il sort du noir pendant qu'il cherche. La pierre s'entend désormais à **9 cases** au lieu de 5,5 |
 
@@ -552,12 +552,12 @@ et demie.
 Le bandeau passager et les phrases du décor disaient la même chose, **de deux
 couleurs et à deux endroits différents**, et se recouvraient l'une l'autre. Tout
 ce qui EXPLIQUE passe maintenant par le bandeau, d'un seul ton. Seules les
-répliques des âmes restent dans le monde, attachées à qui parle — là, la couleur
+répliques des lumières restent dans le monde, attachées à qui parle — là, la couleur
 dit *qui*, pas *quoi* : bleu quand elle est encore éteinte, vert quand elle
 vient de se rallumer.
 
 Une seule file, donc une seule phrase à l'écran. Mesuré en rallumant toutes les
-âmes d'un coup : **au pire 1** texte affiché à la fois, bandeau compris. Et le
+lumières d'un coup : **au pire 1** texte affiché à la fois, bandeau compris. Et le
 texte reste plus longtemps — 4,4 s pour une explication, 5,4 s pour une phrase
 du décor, contre 2,8 s avant.
 
@@ -642,7 +642,7 @@ la géographie qui enseignait le contraire de ce qu'on voulait.
 |---|---|
 | « La pierre n'est jamais rentabilisé, on va tout droit » | La galerie se traversait **20/20 en 2,3 s**. Ses deux portes étaient alignées sur la colonne 18 : on descendait une ligne droite de cinq cases. Les 44 cases « pour avoir la place de lancer » n'étaient jamais parcourues |
 | « Au deuxième Guet on essaye, on meurt, on recommence, sans comprendre » | Le couloir de l'escorte était **0/20**. Large d'une case, il était *bouché* par le Guet : le toucher tue, et la pierre n'étourdit qu'à partir d'Ardent — hors budget du prologue (plafond 68 d'éclat, Ardent à 88). La pierre ne **pouvait pas** résoudre ce couloir |
-| « Après la première âme, le joueur remonte tout l'étage » | Repartir à l'est chercher la seconde était **0/20, jamais atteinte**. Il n'a pas manqué d'intuition : le niveau punissait la route prévue et récompensait l'autre — au nord c'était connu, sûr, et il y avait un Frileux dont il se souvenait |
+| « Après la première lumière, le joueur remonte tout l'étage » | Repartir à l'est chercher la seconde était **0/20, jamais atteinte**. Il n'a pas manqué d'intuition : le niveau punissait la route prévue et récompensait l'autre — au nord c'était connu, sûr, et il y avait un Frileux dont il se souvenait |
 
 **Le diagnostic, en une phrase : le prologue ne contenait aucun endroit où le
 pierre était la réponse.** Pas un. Et son seul passage difficile ne pouvait pas
@@ -660,8 +660,8 @@ pierre était la réponse.** Pas un. Et son seul passage difficile ne pouvait pa
    colonne 14. Traverser demande de se déplacer dans la ronde du Guet, là où il
    y a la place de lancer.
 3. **La dernière lueur est passée à l'est du Guet de l'escorte** (colonne 16) et
-   **la seconde âme à la bouche du couloir** (17,22) : on devient Curieux
-   *après* avoir traversé, et les deux âmes sont vues à l'aller. Plus rien
+   **la seconde lumière à la bouche du couloir** (17,22) : on devient Curieux
+   *après* avoir traversé, et les deux lumières sont vues à l'aller. Plus rien
    n'oblige à deviner qu'il en reste une.
 4. **Le couloir de l'escorte fait deux cases de haut** sur toute la ronde du
    Guet, et **ses deux battants sont hauts de deux cases**. Sans ce doublement,
@@ -679,16 +679,16 @@ pierre était la réponse.** Pas un. Et son seul passage difficile ne pouvait pa
 | Galerie, tout droit | 20/20 | **6/20** |
 | Galerie, en lançant une pierre et en attendant que le Guet parte | — | **20/20** |
 | Couloir de l'escorte, ligne du haut | 0/20 | 0/20 *(inchangé, et voulu)* |
-| Couloir de l'escorte, ligne du bas | impossible | **20/20 seul, 18/20 à deux âmes** |
+| Couloir de l'escorte, ligne du bas | impossible | **20/20 seul, 18/20 à deux lumières** |
 | Retour vers la bouche du couloir | 0/20 | **20/20** |
 
 Foncer n'est plus la stratégie dominante dans la galerie, la pierre l'est. Le
 couloir est devenu un choix de voie au lieu d'un mur : la ligne du haut tue
-toujours, celle du bas passe, et escorter deux âmes coûte deux essais sur vingt.
+toujours, celle du bas passe, et escorter deux lumières coûte deux essais sur vingt.
 
 **Tout ceci est en tests** — `tests/prologue.test.ts` pilote la vraie
 simulation, sans canvas ni navigateur, et chaque intention du niveau y est une
-assertion. Si quelqu'un réaligne les portes de la galerie ou remet une âme au
+assertion. Si quelqu'un réaligne les portes de la galerie ou remet une lumière au
 fond de la salle de droite, la suite le dit.
 
 ---
@@ -767,10 +767,10 @@ configurations essayées, vingt essais chacune, à tous les moments de la ronde.
 | Galerie, en lançant d'abord une pierre | 20/20 | **20/20** |
 | Couloir de l'escorte, ligne du haut | 0/20 | 0/20 |
 | Couloir, ligne du bas, seul | 20/20 | 16/20 |
-| Couloir, ligne du bas, une et deux âmes | 20/20 et 18/20 | **17/20 et 17/20** |
+| Couloir, ligne du bas, une et deux lumières | 20/20 et 18/20 | **17/20 et 17/20** |
 | Retour vers la bouche du couloir | 20/20 | 8/20 |
 
-Le retour a payé la nouvelle règle de traque. C'est assumé : les deux âmes sont
+Le retour a payé la nouvelle règle de traque. C'est assumé : les deux lumières sont
 vues à l'aller, donc ce retour n'est plus un passage obligé — et il reste
 possible, là où il était mortel il y a deux tours.
 
@@ -823,13 +823,13 @@ arrive après la mort n'est pas une réponse.
 
 ### Le convoi souffle sa lumière
 
-Quand une sentinelle est en alerte ou charge, **les âmes déjà rallumées
+Quand une sentinelle est en alerte ou charge, **les lumières déjà rallumées
 soufflent leur lumière** : plus de halo, plus de faisceau, plus de trou dans la
 nuit. **Elles gardent leur couleur** — elles sont toujours rallumées, elles se
 cachent seulement ; on les voit donc encore, mais dans NOTRE lumière. Elles
 rallument la leur dès que la menace retombe.
 
-C'est de la fiction autant que de la règle : une âme qui a peur cache sa
+C'est de la fiction autant que de la règle : une lumière qui a peur cache sa
 lumière. Et surtout, **seule la lumière du joueur le trahit encore** — être
 détecté parce qu'un PNJ qu'on escorte brille dans notre dos était incompréhensible.
 En échange, escorter ne coûte plus rien en discrétion : c'est assumé, la
@@ -875,7 +875,7 @@ Deux états, et un seul était visible :
 
 - **dans le noir**, on ne voit plus que **ses yeux** ;
 - **dans la lumière de quelqu'un d'autre** — une torche, un faisceau — on le
-  voit **en entier mais vidé**, un contour sans couleur, comme une âme qu'on
+  voit **en entier mais vidé**, un contour sans couleur, comme une lumière qu'on
   n'a pas encore rallumée.
 
 Le second cas écrasait le premier à cause d'un détail : `estEclaire()` compte
@@ -883,7 +883,7 @@ Le second cas écrasait le premier à cause d'un détail : `estEclaire()` compte
 Falot soufflé se croyait donc éclairé par sa propre lumière, qu'il venait
 pourtant de couvrir. D'où `eclaireParAutrui()` (`coeur/regles/lumiere.ts`),
 qui ne regarde que **les sources extérieures** : les torches et braises
-posées, et les faisceaux des âmes déjà rallumées. L'état « deux yeux dans le
+posées, et les faisceaux des lumières déjà rallumées. L'état « deux yeux dans le
 noir » existe enfin.
 
 ### Une torche reprise ne s'éteint plus

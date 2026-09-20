@@ -53,18 +53,18 @@ describe('genererZone', () => {
     );
   });
 
-  it('tient ses quotas : assez d’âmes pour ouvrir le Seuil, et au moins deux Guets', () => {
+  it('tient ses quotas : assez de lumières pour ouvrir le Seuil, et au moins deux Guets', () => {
     fc.assert(
       fc.property(
         fc.integer({ min: 0, max: 4000 }),
         fc.integer({ min: 2, max: 9 }),
         (i, n) => {
           const z = genererZone(`LUX-${i}`, n, 2)!;
-          const ames = z.persos.filter((p) => p.emotion !== EMOTIONS.COLERE).length;
-          const guets = z.persos.length - ames;
-          // Le Seuil doit rester ouvrable même si une âme est perdue en route :
+          const lumieres = z.persos.filter((p) => p.emotion !== EMOTIONS.COLERE).length;
+          const guets = z.persos.length - lumieres;
+          // Le Seuil doit rester ouvrable même si une lumière est perdue en route :
           // c'est exactement la raison du « −1 » dans le calcul de `requis`.
-          expect(z.requis).toBeLessThanOrEqual(ames - 1);
+          expect(z.requis).toBeLessThanOrEqual(lumieres - 1);
           expect(z.requis).toBeGreaterThanOrEqual(2);
           expect(guets).toBeGreaterThanOrEqual(2);
         },

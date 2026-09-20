@@ -83,7 +83,7 @@ export const ETAGES_ECRITS: Readonly<Record<number, EtageEcrit>> = {
       // Guet. Doublés, ils scellent toujours son quartier — une case de porte
       // est un mur pour lui, battant ouvert ou non.
       '##..S...|o.o..r|o*....###', // 21   le Seuil, les fragments, le Guet de l'escorte
-      '##....4.|......|.b....###', // 22   le couloir sur deux cases, et la 2e âme à sa bouche
+      '##....4.|......|.b....###', // 22   le couloir sur deux cases, et la 2e lumière à sa bouche
       '##......####.b##......###', // 23
       '#########################', // 24
     ],
@@ -117,12 +117,12 @@ export const ETAGES_ECRITS: Readonly<Record<number, EtageEcrit>> = {
       // plutôt qu'à Falot. Elle est dans la fiction : une lampe ne marche
       // pas, on la porte. La main qui la tient, c'est la tienne.
       '7': 'Pose ta main sur le noir, et tire : il va où tu vas.',
-      '2': 'Une âme restée éteinte trop longtemps. Elle ne retrouvera personne.',
-      '4': 'Sortir, c’est monter. Un Seuil cède quand assez d’âmes s’y tiennent.',
+      '2': 'Une lumière restée éteinte trop longtemps. Elle ne retrouvera personne.',
+      '4': 'Sortir, c’est monter. Un Seuil cède quand assez de lumières s’y tiennent.',
       '5': 'Tant que la flamme tient, aucun Guet n’approche.',
       '8': 'Une torche éteinte. Ce qu’il te reste de lumière suffit à la reprendre.',
     },
-    // Deux âmes, et les deux sont dans la même salle, au bout du couloir des
+    // Deux lumières, et les deux sont dans la même salle, au bout du couloir des
     // fragments. Elles ont d'abord été posées aux deux bouts du niveau : il
     // fallait alors retraverser la moitié de l'étage pour la seconde, et ce
     // demi-tour ne se devinait pas — rien sur le chemin ne le demandait.
@@ -328,7 +328,7 @@ export function zoneEcrite(numero: number): Zone | null {
       y: (leSeuil.cy + 0.5) * CASE,
       r: CASE * 0.55,
       vue: false,
-      ames: 0,
+      lumieres: 0,
     },
     requis: modele.requis,
     largeur: cols * CASE,

@@ -69,7 +69,7 @@ const nouveauJoueur = (): Joueur => ({
   // dessinait pas du tout.
   tremble: 0,
   // Le joueur ne cligne pas et ne s'aveugle pas, mais il partage le corps des
-  // âmes : les champs existent, à zéro.
+  // lumières : les champs existent, à zéro.
   aveugle: 0,
   cligne: 0,
   pierres: PIERRE[0].reserve,
@@ -140,7 +140,7 @@ export function creerPartie(reglages: Reglages = {}): Partie {
     // monter un « +4 » vers la barre du haut.
     premieres: { lueur: true, mort: true, seuil: false, main: false },
     // La règle attachée à une espèce ne se dit qu'une fois : répétée à chaque
-    // âme, elle redevient la modale intrusive qu'on a retirée.
+    // lumière, elle redevient la modale intrusive qu'on a retirée.
     regleDite: {},
     nudgePierre: 0,
     nudgeArme: false,
@@ -178,7 +178,7 @@ function zoneVide(): Zone {
     reprises: [],
     murmures: [],
     depart: { x: 0, y: 0 },
-    sortie: { x: 0, y: 0, r: 1, vue: false, ames: 0 },
+    sortie: { x: 0, y: 0, r: 1, vue: false, lumieres: 0 },
     requis: 1,
     largeur: 1,
     hauteur: 1,

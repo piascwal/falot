@@ -4,7 +4,7 @@
  * Le bandeau passager et les phrases du décor disaient la même chose, de deux
  * couleurs et à deux endroits différents, et se recouvraient l'une l'autre.
  * Tout ce qui EXPLIQUE passe désormais par le bandeau, d'un seul ton ; seules
- * les répliques des âmes restent dans le monde, attachées à qui parle — là, la
+ * les répliques des lumières restent dans le monde, attachées à qui parle — là, la
  * couleur dit qui, pas quoi.
  *
  * Rien ici ne touche au DOM : la voix est un ÉTAT de la partie (`partie.bandeau`),

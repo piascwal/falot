@@ -13,7 +13,7 @@
  *
  * Le convoi, lui, souffle sa lumière dès qu'un Guet se doute de quelque chose
  * (voir `souffler`) : on se fait prendre pour ce qu'on porte, pas pour ceux
- * qu'on emmène. Les âmes restaient sinon des corps à voir, et escorter revenait
+ * qu'on emmène. Les lumières restaient sinon des corps à voir, et escorter revenait
  * à traîner des projecteurs.
  */
 
@@ -127,13 +127,13 @@ export function majRegles(partie: Partie, dt: number): void {
   // planté devant. On le dit une fois, la première fois qu'on s'en approche.
   if (
     !partie.premieres.seuil &&
-    zone.sortie.ames < zone.requis &&
+    zone.sortie.lumieres < zone.requis &&
     Math.hypot(zone.sortie.x - joueur.x, zone.sortie.y - joueur.y) < CASE * 2.4
   ) {
     partie.premieres.seuil = true;
     montrerToast(
       partie,
-      `Le Seuil est vide — il s'ouvre quand ${zone.requis} âmes s'y tiennent`,
+      `Le Seuil est vide — il s'ouvre quand ${zone.requis} lumières s'y tiennent`,
     );
   }
 
@@ -189,7 +189,7 @@ export function majRegles(partie: Partie, dt: number): void {
     murmurer(partie, m.x, m.y - CASE * 0.95, m.texte);
   }
 
-  // Une âme qu'on ne peut pas encore rallumer laisse le joueur tourner autour
+  // Une lumière qu'on ne peut pas encore rallumer laisse le joueur tourner autour
   // d'elle sans comprendre ce qu'elle attend. Elle le dit — une fois, et
   // seulement tant qu'on n'a pas de faisceau, c'est-à-dire tant que c'est vrai.
   if (!porteeFaisceau(joueur) && !joueur.eteint) {
@@ -226,9 +226,9 @@ export function majRegles(partie: Partie, dt: number): void {
       p.calme = true;
       p.suit = true;
       p.rang = zone.persos.filter((q) => q.suit).length; // sa place dans la file
-      // Une âme ne paie QU'UNE FOIS. Paniquer et mourir remettent `calme` à
-      // faux, donc recalmer la même âme repayait 6 d'éclat à chaque tour :
-      // mesuré, une seule âme rapportait 30 d'éclat en cinq recalmages, sans
+      // Une lumière ne paie QU'UNE FOIS. Paniquer et mourir remettent `calme` à
+      // faux, donc recalmer la même lumière repayait 6 d'éclat à chaque tour :
+      // mesuré, une seule lumière rapportait 30 d'éclat en cinq recalmages, sans
       // aucune limite. C'est ce qui faisait monter les formes bien plus vite
       // que le plafond d'une zone ne l'autorise. La récupérer reste gagnant —
       // on récupère sa cargaison et ses dix points de livraison.
@@ -272,7 +272,7 @@ export function majRegles(partie: Partie, dt: number): void {
   const abri = aLAbri(zone, joueur.x, joueur.y, joueur.fanal);
   joueur.abri = abri; // lu par le visage : voir `humeurDuJoueur`
   // Calculé UNE fois par image et non par sentinelle : la question ne dépend
-  // que de la position de l'âme, pas de qui la regarde.
+  // que de la position de la lumière, pas de qui la regarde.
   for (const q of zone.persos) {
     q.abri = q.emotion !== EMOTIONS.COLERE && q.suit && !q.livre && aLAbri(zone, q.x, q.y);
   }
@@ -330,7 +330,7 @@ export function majRegles(partie: Partie, dt: number): void {
     }
 
     // Ce que la sentinelle peut voir : toi ET ton convoi. C'est le cœur de
-    // l'arbitrage — chaque âme que tu escortes est une silhouette de plus
+    // l'arbitrage — chaque lumière que tu escortes est une silhouette de plus
     // dans le faisceau, et la jauge monte d'autant plus vite.
     const exposable = (q: { x: number; y: number }) => {
       if (p.gene || p.cligne > 0) return false;
@@ -365,7 +365,7 @@ export function majRegles(partie: Partie, dt: number): void {
     // n'est pas traverser.
     const joueurVu =
       !voile && apparait(joueur.eteint, abri) && joueur.repit <= 0 && exposable(joueur);
-    // Une âme qui a soufflé sa lumière n'est plus un corps à voir : seul ce que
+    // Une lumière qui s'est soufflée n'est plus un corps à voir : seul ce que
     // Falot porte le désigne encore (voir `souffler`).
     const convoi = voile
       ? []
@@ -507,21 +507,21 @@ export function majRegles(partie: Partie, dt: number): void {
     if (Math.hypot(zone.sortie.x - q.x, zone.sortie.y - q.y) > zone.sortie.r) continue;
     q.livre = true;
     q.suit = false;
-    zone.sortie.ames++;
+    zone.sortie.lumieres++;
     gagnerEclat(partie, 10);
     emettre(partie, zone.sortie.x, zone.sortie.y, '#ffe9a8', 16, 110);
     onde(partie, zone.sortie.x, zone.sortie.y, CASE * 2.6, '#ffe9a8');
     montrerToast(
       partie,
-      zone.sortie.ames >= zone.requis
+      zone.sortie.lumieres >= zone.requis
         ? 'Le portail est chargé — entre'
-        : `Âme livrée — ${zone.sortie.ames}/${zone.requis}`,
+        : `Lumière livrée — ${zone.sortie.lumieres}/${zone.requis}`,
     );
   }
 
   // On attend que le convoi soit RENTRÉ avant de changer de zone : le joueur
   // arrive au portail en même temps que ses suiveurs, et sans cette attente
-  // les âmes amenées en plus du quota restaient dehors et étaient perdues.
+  // les lumières amenées en plus du quota restaient dehors et étaient perdues.
   const enAspiration = zone.persos.some(
     (q) =>
       q.suit &&
@@ -529,7 +529,7 @@ export function majRegles(partie: Partie, dt: number): void {
       Math.hypot(zone.sortie.x - q.x, zone.sortie.y - q.y) < CASE * 2.6,
   );
   if (
-    zone.sortie.ames >= zone.requis &&
+    zone.sortie.lumieres >= zone.requis &&
     !enAspiration &&
     Math.hypot(zone.sortie.x - joueur.x, zone.sortie.y - joueur.y) < zone.sortie.r
   ) {

@@ -50,13 +50,13 @@ Il leur reste un filet de lumière devant eux. Ils suivent n'importe où, sans
 condition, et ils éclairent la route. Ce qui veut dire qu'ils vous dénoncent
 aussi.
 
-### Les Guets (rouges) — des âmes qui ne remonteront plus
+### Les Guets (rouges) — des lumières qui ne remonteront plus
 
 > **Le nom se dit dans le jeu.** Il était écrit ici et nulle part ailleurs : on
 > pouvait jouer des heures sans que les rouges aient un nom. Les murmures de
 > l'étage 1 et la cage d'escalier disent désormais « un Guet ».
 
-Un Guet a été une âme comme celles qu'on remonte. Il est resté éteint trop
+Un Guet a été une lumière comme celles qu'on remonte. Il est resté éteint trop
 longtemps, et il a fini par le comprendre : **son humain ne le reconnaîtra
 plus.** Personne ne viendra, et il n'y a plus rien à attendre.
 
@@ -65,7 +65,7 @@ montent encore, de celui qui les pousse, de tout ce qui a l'air d'y croire. Il
 veut éteindre ce qui brille, parce qu'il ne brillera plus.
 
 C'est ce qui rend l'escorte insupportable au bon sens du terme : **ce qui te
-poursuit, c'est ce que tes âmes deviendront si tu les laisses en bas.**
+poursuit, c'est ce que tes lumières deviendront si tu les laisses en bas.**
 
 On ne tue donc pas un Guet : il n'y a rien à tuer, il est déjà perdu. On peut
 l'aveugler un instant, ou lui donner quelque chose de mieux à regarder.
@@ -94,7 +94,7 @@ faire.
 ## Son but
 
 Un Seuil ne s'ouvre pas avec une clé. Il s'ouvre quand assez de lumière se tient
-dedans. Chaque âme que Falot y amène y laisse sa flamme, et quand il y en a
+dedans. Chaque lumière que Falot y amène y laisse sa flamme, et quand il y en a
 assez, le passage cède. Il pousse les siens devant lui, puis il monte à leur
 suite — vidé de tout ce qu'il avait retrouvé.
 
@@ -138,7 +138,7 @@ Et ce qu'il a retrouvé, il le donne au Seuil. Tout. C'est le prix du passage.
 > est gardé le temps d'une passe d'écriture.
 
 C'est le trou le plus voyant de la première version : ton halo, ton faisceau et
-celui de chaque âme qui te suit te font repérer, alors qu'une torche au mur ou
+celui de chaque lumière qui te suit te font repérer, alors qu'une torche au mur ou
 une braise posée t'effacent. Deux lumières, deux effets contraires, et aucune
 raison donnée.
 
@@ -152,7 +152,7 @@ tombé avant lui. La forme exacte de Falot.
 
 De là, tout découle :
 
-- **Ce que tu portes te trahit.** Ton halo, ton faisceau, une âme rallumée
+- **Ce que tu portes te trahit.** Ton halo, ton faisceau, une lumière rallumée
   derrière toi : chacun est une petite lumière isolée de plus. Plus tu en
   traînes, plus vite il comprend ce qu'il regarde — c'est la jauge d'escorte,
   et elle n'a jamais eu d'autre explication.
@@ -162,7 +162,7 @@ De là, tout découle :
   dedans : **on ne repère pas une bougie dans un brasier.** Tu n'es pas caché,
   tu n'as simplement plus la forme qu'il cherche.
 - **Et ça vaut pour qui se serre contre toi.** L'abri n'est pas un statut, c'est
-  une place : chaque âme qui dépasse du halo redevient une petite lumière seule.
+  une place : chaque lumière qui dépasse du halo redevient une petite lumière seule.
 - **La pierre n'est ni l'un ni l'autre.** Elle ne brille pas du tout. C'est la
   seule chose ici qui puisse déplacer un regard sans le nourrir.
 - **Trop d'un coup l'aveugle.** L'éclat du Solaire ne l'éclaire pas : il efface
@@ -230,7 +230,7 @@ peut pas ouvrir un mur avec de la lumière.
 | Un Guet ne franchit jamais une porte | Commodité de jeu, pas règle du monde : ça donne un abri qui ne coûte pas de lumière. À lever le jour où l'on voudra durcir — rien dans la fiction ne l'interdit |
 | Sa jauge monte plus vite si le convoi est gros | Plus il y a à regarder, plus vite il comprend ce qu'il regarde |
 | Mourir se dit « éteint », on repart du seuil | On ne meurt pas ici ; se rallumer coûte du temps, pas la vie |
-| Les âmes livrées restent, le convoi se disperse | Ce qui a franchi le Seuil est hors d'atteinte ; ce qu'il portait encore tombe avec lui |
+| Les lumières livrées restent, le convoi se disperse | Ce qui a franchi le Seuil est hors d'atteinte ; ce qu'il portait encore tombe avec lui |
 | Un fil marque le chemin déjà parcouru | Il ne connaît pas les Dessous, seulement ce qu'il a déjà traversé |
 | Des torches éteintes au mur, qu'on rallume en passant | Laissées par ceux qui sont passés avant. Elles ne brûlent plus : c'est Falot qui les reprend, avec ce qu'il lui reste |
 | Une torche reprise ne s'éteint plus | Ce qu'on redonne au monde, on ne le reprend pas. Seule celle qu'on **porte** se consume : elle se vide parce qu'on la promène |
@@ -240,14 +240,14 @@ peut pas ouvrir un mur avec de la lumière.
 | Des murs fêlés qu'une pierre ouvre | Personne n'a bâti les Dessous : on y a entassé. Ça tient mal, et la lumière ne perce pas la pierre — seule la chose qui ne brille pas le peut |
 | On repart Peureux à chaque nouvelle zone | Il a tout donné au Seuil, et il le paie à chaque fois |
 | On le voit se vider avant de passer | La lumière quitte son corps par filets et rejoint le portail ; le halo se referme jusqu'à presque rien |
-| Le corps d'une âme se remplit pendant qu'on l'éclaire | On la rallume vraiment : le niveau monte en elle, du contour sombre au vert plein |
+| Le corps d'une lumière se remplit pendant qu'on l'éclaire | On la rallume vraiment : le niveau monte en elle, du contour sombre au vert plein |
 | Une carte verticale entre deux zones | Les Dessous sont un bâtiment. Chaque Seuil est un étage de plus vers la surface |
-| Une âme rallumée dit une phrase | Ce sont des gens. On ne l'entend que si on a sauvé quelqu'un, et le jeu ne s'arrête pas pour autant |
+| Une lumière rallumée dit une phrase | Ce sont des gens. On ne l'entend que si on a sauvé quelqu'un, et le jeu ne s'arrête pas pour autant |
 | Des phrases pâles posées dans le décor | D'autres sont passés ici. Ce qu'ils ont compris est resté sur place, comme le reste |
 | Falot peut souffler sa propre lumière | Il ne s'éteint pas, il se couvre : il garde sa couleur, mais il n'éclaire plus rien et un Guet n'a plus de lampe à regarder. Le prix est immédiat — on n'y voit soi-même presque plus rien |
 | Un Falot soufflé ne laisse pas de fil | Il n'y a pas de trace sans lumière. C'est ce qui sème un traqueur |
 | Soufflé, on n'est plus que deux yeux | Il ne s'éteint pas, il se couvre : son corps disparaît dans le noir comme celui de n'importe qui d'ici, et on ne dirige plus que son regard |
-| Sauf dans la lumière de quelqu'un d'autre | Une torche, un faisceau : on le voit en entier, mais vidé de sa couleur, comme une âme qu'on n'a pas encore rallumée. Se couvrir n'est pas disparaître |
+| Sauf dans la lumière de quelqu'un d'autre | Une torche, un faisceau : on le voit en entier, mais vidé de sa couleur, comme une lumière qu'on n'a pas encore rallumée. Se couvrir n'est pas disparaître |
 | Trois secondes de souffle, pas plus | Se couvrir est un geste, pas un état. La réserve se refait deux fois plus lentement qu'elle ne se dépense |
 | Soufflé, il ne touche plus aux torches | Couvert, il ne donne pas de lumière — il n'en prend pas non plus |
 | Une ombre sous chaque corps | Personne ne marche ici : ce sont des lumières, et elles flottent |
@@ -256,8 +256,10 @@ peut pas ouvrir un mur avec de la lumière.
 | Du sol qui craque sous qui se presse | Les Dessous ont brûlé par endroits. Un bruit ne demande pas de ligne de vue |
 | Un Guet qui refait ton chemin | Une lumière laisse une trace, et il a compris qu'il suffisait de la remonter |
 | Un Guet qui n'a pas de dos | Il ne cherche pas une direction, il regarde ce qui est éclairé. Une torche te dénonce au lieu de te couvrir |
-| Des âmes qui reculent devant ta lumière | Elles en ont trop vu de près. Il faut venir les chercher dans le noir |
+| Des lumières qui reculent devant ta lumière | Elles en ont trop vu de près. Il faut venir les chercher dans le noir |
 | Une porte qui tient tant qu'on pèse dessus | Les Dessous ne sont pas bâtis, ils sont entassés : ce qui tient, tient par le poids |
+| Ce qu'on remonte, ce sont des lumières | Pas des âmes, pas des gens : ce qui est tombé quand quelqu'un a débranché une veilleuse ou soufflé une flamme. Une seule histoire, pas deux |
+| Il ne rejoint jamais ce qu'il éclaire | Une lumière se tient toujours à l'autre bout de son faisceau. S'approcher, c'est cesser d'éclairer ; il recule, et ça reste allumé |
 | Un premier étage écrit à la main, les suivants tirés au sort | Le bas du puits a une forme ; au-dessus, plus personne ne sait |
 
 ## Ce qui est arrêté (les quatre questions)
@@ -266,18 +268,23 @@ Ces quatre points ont longtemps été « à débattre ». Ils sont tranchés, et
 détail — la campagne, les étages, la fin — est dans
 [`lux-campagne.md`](lux-campagne.md).
 
-1. **La fin.** Falot **sort, et il retombe**. Les âmes qu'il remonte sont le
-   bonheur des gens d'en haut : chacune retrouve le sien, et on les voit le
-   faire. Lui aussi y arrive — son humain le reconnaît, ils se rapprochent, et
-   au moment de se lier, **l'homme oublie**. Alors il retombe tout en bas, et
-   ça recommence. Cet homme malade, moqué, qui ne se souvient de rien, est le
-   seul à tenir le bonheur des autres allumé — et on ne le dit jamais.
-2. **Falot sait-il ce qu'est un Guet ?** **Non.** S'il savait qu'une âme
+1. **La fin.** Falot **les remonte toutes, et il ne rejoint jamais la
+   sienne**. Ce qu'il escorte, ce sont des LUMIÈRES — celles du premier
+   paragraphe de ce document, et rien d'autre : on a un temps raconté « le
+   bonheur des gens », et ça faisait deux histoires au lieu d'une. Elles
+   repartent allumer quelque chose là-haut, et on les voit le faire : une
+   veilleuse, une bougie, un lampadaire, un phare. Puis vient la sienne, et
+   **plus il s'approche, moins il l'éclaire** — une lumière se tient toujours
+   à l'autre bout de son faisceau. Alors il recule pour que ça reste allumé,
+   et il redescend parce qu'il en reste à remonter. C'est la règle du jeu
+   entier qui lui prend la seule chose qu'il voulait : ce qui est posé
+   t'efface, ce que tu portes te trahit.
+2. **Falot sait-il ce qu'est un Guet ?** **Non.** S'il savait qu'une lumière
    abandonnée finit par devenir ça, remonter serait un calcul ; il faut que ce
    soit un geste.
-3. **Voit-on le monde d'en haut ?** **Oui, une fois** : la rue au crépuscule,
-   les gens qui se rallument, et lui. C'est la scène de fin, et elle ne sert
-   qu'une fois.
+3. **Voit-on le monde d'en haut ?** **Oui, une fois** : quatre fenêtres sur
+   quatre vies, et la sienne. C'est la scène de fin, et elle ne sert qu'une
+   fois.
 4. **Le nom du monde.** **Les Dessous.**
 
 ## Point 2 — l'étage 1 (fait)
@@ -300,7 +307,7 @@ et chaque salle est un moment du récit plutôt qu'un tutoriel.
    regarder pour le rallumer — *le faisceau, calmer*.
 4. Un couloir à traverser à deux, avec un Guet au bout — *le convoi rend
    visible*.
-5. Un Seuil qui demande deux âmes quand on n'en a qu'une — *il faut retourner en
+5. Un Seuil qui demande deux lumières quand on n'en a qu'une — *il faut retourner en
    chercher une*.
 
 Cinq salles, aucun texte d'explication : chaque règle est apprise par une

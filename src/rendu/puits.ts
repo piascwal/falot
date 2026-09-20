@@ -132,9 +132,9 @@ export function dessinerPuits(ecran: Ecran, partie: Partie, temps: number): void
       3,
     );
 
-    // les âmes laissées sur ce palier : de petites lumières, alignées
-    const ames = franchi?.ames ?? 0;
-    for (let i = 0; i < ames; i++) {
+    // les lumières laissées sur ce palier : de petits ronds, alignés
+    const lumieres = franchi?.lumieres ?? 0;
+    for (let i = 0; i < lumieres; i++) {
       const px = ex(-LARGE + CASE * 0.75 + i * CASE * 0.42);
       const py = ey(y) - 9;
       const g = ctx.createRadialGradient(px, py, 0, px, py, 11);
@@ -199,11 +199,11 @@ export function dessinerPuits(ecran: Ecran, partie: Partie, temps: number): void
   portail(ecran, ex(0), ey(0), CASE * 0.62, clamp(1 - puits.h * 1.6, 0, 1));
   portail(ecran, ex(0), ey(-ETAGE), CASE * 0.62, clamp(puits.h * 1.4 - 0.15, 0, 1));
 
-  // --- LES ÂMES QUI LE SUIVENT ---
+  // --- LES LUMIÈRES QUI LE SUIVENT ---
   // Celles qu'il vient de livrer montent derrière lui, à la queue leu leu.
   // Elles ne sont pas un décor : c'est le compte exact de ce qu'il remonte,
   // et c'est la seule raison pour laquelle il grimpe.
-  const livrees = partie.montee.find((m) => m.etage === puits.arrivee - 1)?.ames ?? 0;
+  const livrees = partie.montee.find((m) => m.etage === puits.arrivee - 1)?.lumieres ?? 0;
   for (let i = 0; i < Math.min(livrees, 6); i++) {
     // chacune traîne un peu plus que la précédente, et ondule
     const retard = (i + 1) * 0.055;

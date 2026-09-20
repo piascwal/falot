@@ -14,7 +14,7 @@ import type { Partie, Perso, Torche, Zone } from '../types.js';
 
 /**
  * LE CONVOI SOUFFLE SA LUMIÈRE. Dès qu'un Guet se doute de quelque chose, les
- * âmes rallumées s'éteignent : elles n'éclairent plus, et on ne les voit plus.
+ * lumières rallumées s'éteignent : elles n'éclairent plus, et on ne les voit plus.
  * Il ne reste que ce que Falot porte — c'est lui qui se fait prendre, pas ceux
  * qu'il emmène.
  *
@@ -100,7 +100,7 @@ export const aLAbri = (z: Zone, x: number, y: number, portee?: Torche | null): b
  * ÉCLAIRÉ PAR QUELQU'UN D'AUTRE. La question n'est pas la même que « est-ce
  * éclairé » : à zéro distance de lui-même, Falot est toujours dans son propre
  * halo, si petit soit-il. Soufflé, il fallait donc savoir si une AUTRE
- * lumière le touche — une torche, une braise, le faisceau d'une âme rallumée.
+ * lumière le touche — une torche, une braise, le faisceau de quelqu'un qu'on a rallumé.
  * Sans ça, « on ne voit que ses yeux dans le noir » n'arrivait jamais.
  */
 export function eclaireParAutrui(partie: Partie, x: number, y: number): boolean {

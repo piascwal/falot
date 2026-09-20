@@ -3,7 +3,7 @@
  *
  * On redevient Peureux à chaque nouvelle zone : c'est le prix du Seuil, et tout
  * se regagne sur place. Ce qui survit d'un étage à l'autre tient en une ligne —
- * `partie.montee`, les âmes remontées derrière soi — et c'est exactement le
+ * `partie.montee`, les lumières remontées derrière soi — et c'est exactement le
  * propos du jeu.
  */
 

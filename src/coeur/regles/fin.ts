@@ -1,16 +1,20 @@
 /**
- * LA FIN — il sort, et il retombe.
+ * LA FIN — ce que deviennent les lumières, et pourquoi il retombe.
  *
- * Falot ne monte pas pour s'échapper : il monte pour retrouver SON humain.
- * Les âmes qu'il remonte sont le bonheur des gens d'en haut, et chacune finit
- * par retrouver le sien. Lui aussi y arrive. Son humain le reconnaît, ils se
- * rapprochent — et au moment de se lier, l'homme oublie.
+ * Le scénario ne parle plus d'âmes : ce sont des LUMIÈRES, et rien d'autre.
+ * Falot les remonte, elles repartent allumer quelque chose là-haut, et on le
+ * voit — un enfant, un couple, un trottoir sous la pluie, un bateau au large.
  *
- * Alors il retombe, tout en bas, et ça recommence. C'est la seule fin possible
- * pour un jeu dont le sujet est l'oubli : il n'y a personne à blâmer, et il
- * reste des âmes à remonter.
+ * Puis vient la sienne. Elle l'attend, elle est là, et il ne peut pas la
+ * rejoindre : **une lumière est toujours à l'autre bout du faisceau.** Plus
+ * il s'approche, moins il éclaire ; collé à la vitre, il n'éclaire plus rien
+ * du tout. C'est la règle que le jeu enseigne depuis le premier étage — ce
+ * qui est posé t'efface, ce que tu portes te trahit — retournée contre lui.
  *
- * Quatre temps, rien à cliquer. Une commande tenue accélère : on peut avoir
+ * Il n'y a donc personne à blâmer, et rien à réparer : il recule pour que ça
+ * reste allumé, et il redescend parce qu'il en reste à remonter.
+ *
+ * Cinq temps, rien à cliquer. Une commande tenue accélère : on peut avoir
  * déjà vu la fin sans vouloir l'attendre une deuxième fois.
  */
 
@@ -22,19 +26,23 @@ import { lancerLaChute } from './seuil.js';
 
 /**
  * La durée de chaque temps, en secondes, dans l'ordre où ils viennent :
- *   — les autres âmes retrouvent les leurs ;
- *   — le sien le reconnaît, et ils se rapprochent ;
- *   — il oublie ;
- *   — Falot retombe.
+ *   — L'ESCORTE : Falot, en bleu, mène son convoi de lumières à la surface ;
+ *   — LE FIL : elles le quittent et prennent un fil, comme celui qu'il laisse
+ *     derrière lui, qui se sépare en quatre ;
+ *   — LES QUATRE : chacune allume sa scène, et on les voit toutes les quatre ;
+ *   — LA SIENNE : sa fenêtre à lui, et ce qui se passe quand il s'approche ;
+ *   — LA CHUTE : il redescend.
  */
 export const TEMPS_FIN = {
-  retrouvailles: 6,
-  retrouve: 5,
-  oubli: 4,
+  escorte: 5,
+  fil: 2.6,
+  quatre: 8,
+  sienne: 9,
   chute: 4.5,
 } as const;
-export const DUREE_FIN =
-  TEMPS_FIN.retrouvailles + TEMPS_FIN.retrouve + TEMPS_FIN.oubli + TEMPS_FIN.chute;
+export type EtapeFin = keyof typeof TEMPS_FIN;
+const ORDRE = ['escorte', 'fil', 'quatre', 'sienne', 'chute'] as const;
+export const DUREE_FIN = ORDRE.reduce((a, e) => a + TEMPS_FIN[e], 0);
 
 export function lancerLaFin(partie: Partie): void {
   partie.fin = { t: 0 };
@@ -43,10 +51,10 @@ export function lancerLaFin(partie: Partie): void {
   partie.joueur.vy = 0;
 }
 
-/** Où en est-on de la fin : le temps écoulé, découpé en quatre. */
-export function tempsFin(t: number): { etape: keyof typeof TEMPS_FIN; k: number } {
+/** Où en est-on de la fin : le temps écoulé, découpé en cinq. */
+export function tempsFin(t: number): { etape: EtapeFin; k: number } {
   let reste = t;
-  for (const etape of ['retrouvailles', 'retrouve', 'oubli', 'chute'] as const) {
+  for (const etape of ORDRE) {
     const d = TEMPS_FIN[etape];
     if (reste < d) return { etape, k: clamp(reste / d, 0, 1) };
     reste -= d;
@@ -66,7 +74,7 @@ export function majFin(partie: Partie, dt: number): void {
 
   // ET ÇA RECOMMENCE. Il est retombé tout en bas, là où le jeu a commencé.
   // Pas un mode déverrouillé, pas un bonus : la même descente, parce qu'il
-  // reste des âmes et qu'il ne se souvient déjà plus d'avoir échoué.
+  // reste des lumières et qu'il n'a pas choisi autre chose.
   partie.fin = null;
   partie.finVue = true;
   chargerZone(partie, 1);

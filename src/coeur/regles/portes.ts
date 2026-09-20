@@ -1,7 +1,7 @@
 /**
  * Les portes, et l'éboulement d'un mur fêlé.
  *
- * Une porte s'ouvre pour QUI QUE CE SOIT — joueur comme âme — et se referme
+ * Une porte s'ouvre pour QUI QUE CE SOIT — joueur comme lumière — et se referme
  * seule. C'est ce qui en fait un objet de tension et pas un verrou : s'en
  * approcher ouvre le couloir au regard d'en face, exactement au moment où on
  * voudrait rester caché. Un Guet, lui, n'en pousse jamais aucune : c'est la
@@ -22,7 +22,7 @@ export function majPortes(partie: Partie, dt: number): void {
   const { joueur, zone } = partie;
 
   // LA PESÉE. Une dalle chargée tient sa porte ouverte : Falot peut y rester —
-  // et alors il ne passe pas — ou y laisser une âme et revenir la chercher.
+  // et alors il ne passe pas — ou y laisser une lumière et revenir la chercher.
   for (const dl of zone.dalles) {
     dl.pesee =
       Math.hypot(joueur.x - dl.x, joueur.y - dl.y) < CASE * 0.5 ||

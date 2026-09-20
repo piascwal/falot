@@ -23,7 +23,7 @@ import { estEclaire } from './lumiere.js';
 export function suivre(partie: Partie, p: Perso, dt: number): void {
   const { joueur, zone } = partie;
 
-  // LA PESÉE. Une âme qui marche sur une dalle s'y arrête et n'en bouge plus :
+  // LA PESÉE. Une lumière qui marche sur une dalle s'y arrête et n'en bouge plus :
   // elle tient la porte. On la reprend en revenant la chercher — c'est tout ce
   // que l'étage 9 demande, et ça se découvre en le voyant arriver.
   if (zone.dalles.length) {
@@ -51,7 +51,7 @@ export function suivre(partie: Partie, p: Perso, dt: number): void {
   // Le portail aspire : sans ça un suiveur gardait son espacement derrière le
   // joueur et n'entrait jamais dans le rayon de livraison, même collé dessus.
   // Le portail aspire quoi qu'il arrive, même une fois le quota atteint : une
-  // âme amenée jusque-là ne doit jamais rester plantée devant la porte sous
+  // lumière amenée jusque-là ne doit jamais rester plantée devant la porte sous
   // prétexte que le compte est bon. Elle entre, et ce qu'on a sauvé de plus
   // est sauvé quand même.
   const versPortail = Math.hypot(zone.sortie.x - p.x, zone.sortie.y - p.y);

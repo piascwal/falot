@@ -76,7 +76,7 @@ function plan(dessin: string[]): Zone {
     reprises: [],
     murmures: [],
     depart: { x: CASE * 1.5, y: CASE * 1.5 },
-    sortie: { x: CASE * 1.5, y: CASE * 1.5, r: CASE * 0.55, vue: false, ames: 0 },
+    sortie: { x: CASE * 1.5, y: CASE * 1.5, r: CASE * 0.55, vue: false, lumieres: 0 },
     requis: 1,
     largeur: cols * CASE,
     hauteur: lignes * CASE,

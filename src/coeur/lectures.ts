@@ -59,7 +59,7 @@ export const porteeFaisceau = (j: Joueur): number =>
 export const coneFaisceau = (j: Joueur): number => forme(j).cone;
 
 /**
- * Le joueur a peur des mêmes choses que ses âmes, plus une : sentir sa propre
+ * Le joueur a peur des mêmes choses que ses lumières, plus une : sentir sa propre
  * lumière se faire manger. Et viser à la pierre passe avant tout le reste :
  * c'est un geste volontaire, il mérite son visage à lui.
  *

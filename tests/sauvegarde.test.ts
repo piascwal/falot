@@ -34,22 +34,22 @@ afterEach(() => vi.unstubAllGlobals());
 describe('la progression', () => {
   it('part vide, et retient un premier étage', () => {
     expect(lireProgression()).toEqual({ atteint: 1, finVue: false, etages: {} });
-    const p = retenirBilan(1, { lumiere: 0.4, ames: 2, amesTotal: 3, morts: 2 }, 2);
+    const p = retenirBilan(1, { lumiere: 0.4, lumieres: 2, lumieresTotal: 3, morts: 2 }, 2);
     expect(p.atteint).toBe(2);
     expect(p.etages[1].lumiere).toBeCloseTo(0.4, 5);
   });
 
   it('ne garde jamais le pire, colonne par colonne', () => {
-    retenirBilan(3, { lumiere: 0.9, ames: 1, amesTotal: 4, morts: 5 }, 4);
-    const p = retenirBilan(3, { lumiere: 0.2, ames: 4, amesTotal: 4, morts: 0 }, 4);
+    retenirBilan(3, { lumiere: 0.9, lumieres: 1, lumieresTotal: 4, morts: 5 }, 4);
+    const p = retenirBilan(3, { lumiere: 0.2, lumieres: 4, lumieresTotal: 4, morts: 0 }, 4);
     // le meilleur de chaque colonne : c'est ce qu'on cherche — finir par tout
     // avoir, pas réussir tout d'un coup
-    expect(p.etages[3]).toEqual({ lumiere: 0.9, ames: 4, amesTotal: 4, morts: 0 });
+    expect(p.etages[3]).toEqual({ lumiere: 0.9, lumieres: 4, lumieresTotal: 4, morts: 0 });
   });
 
   it('ne redescend jamais l’étage atteint', () => {
-    retenirBilan(7, { lumiere: 1, ames: 1, amesTotal: 1, morts: 0 }, 8);
-    const p = retenirBilan(2, { lumiere: 1, ames: 1, amesTotal: 1, morts: 0 }, 3);
+    retenirBilan(7, { lumiere: 1, lumieres: 1, lumieresTotal: 1, morts: 0 }, 8);
+    const p = retenirBilan(2, { lumiere: 1, lumieres: 1, lumieresTotal: 1, morts: 0 }, 3);
     expect(p.atteint).toBe(8);
   });
 

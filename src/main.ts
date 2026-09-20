@@ -128,7 +128,12 @@ function corpsBoucle(maintenant: number): void {
     const b = partie.bilan;
     retenirBilan(
       b.etage,
-      { lumiere: b.lumiere, ames: b.ames, amesTotal: b.amesTotal, morts: b.morts },
+      {
+        lumiere: b.lumiere,
+        lumieres: b.lumieres,
+        lumieresTotal: b.lumieresTotal,
+        morts: b.morts,
+      },
       b.suivante,
     );
   }

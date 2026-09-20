@@ -1,5 +1,5 @@
 /**
- * Les personnages : les deux couleurs d'âmes, et les Guets.
+ * Les personnages : les deux couleurs de lumières, et les Guets.
  *
  * Un Guet est une SENTINELLE : il ne te voit que dans son cône, donc on peut le
  * contourner, passer dans son dos, attendre que son balayage s'éloigne. Sa
@@ -116,10 +116,10 @@ export function majPersos(partie: Partie, dt: number, eclaires: Set<Perso>): voi
           vueLibre(zone, p.x, p.y, joueur.x, joueur.y)
         : d < CASE * 5 && vueLibre(zone, p.x, p.y, joueur.x, joueur.y);
 
-    // Une âme ne porte pas une humeur de naissance : elle porte celle de la
+    // Une lumière ne porte pas une humeur de naissance : elle porte celle de la
     // situation, exactement comme le joueur. Calculée avant son déplacement,
     // donc sur la vitesse de l'image précédente — un retard invisible.
-    // Une âme à l'abri porte le même visage apaisé que Falot : d'un coup
+    // Une lumière à l'abri porte le même visage apaisé que Falot : d'un coup
     // d'œil on voit lesquels de ses suiveurs sont couverts et lesquels
     // dépassent de la lumière.
     if (p.emotion !== EMOTIONS.COLERE) {

@@ -62,16 +62,16 @@ export function paniquer(partie: Partie, q: Perso): void {
   q.baseX = q.x;
   q.baseY = q.y;
   emettre(partie, q.x, q.y - D.taille * 0.8, '#8fd0ff', 8, 70);
-  montrerToast(partie, "Une âme t'échappe !");
+  montrerToast(partie, "Une lumière t'échappe !");
   for (const r of zone.persos) if (r.suit && r.rang > q.rang) r.rang--;
 }
 
-// Un point de sol libre au plus près d'une position : les âmes lâchées ne
+// Un point de sol libre au plus près d'une position : les lumières lâchées ne
 // doivent pas se retrouver dans la pierre.
 // Elles se répandent autour du point de chute plutôt que de s'y empiler :
-// cinq âmes sur un même pixel, on n'en voit qu'une et on croit en avoir perdu
+// cinq lumières sur un même pixel, on n'en voit qu'une et on croit en avoir perdu
 // quatre pour de bon. On balaye en spirale et on refuse une place déjà prise —
-// un cap figé par âme ne suffisait pas, celle dont le cap pointait dans la
+// un cap figé par lumière ne suffisait pas, celle dont le cap pointait dans la
 // pierre restait plantée au centre avec les autres.
 function solLibrePres(
   partie: Partie,
@@ -142,7 +142,7 @@ export function eteindre(partie: Partie): void {
   montrerToast(
     partie,
     perdues
-      ? `Éteint — ${perdues} âme${perdues > 1 ? 's' : ''} lâchée${perdues > 1 ? 's' : ''} là où tu es tombé`
+      ? `Éteint — ${perdues} lumière${perdues > 1 ? 's' : ''} lâchée${perdues > 1 ? 's' : ''} là où tu es tombé`
       : 'Éteint — tu repars du seuil',
   );
 

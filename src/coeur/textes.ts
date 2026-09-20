@@ -10,7 +10,7 @@
 
 import { EMOTIONS, type Emotion } from './formes.js';
 
-// Ce que disent les âmes qu'on rallume. Le meilleur canal possible : il est
+// Ce que disent les lumières qu'on rallume. Le meilleur canal possible : il est
 // mérité — on ne l'entend qu'après avoir sauvé quelqu'un —, il est diégétique
 // — ce sont des gens qui parlent —, et il est inépuisable.
 export const REPLIQUES: Partial<Record<Emotion, readonly string[]>> = {
@@ -30,7 +30,7 @@ export const REPLIQUES: Partial<Record<Emotion, readonly string[]>> = {
   ],
 };
 
-// Ce que dit une âme qu'on ne peut pas ENCORE rallumer. Sans ça on tourne
+// Ce que dit une lumière qu'on ne peut pas ENCORE rallumer. Sans ça on tourne
 // autour d'elle en cherchant quoi faire, et l'échec n'apprend rien.
 export const ETEINTS: readonly string[] = [
   'On m’a vidé. Il m’en faudrait un peu de la tienne — elle est trop petite.',
@@ -63,18 +63,23 @@ export const RECIT_PLUS_HAUT: readonly string[] = [
 ];
 
 /**
- * LA FIN. Falot sort, et il retombe.
+ * LA FIN — ce que deviennent les lumières qu'il a remontées.
  *
- * Les âmes qu'il remonte sont le bonheur des gens d'en haut : chacune finit
- * par retrouver le sien, et on les voit le faire. Lui aussi y arrive — son
- * humain le reconnaît, ils se rapprochent, et au moment de se lier, l'homme
- * oublie. Il n'y a personne à blâmer, et il reste des âmes à remonter.
+ * Ce ne sont pas des âmes, et ça n'a jamais été des gens : ce sont des
+ * LUMIÈRES. Chacune retourne allumer quelque chose là-haut — une veilleuse,
+ * une bougie, un lampadaire, un phare. On les voit le faire, en quatre.
  *
- * Quatre phrases en tout. Le reste est dans l'image.
+ * Puis vient la sienne, et la seule chose qu'il n'aura jamais : on ne peut
+ * pas entrer dans ce qu'on éclaire. Une lumière est toujours à l'autre bout
+ * du faisceau — c'est exactement la règle que le joueur apprend depuis douze
+ * étages, prise par le bout qui fait mal.
+ *
+ * Cinq phrases en tout. Le reste est dans l'image.
  */
 export const FIN = {
-  retrouvailles: 'Chacune retrouve le sien.',
-  retrouve: 'Le sien le reconnaît.',
-  oubli: 'Il a oublié.',
+  escorte: 'Il les a toutes remontées.',
+  quatre: 'Quelque part, quelqu’un a moins peur.',
+  sienne: 'La sienne l’attend.',
+  loin: 'Mais on n’entre pas dans ce qu’on éclaire.',
   chute: 'Alors il redescend. Il en reste à remonter.',
 } as const;

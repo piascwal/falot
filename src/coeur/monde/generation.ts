@@ -215,7 +215,7 @@ export function genererZone(
 
     // On pose d'abord les PLACES, on décide la composition ensuite. Tirer
     // l'émotion place par place ne garantissait rien : une zone pouvait naître
-    // avec une seule âme à calmer — le portail en réclamait alors plus qu'il
+    // avec une seule lumière à calmer — le portail en réclamait alors plus qu'il
     // n'en existait — ou, après qu'on eut écarté ces variantes-là, sans la
     // moindre sentinelle, c'est-à-dire sans le moindre danger.
     const places: Case[] = [];
@@ -303,7 +303,7 @@ export function genererZone(
     if (!lueurs.every(joignable)) continue;
 
     // Filet de sécurité : les quotas sont déjà garantis plus haut, mais une
-    // place peut être perdue en chemin. Une zone sans assez d'âmes est
+    // place peut être perdue en chemin. Une zone sans assez de lumières est
     // infinissable, une zone sans sentinelle est sans danger.
     const calmables = persos.filter((q) => q.emotion !== EMOTIONS.COLERE).length;
     if (calmables < MINI_AMES) continue;
@@ -429,7 +429,7 @@ export function genererZone(
       }
     }
 
-    // LES FAROUCHES. Toutes les âmes de cet étage ont trop vu de lumière :
+    // LES FAROUCHES. Toutes les lumières de cet étage en ont trop vu de près :
     // aucune ne se laisse rallumer au faisceau. C'est la salle entière qui
     // enseigne, pas une exception cachée dans un coin.
     if (traits.includes('farouches')) {
@@ -439,7 +439,7 @@ export function genererZone(
     // LA PESÉE. Une porte scellée, et la dalle qui la commande. On ne scelle
     // JAMAIS un passage obligé : la règle est la même que pour les fissures —
     // le Seuil doit rester atteignable avec cette porte condamnée, sinon
-    // laisser une âme derrière soi deviendrait un piège au lieu d'un choix.
+    // laisser une lumière derrière soi deviendrait un piège au lieu d'un choix.
     const dalles: Dalle[] = [];
     if (traits.includes('pesee') && portes.length) {
       const ordre = [...portes];
@@ -546,7 +546,7 @@ export function genererZone(
       cendres,
       vues: z.mur.map((rang) => rang.map(() => 0)),
       depart: { x: (depart.cx + 0.5) * CASE, y: (depart.cy + 0.5) * CASE },
-      // Le portail ne compte plus des lueurs mais des ÂMES : il faut lui
+      // Le portail ne compte plus des lueurs mais des LUMIÈRES : il faut lui
       // amener des bonhommes calmés. Les lueurs redeviennent ce qu'elles
       // auraient toujours dû être — du carburant, pas un objectif.
       sortie: {
@@ -554,10 +554,10 @@ export function genererZone(
         y: (leSeuil.cy + 0.5) * CASE,
         r: CASE * 0.55,
         vue: false,
-        ames: 0,
+        lumieres: 0,
       },
-      // Nombre d'âmes à livrer. Il en reste toujours au moins une de rab :
-      // une âme rattrapée par un rouge panique et redevient à calmer, et on
+      // Nombre de lumières à livrer. Il en reste toujours au moins une de rab :
+      // une lumière rattrapée par un rouge panique et redevient à calmer, et on
       // ne doit jamais se retrouver coincé pour autant.
       requis: Math.max(2, Math.min(calmables - 1, 2 + Math.floor(numero / 2))),
       largeur: z.cols * CASE,

@@ -135,7 +135,7 @@ function poserLaGrille(partie: Partie, tout: boolean): void {
       const barre = document.createElement('i');
       barre.style.setProperty('--part', `${Math.round(trace.lumiere * 100)}%`);
       b.appendChild(barre);
-      b.title = `${Math.round(trace.lumiere * 100)} % de lumière, ${trace.ames}/${trace.amesTotal} âmes, pris ${trace.morts} fois`;
+      b.title = `${Math.round(trace.lumiere * 100)} % éclairé, ${trace.lumieres}/${trace.lumieresTotal} lumières, pris ${trace.morts} fois`;
     }
     // `?debug` ouvre tout : pendant qu'on construit, on veut aller voir
     // l'étage 10 sans avoir fait les neuf autres.

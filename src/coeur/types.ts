@@ -23,7 +23,7 @@ export interface Case {
   cy: number;
 }
 
-/** Ce qu'il faut pour dessiner un corps : le joueur et les âmes le partagent. */
+/** Ce qu'il faut pour dessiner un corps : le joueur et les lumières le partagent. */
 export interface Corps extends Point {
   /** Échelle de la gelée, et sa vitesse : le corps s'écrase sur les chocs. */
   sx: number;
@@ -67,13 +67,13 @@ export interface Perso extends Corps {
   pese: boolean;
   /** A-t-il déjà dit qu'il était vide ? */
   aDit: boolean;
-  /** A-t-il déjà payé son calmage ? Une âme ne rapporte qu'une fois. */
+  /** A-t-il déjà payé son calmage ? Une lumière ne rapporte qu'une fois. */
   prime: boolean;
   compteCalme: number;
   fuit: number;
   abri: boolean;
   /**
-   * Une âme rallumée qui SE CACHE : dès qu'un Guet se doute de quelque chose,
+   * Une lumière rallumée qui SE CACHE : dès qu'un Guet se doute de quelque chose,
    * le convoi souffle sa lumière. Il cesse d'éclairer, et cesse d'être vu —
    * seule la lumière que Falot porte le désigne encore. C'est ce qui rend
    * l'escorte lisible : on se fait prendre pour ce qu'on porte, pas pour ceux
@@ -249,7 +249,7 @@ export interface Porte extends Case, Point {
 /**
  * LA PESÉE (étage 9). Une dalle qui commande une porte scellée : elle ne
  * s'ouvre que tant que quelque chose pèse dessus. Falot peut y rester — et
- * alors il ne passe pas — ou y laisser une âme, et revenir la chercher.
+ * alors il ne passe pas — ou y laisser une lumière, et revenir la chercher.
  *
  * La porte retombe LENTEMENT une fois la dalle relâchée : c'est ce qui laisse
  * le temps de repasser avec celle qu'on était venu rechercher.
@@ -305,8 +305,8 @@ export interface Bilan {
   etage: number;
   /** La part du plancher qu'on a éclairée, de 0 à 1. */
   lumiere: number;
-  ames: number;
-  amesTotal: number;
+  lumieres: number;
+  lumieresTotal: number;
   morts: number;
   /** Ce que l'étage suivant vaudra : gardé pour lancer la montée après. */
   suivante: number;
@@ -315,7 +315,7 @@ export interface Bilan {
 export interface Seuil extends Point {
   r: number;
   vue: boolean;
-  ames: number;
+  lumieres: number;
 }
 
 export interface Zone {
@@ -350,7 +350,7 @@ export interface Zone {
   cendres: Case[];
   /**
    * LE PLANCHER QU'ON A ÉCLAIRÉ, case par case. Marqué une fois pour toutes
-   * dès qu'une lumière le touche — la sienne, une torche, une âme rallumée.
+   * dès qu'une lumière le touche — la sienne, une torche, celle de quelqu'un qu'on a rallumé.
    * C'est la matière du bilan de fin d'étage, et la seule chose du jeu qu'on
    * puisse vouloir finir à cent pour cent.
    */
@@ -361,7 +361,7 @@ export interface Zone {
   traits: Trait[];
   depart: Point;
   sortie: Seuil;
-  /** Âmes à livrer pour que le Seuil cède. */
+  /** Lumières à livrer pour que le Seuil cède. */
   requis: number;
   largeur: number;
   hauteur: number;
@@ -469,10 +469,10 @@ export interface Envol {
   reste: number;
 }
 
-/** Un étage vidé, et combien d'âmes y sont remontées. */
+/** Un étage vidé, et combien de lumières y sont remontées. */
 export interface Etage {
   etage: number;
-  ames: number;
+  lumieres: number;
 }
 
 /** Le joystick flottant : il naît sous le doigt, où qu'on le pose. */

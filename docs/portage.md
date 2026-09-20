@@ -16,7 +16,7 @@ a changé — parce qu'un port silencieux est un port qu'on ne peut pas vérifie
    arrière-plan ne doit pas simuler trente secondes d'un coup.
 
 2. **Le hasard du cœur est tiré de la graine** (`partie.hasard()`). Les
-   étincelles, les clignements d'yeux et les positions de repli d'une âme
+   étincelles, les clignements d'yeux et les positions de repli d'une lumière
    lâchée passaient par `Math.random()`. C'est invisible en jouant, et ça
    rendait tout rejeu impossible. Le rendu, lui, garde `Math.random()` :
    s'il consommait le hasard de la simulation, dessiner ferait dériver la
@@ -90,7 +90,7 @@ a changé — parce qu'un port silencieux est un port qu'on ne peut pas vérifie
 
 - **L'étage 1 a changé** après des tests utilisateurs : deux issues fêlées dans
   la salle du réveil, les portes de la galerie désalignées, le couloir de
-  l'escorte élargi à deux cases, la seconde âme déplacée à la bouche du
+  l'escorte élargi à deux cases, la seconde lumière déplacée à la bouche du
   couloir. Le détail et les mesures sont dans
   [`lux-niveau-1.md`](lux-niveau-1.md).
   **Conséquence pour `npm run comparer`** : le POC gelé n'est plus une

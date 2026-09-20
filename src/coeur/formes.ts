@@ -118,7 +118,7 @@ export const EMOTIONS = { PEUR: 'peur', COLERE: 'colere', CURIEUX: 'curieux' } a
 export type Emotion = (typeof EMOTIONS)[keyof typeof EMOTIONS];
 
 // Un visage ne dit pas QUI on est, il dit CE QUI SE PASSE. Trois humeurs, la
-// même règle pour le joueur et pour les âmes qu'il escorte : on court, on
+// même règle pour le joueur et pour les lumières qu'il escorte : on court, on
 // marche, ou quelque chose nous a repérés. Avant, le peureux portait des
 // sourcils d'intrigué en permanence et on ne lisait plus rien sur lui.
 // INQUIET est la peur au repos : mêmes sourcils relevés, mêmes grands yeux,
@@ -135,18 +135,18 @@ export const HUMEURS = {
 } as const;
 export type Humeur = (typeof HUMEURS)[keyof typeof HUMEURS];
 
-// Le vert d'une âme rallumée. Nommé une fois : il sert au corps qui se
+// Le vert d'une lumière rallumée. Nommé une fois : il sert au corps qui se
 // remplit, au personnage une fois calmé, et à ses particules.
 export const RALLUME = '#a8f0c8';
 
-// Le temps qu'il faut pour rallumer une âme. C'est aussi la durée pendant
+// Le temps qu'il faut pour rallumer une lumière. C'est aussi la durée pendant
 // laquelle on VOIT son corps se remplir : la barre de chargement, c'est elle.
 export const DUREE_CALME = 1.1;
 
 // moitié de la vitesse de pointe du joueur : au-delà, on court vraiment
 const SEUIL_COURSE = 150;
 
-// `calme` distingue le repos serein du repos inquiet : une âme qu'on n'a pas
+// `calme` distingue le repos serein du repos inquiet : une lumière qu'on n'a pas
 // encore apprivoisée reste sur ses gardes.
 export const humeurSelon = (
   p: { vx: number; vy: number },

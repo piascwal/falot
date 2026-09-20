@@ -17,7 +17,7 @@ const jouer = (p: Partie, secondes: number) => {
 };
 
 const guets = (p: Partie) => p.zone.persos.filter((q) => q.emotion === EMOTIONS.COLERE);
-const ames = (p: Partie) => p.zone.persos.filter((q) => q.emotion !== EMOTIONS.COLERE);
+const lumieres = (p: Partie) => p.zone.persos.filter((q) => q.emotion !== EMOTIONS.COLERE);
 
 describe('une partie qui démarre', () => {
   let p: Partie;
@@ -270,7 +270,7 @@ describe('un Guet', () => {
       const p = creerPartie({ grain: 'GUET' });
       const g = guets(p)[0];
       seFaireVoir(p, g, 3);
-      const suivants = ames(p).slice(0, convoi);
+      const suivants = lumieres(p).slice(0, convoi);
       for (const q of suivants) {
         q.calme = true;
         q.suit = true;
@@ -281,7 +281,7 @@ describe('un Guet', () => {
       avancer(p, PAS);
       return g.charge;
     };
-    // Chaque âme escortée est une petite lumière de plus dans le cône.
+    // Chaque lumière escortée est un halo de plus dans le cône.
     expect(mesure(2)).toBeGreaterThan(mesure(0));
   });
 
@@ -334,7 +334,7 @@ describe('la mort', () => {
     const p = creerPartie({ grain: 'MORT' });
     gagnerEclat(p, 40);
     const eclat = p.joueur.eclat;
-    const suivants = ames(p).slice(0, 2);
+    const suivants = lumieres(p).slice(0, 2);
     for (const q of suivants) {
       q.calme = true;
       q.suit = true;
@@ -392,15 +392,15 @@ describe('le pierre', () => {
   });
 });
 
-describe('rallumer une âme', () => {
+describe('rallumer une lumière', () => {
   it('la fait suivre, et ne paie sa prime qu’une fois', () => {
     const p = creerPartie({ grain: 'AME' });
-    // Curieux : il a un faisceau. Sans lui, aucune âme ne peut être rallumée —
+    // Curieux : il a un faisceau. Sans lui, aucune lumière ne peut être rallumée —
     // c'est la règle, et l'étage 1 la met en scène avec un Frileux hors
     // d'atteinte.
     p.joueur.niveau = 1;
     p.joueur.regard = 0;
-    const q = ames(p)[0];
+    const q = lumieres(p)[0];
     q.x = p.joueur.x + CASE * 1.5; // droit devant, dans le couloir d'entrée
     q.y = p.joueur.y;
     q.baseX = q.x;
@@ -410,7 +410,7 @@ describe('rallumer une âme', () => {
     expect(q.calme).toBe(true);
     expect(q.suit).toBe(true);
     expect(p.joueur.eclat).toBe(eclat + 6);
-    // Paniquer puis la recalmer ne repaie pas : une âme ne rapporte qu'une fois.
+    // Paniquer puis la recalmer ne repaie pas : une lumière ne rapporte qu'une fois.
     q.calme = false;
     q.compteCalme = 0;
     jouer(p, DUREE_CALME + 0.3);
@@ -422,7 +422,7 @@ describe('rallumer une âme', () => {
 describe('le convoi', () => {
   it('souffle sa lumière dès qu’un Guet se doute de quelque chose', () => {
     const p = creerPartie({ grain: 'CONVOI' });
-    const q = ames(p)[0];
+    const q = lumieres(p)[0];
     q.calme = true;
     q.suit = true;
     q.prime = true;
@@ -435,7 +435,7 @@ describe('le convoi', () => {
     avancer(p, PAS);
     avancer(p, PAS);
     expect(q.eteint).toBe(true);
-    // et une âme éteinte n'éclaire plus personne
+    // et une lumière éteinte n'éclaire plus personne
     expect(p.eclaires.has(q)).toBe(false);
   });
 
@@ -449,7 +449,7 @@ describe('le convoi', () => {
     p.joueur.x = g.x + CASE * 2.5;
     p.joueur.y = g.y;
     p.joueur.repit = 0;
-    for (const q of ames(p).slice(0, 3)) {
+    for (const q of lumieres(p).slice(0, 3)) {
       q.calme = true;
       q.suit = true;
       q.prime = true;
@@ -457,7 +457,7 @@ describe('le convoi', () => {
       q.y = p.joueur.y;
     }
     avancer(p, PAS);
-    // trois âmes collées au joueur, et il ne compte QUE le joueur
+    // trois lumières collées au joueur, et il ne compte QUE le joueur
     expect(g.corpsVus).toBe(1);
   });
 });
@@ -513,7 +513,7 @@ function empreinte(p: Partie): string {
     r(p.joueur.eclat),
     p.joueur.niveau,
     p.joueur.pierres,
-    p.zone.sortie.ames,
+    p.zone.sortie.lumieres,
     p.zone.braises.length,
     p.particules.length,
     p.zone.persos

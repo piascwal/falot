@@ -72,15 +72,15 @@ export function partEclairee(zone: Zone): number {
 
 export function lancerLeBilan(partie: Partie, suivante: number): void {
   const { zone } = partie;
-  // Toutes les âmes de l'étage, livrées ou non : c'est le dénominateur, et
+  // Toutes les lumières de l'étage, livrées ou non : c'est le dénominateur, et
   // c'est ce qui rend un étage « fini » ou seulement traversé.
-  const amesTotal = zone.persos.filter((q) => q.emotion !== EMOTIONS.COLERE).length;
+  const lumieresTotal = zone.persos.filter((q) => q.emotion !== EMOTIONS.COLERE).length;
   partie.bilan = {
     t: 0,
     etage: zone.numero,
     lumiere: partEclairee(zone),
-    ames: zone.sortie.ames,
-    amesTotal,
+    lumieres: zone.sortie.lumieres,
+    lumieresTotal,
     morts: partie.morts,
     suivante,
   };
@@ -106,12 +106,12 @@ export function majBilan(partie: Partie, dt: number): void {
   lancerLePuits(partie, suivante);
 }
 
-/** Un étage parfait : tout éclairé, toutes les âmes, jamais pris. */
+/** Un étage parfait : tout éclairé, toutes les lumières, jamais pris. */
 export const sansFaute = (b: {
   lumiere: number;
-  ames: number;
-  amesTotal: number;
+  lumieres: number;
+  lumieresTotal: number;
   morts: number;
-}): boolean => b.lumiere > 0.995 && b.ames >= b.amesTotal && b.morts === 0;
+}): boolean => b.lumiere > 0.995 && b.lumieres >= b.lumieresTotal && b.morts === 0;
 
 export { DUREE_BILAN, POSE };

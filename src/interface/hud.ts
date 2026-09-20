@@ -1,5 +1,5 @@
 /**
- * L'interface du haut : la zone, les pastilles d'âmes, la jauge de confiance,
+ * L'interface du haut : la zone, les pastilles de lumières, la jauge de confiance,
  * le bandeau, et le bouton pierre.
  *
  * Elle ne fait que REFLÉTER la partie, une fois par image. Aucune règle du jeu
@@ -46,7 +46,7 @@ export function creerHud(): Hud {
   const elBarre = el('barre');
   const elBarreBoite = document.querySelector<HTMLElement>('.barre');
   const elJauge = el('jauge');
-  const elAmes = el('ames');
+  const elLumieres = el('lumieres');
   const elToast = el('toast');
   const elPierre = el<HTMLButtonElement>('pierre');
   const elSouffle = el<HTMLButtonElement>('souffle');
@@ -122,15 +122,15 @@ export function creerHud(): Hud {
       elFanal.hidden = !joueur.fanal && !torcheSousLaMain(partie);
       elFanal.classList.toggle('tenu', joueur.fanal !== null);
 
-      // --- les pastilles d'âmes : on ne les reconstruit que si le compte bouge ---
-      const etat = `${zone.sortie.ames}/${zone.requis}`;
-      if (elAmes.dataset.etat !== etat) {
-        elAmes.dataset.etat = etat;
-        elAmes.innerHTML = '';
+      // --- les pastilles de lumières : on ne les reconstruit que si le compte bouge ---
+      const etat = `${zone.sortie.lumieres}/${zone.requis}`;
+      if (elLumieres.dataset.etat !== etat) {
+        elLumieres.dataset.etat = etat;
+        elLumieres.innerHTML = '';
         for (let i = 0; i < zone.requis; i++) {
           const pastille = document.createElement('i');
-          if (i < zone.sortie.ames) pastille.className = 'pleine';
-          elAmes.appendChild(pastille);
+          if (i < zone.sortie.lumieres) pastille.className = 'pleine';
+          elLumieres.appendChild(pastille);
         }
       }
 

@@ -24,7 +24,7 @@ export const D = {
    *  l'aurait pas rapetissé et il aurait paru énorme à l'écran. */
   taille: CASE * 0.5,
   halo: CASE * 1.5,
-  /** Portée de base d'un relais ; le faisceau des âmes vaut cinq fois ça. */
+  /** Portée de base d'un relais ; le faisceau des lumières vaut cinq fois ça. */
   portee: CASE,
   cone: 0.2,
 } as const;
