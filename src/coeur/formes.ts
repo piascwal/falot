@@ -130,8 +130,6 @@ export const HUMEURS = {
   INQUIET: 'inquiet',
   INTRIGUE: 'intrigue',
   ACHARNE: 'acharne',
-  /** Il court. Ses sourcils ne changent pas : seule la bouche s'ouvre. */
-  COURSE: 'course',
   VISEE: 'visee',
   APAISE: 'apaise',
 } as const;
@@ -158,7 +156,7 @@ export const humeurSelon = (
   menace
     ? HUMEURS.PEUR
     : Math.hypot(p.vx, p.vy) > SEUIL_COURSE
-      ? HUMEURS.COURSE
+      ? HUMEURS.ACHARNE
       : calme
         ? HUMEURS.INTRIGUE
         : HUMEURS.INQUIET;

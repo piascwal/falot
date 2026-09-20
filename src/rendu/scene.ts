@@ -316,9 +316,25 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
   const opac = aBonus(joueur, 'souffle') ? 0.5 : 1;
   // Pendant la scène d'ouverture il n'est pas encore là : on ne le dessine pas,
   // puis il gonfle depuis rien quand la lumière touche le sol.
-  // SOUFFLÉ, IL N'A PLUS DE CORPS. On ne voit plus de lui que ses yeux — et
-  // on ne dirige plus que son regard. Ils sont dessinés bien plus tard, avec
-  // ceux des inconnus, parce qu'ils doivent passer PAR-DESSUS l'obscurité.
+  // SOUFFLÉ, IL N'A PLUS DE CORPS — sauf si quelque chose d'autre l'éclaire.
+  // Dans une torche ou dans un faisceau, on le voit en entier, mais VIDÉ de
+  // sa couleur, exactement comme une âme qu'on n'a pas encore rallumée : ce
+  // n'est plus sa lumière qui le montre, c'est celle des autres.
+  const vuParAutrui = joueur.eteint && estEclaire(partie, joueur.x, joueur.y);
+  if (partie.eclosion > 0.02 && vuParAutrui) {
+    dessinerOmbre(ecran, joueur, D.taille * 1.06 * partie.eclosion, partie.eclosion * 0.7);
+    dessinerTete(
+      ecran,
+      joueur,
+      f.couleur,
+      D.taille * 1.06 * partie.eclosion,
+      false, // éteint : le corps sombre et le contour de sa couleur
+      partie.eclosion,
+      humeurDuJoueur(partie),
+      temps,
+      0,
+    );
+  }
   if (partie.eclosion > 0.02 && !joueur.eteint) {
     dessinerOmbre(ecran, joueur, D.taille * 1.06 * partie.eclosion, partie.eclosion);
     dessinerTete(
@@ -630,7 +646,7 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
   // Et Falot soufflé : deux yeux qui flottent dans le noir, comme n'importe
   // quel inconnu d'ici. C'est tout ce que les autres verraient de lui, et
   // c'est tout ce que le joueur en garde.
-  if (joueur.eteint && partie.eclosion > 0.02)
+  if (joueur.eteint && !vuParAutrui && partie.eclosion > 0.02)
     dessinerYeuxSeuls(ecran, joueur, D.taille * 1.06, 0.85 * partie.eclosion);
 
   // --- les gains qui montent vers la jauge, et les phrases du décor ---

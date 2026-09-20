@@ -17,6 +17,10 @@ import type { Corps, Partie } from '../types.js';
  * La gelée. Le corps s'écrase dans le sens de sa vitesse et se gonfle sur
  * l'autre axe : c'est ce qui donne de la matière à un carré arrondi.
  */
+/** Trois secondes de souffle, et il les refait deux fois plus lentement. */
+export const SOUFFLE_MAX = 3;
+const REPRISE_SOUFFLE = 0.5;
+
 export function majJelly(p: Corps, dt: number): void {
   const cibleX = clamp(1 + p.vy * 0.00055 - p.vx * 0.00055, 0.84, 1.19);
   const cibleY = clamp(1 + p.vx * 0.00055 - p.vy * 0.00055, 0.84, 1.19);
@@ -36,12 +40,22 @@ export function majJoueur(partie: Partie, dt: number): void {
   // le temps d'un passage et on respire après. Il faut s'en être souvenu
   // (étage 3), et ça ne tient pas pendant qu'il arrive ou qu'il s'en va —
   // sinon on ressort d'une vidange déjà éteint sans avoir rien demandé.
-  joueur.eteint =
+  //
+  // ET ÇA NE DURE QUE TROIS SECONDES. Sans limite, on traversait l'étage
+  // entier couvert : plus de lumière, plus de danger, plus de jeu. La réserve
+  // se refait deux fois plus lentement qu'elle ne se dépense.
+  const veut =
     partie.pouvoirs.souffle &&
     entrees.souffle &&
     !partie.vidange &&
     !partie.envol &&
     !partie.chute;
+  joueur.eteint = veut && joueur.souffleReste > 0;
+  joueur.souffleReste = clamp(
+    joueur.souffleReste + (joueur.eteint ? -dt : dt * REPRISE_SOUFFLE),
+    0,
+    SOUFFLE_MAX,
+  );
 
   // clavier d'abord : sur ordinateur c'est lui qui commande
   const kx = (entrees.touches.droite ? 1 : 0) - (entrees.touches.gauche ? 1 : 0);

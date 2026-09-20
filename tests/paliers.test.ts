@@ -10,6 +10,7 @@ import { describe, expect, it } from 'vitest';
 import { CASE, PORTEE_VUE } from '../src/coeur/dimensions.js';
 import { EMOTIONS } from '../src/coeur/formes.js';
 import { porteeFaisceau, rayonHalo } from '../src/coeur/lectures.js';
+import { chargerZone } from '../src/coeur/monde/chargement.js';
 import { genererZone } from '../src/coeur/monde/generation.js';
 import { distances, solideEn, vueLibre } from '../src/coeur/monde/grille.js';
 import {
@@ -23,6 +24,7 @@ import {
 import { avancer, creerPartie, PAS } from '../src/coeur/partie.js';
 import { prendreOuLacherLeFanal } from '../src/coeur/regles/fanal.js';
 import { DUREE_FIN } from '../src/coeur/regles/fin.js';
+import { SOUFFLE_MAX } from '../src/coeur/regles/joueur.js';
 import type { Partie, Perso, PointRonde } from '../src/coeur/types.js';
 
 const guets = (p: Partie) => p.zone.persos.filter((q) => q.emotion === EMOTIONS.COLERE);
@@ -642,5 +644,32 @@ describe('le souffle — ce qu’on en voit', () => {
     p.entrees.manche.force = 1;
     for (let i = 0; i < 30; i++) avancer(p, PAS);
     expect(Math.abs(p.joueur.regard)).toBeLessThan(0.5);
+  });
+});
+
+describe('le souffle — ce qu’il coûte', () => {
+  it('ne dure que trois secondes, et se refait deux fois plus lentement', () => {
+    const p = creerPartie({ grain: 'SOUFFLE', etage: 3 });
+    expect(p.joueur.souffleReste).toBe(SOUFFLE_MAX);
+    p.entrees.souffle = true;
+    for (let i = 0; i < Math.round(2 / PAS); i++) avancer(p, PAS);
+    expect(p.joueur.eteint).toBe(true);
+    expect(p.joueur.souffleReste).toBeCloseTo(1, 1);
+    // au bout de trois secondes il reprend sa lumière, doigt posé ou non
+    for (let i = 0; i < Math.round(1.2 / PAS); i++) avancer(p, PAS);
+    // la réserve est vide, et il a repris sa lumière tout seul
+    expect(p.joueur.souffleReste).toBeLessThan(0.05);
+    expect(p.joueur.eteint).toBe(false);
+    // et il respire : la réserve revient, moitié moins vite
+    p.entrees.souffle = false;
+    for (let i = 0; i < Math.round(2 / PAS); i++) avancer(p, PAS);
+    expect(p.joueur.souffleReste).toBeCloseTo(1, 1);
+  });
+
+  it('repart plein à chaque étage', () => {
+    const p = creerPartie({ grain: 'SOUFFLE', etage: 3 });
+    p.joueur.souffleReste = 0.2;
+    chargerZone(p, 4);
+    expect(p.joueur.souffleReste).toBe(SOUFFLE_MAX);
   });
 });

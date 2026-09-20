@@ -166,6 +166,12 @@ export interface Joueur extends Corps {
    * est immédiat : on n'y voit soi-même presque plus rien.
    */
   eteint: boolean;
+  /**
+   * Ce qu'il peut encore tenir de souffle, en secondes. Trois au plus : se
+   * couvrir est un geste, pas un état — sans limite on traversait l'étage
+   * entier éteint, et plus rien n'existait. Ça se refait en respirant.
+   */
+  souffleReste: number;
   /** Lissage de « on me regarde », pour le rougissement des bords. */
   vu: number;
   /** Pierres en poche, et la fraction de recharge du prochain. */

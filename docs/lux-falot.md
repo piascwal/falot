@@ -240,6 +240,8 @@ peut pas ouvrir un mur avec de la lumière.
 | Falot peut souffler sa propre lumière | Il ne s'éteint pas, il se couvre : il garde sa couleur, mais il n'éclaire plus rien et un Guet n'a plus de lampe à regarder. Le prix est immédiat — on n'y voit soi-même presque plus rien |
 | Un Falot soufflé ne laisse pas de fil | Il n'y a pas de trace sans lumière. C'est ce qui sème un traqueur |
 | Soufflé, on n'est plus que deux yeux | Il ne s'éteint pas, il se couvre : son corps disparaît dans le noir comme celui de n'importe qui d'ici, et on ne dirige plus que son regard |
+| Sauf dans la lumière de quelqu'un d'autre | Une torche, un faisceau : on le voit en entier, mais vidé de sa couleur, comme une âme qu'on n'a pas encore rallumée. Se couvrir n'est pas disparaître |
+| Trois secondes de souffle, pas plus | Se couvrir est un geste, pas un état. La réserve se refait deux fois plus lentement qu'elle ne se dépense |
 | Soufflé, il ne touche plus aux torches | Couvert, il ne donne pas de lumière — il n'en prend pas non plus |
 | Une ombre sous chaque corps | Personne ne marche ici : ce sont des lumières, et elles flottent |
 | Une torche PORTÉE ne met pas à l'abri | Ce qui est posé efface, ce qu'on porte trahit. Le fanal éloigne les Guets sans cacher personne |

@@ -13,6 +13,7 @@ import { BONUS, FORMES } from '../coeur/formes.js';
 import { clamp } from '../coeur/geometrie.js';
 import { forme, rangPierre } from '../coeur/lectures.js';
 import { torcheSousLaMain } from '../coeur/regles/fanal.js';
+import { SOUFFLE_MAX } from '../coeur/regles/joueur.js';
 import type { Partie } from '../coeur/types.js';
 
 const el = <T extends HTMLElement>(id: string): T => {
@@ -58,7 +59,15 @@ export function creerHud(): Hud {
   const elBonusJauge = el('bonus-jauge');
 
   // Ce que l'interface a déjà montré : on ne touche au DOM que si ça a bougé.
-  const vu = { pierre: 0, jauge: 0, forme: 0, pierres: -1, recharge: -1, bandeau: '' };
+  const vu = {
+    pierre: 0,
+    jauge: 0,
+    forme: 0,
+    pierres: -1,
+    recharge: -1,
+    souffle: -1,
+    bandeau: '',
+  };
 
   return {
     pierre: elPierre,
@@ -96,6 +105,14 @@ export function creerHud(): Hud {
       // grisé aurait promis quelque chose sans le donner : il n'est pas là.
       elSouffle.hidden = !partie.pouvoirs.souffle;
       elSouffle.classList.toggle('tenu', joueur.eteint);
+      // Trois secondes, pas une de plus : l'anneau les montre fondre, et se
+      // refaire. Sans lui on souffle jusqu'à la panne sans comprendre.
+      const reste = Math.round((joueur.souffleReste / SOUFFLE_MAX) * 100) / 100;
+      if (vu.souffle !== reste) {
+        vu.souffle = reste;
+        elSouffle.style.setProperty('--recharge', reste.toFixed(2));
+        elSouffle.disabled = reste <= 0;
+      }
 
       // Le fanal n'apparaît que s'il y a quelque chose à décrocher, ou qu'on
       // tient déjà une torche.

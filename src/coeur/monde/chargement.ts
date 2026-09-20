@@ -8,6 +8,7 @@
  */
 
 import { FORMES, PIERRE } from '../formes.js';
+import { SOUFFLE_MAX } from '../regles/joueur.js';
 import type { Partie } from '../types.js';
 import { ETAGES_ECRITS, zoneEcrite } from './ecrits.js';
 import { genererZone } from './generation.js';
@@ -57,6 +58,7 @@ export function chargerZone(partie: Partie, numero: number): void {
   // loin, et les torches cessent d'être un confort pour devenir la carte.
   joueur.air = zone.traits.includes('voile') ? 0.55 : 1;
   joueur.fanal = null; // une torche ne franchit pas un Seuil
+  joueur.souffleReste = SOUFFLE_MAX; // on repart avec tout son souffle
   joueur.repit = 0;
   joueur.pierres = PIERRE[0].reserve;
   joueur.pierreDispo = 0;

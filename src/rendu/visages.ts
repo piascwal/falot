@@ -130,12 +130,9 @@ export function dessinerTete(
   const affole = humeur === HUMEURS.PEUR; // le vrai danger
   const inquiet = humeur === HUMEURS.INQUIET; // la peur au repos
   const peur = affole || inquiet; // mêmes yeux, mêmes sourcils
+  // Il court : acharné. C'est le seul moment où ce petit inquiet a l'air
+  // décidé, et c'est ce qui le rend attachant — on le voit s'y mettre.
   const acharne = humeur === HUMEURS.ACHARNE;
-  // LA COURSE. Elle portait le visage de l'acharnement — sourcils froncés,
-  // l'air décidé — et Falot cessait d'être ce petit inquiet qu'on a envie de
-  // suivre. Il court maintenant avec ses sourcils de toujours et la bouche
-  // ouverte par l'effort : c'est le même personnage, essoufflé.
-  const court = humeur === HUMEURS.COURSE;
   const visee = humeur === HUMEURS.VISEE;
   const apaise = humeur === HUMEURS.APAISE;
   const w = taille * p.sx,
@@ -277,7 +274,7 @@ export function dessinerTete(
     ctx.moveTo(ecart - lg * 0.5, oeilY - rOeil * 1.5);
     ctx.lineTo(ecart + lg * 0.5, oeilY - rOeil * 1.25);
     ctx.stroke();
-  } else if (peur || court) {
+  } else if (peur) {
     // Pointes INTÉRIEURES relevées, extérieures qui tombent, et le tout
     // remonté loin au-dessus de l'œil : c'est le sourcil inquiet.
     const sy = oeilY - rOeil * 1.95;
@@ -328,9 +325,6 @@ export function dessinerTete(
     // bouche poussée sur le côté, comme on mord sa joue en ajustant
     ctx.moveTo(-bl * 0.1, by + bl * 0.06);
     ctx.quadraticCurveTo(bl * 0.22, by + bl * 0.02, bl * 0.46, by - bl * 0.12);
-  } else if (court) {
-    // la bouche ouverte de qui court : ronde, petite, et immobile
-    ctx.ellipse(0, by, bl * 0.26, bl * 0.34, 0, 0, TAU);
   } else if (affole) {
     // petite bouche ouverte qui tremble
     const t = Math.sin(temps * 18 + (p.tremble || 0)) * demi * 0.03;

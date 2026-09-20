@@ -305,6 +305,20 @@ canvas {
 #souffle:not([hidden]) {
   display: block;
 }
+/* L'icône : une petite lumière, et la barre qui l'éteint. Un mot dans un rond
+     de soixante pixels se lit mal et ne se traduit pas ; un dessin, si. */
+#souffle svg {
+  width: 30px;
+  height: 30px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+}
+#souffle .barre {
+  stroke-width: 2.1;
+}
+/* Ce qu'il reste de souffle : le même anneau que la recharge de la pierre. */
 #souffle.tenu {
   background: rgba(143, 208, 255, 0.02);
   border-color: rgba(143, 208, 255, 0.22);

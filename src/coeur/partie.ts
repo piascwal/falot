@@ -15,7 +15,7 @@ import { PIERRE } from './formes.js';
 import { chargerZone } from './monde/chargement.js';
 import { majFlottants, majParticules } from './particules.js';
 import { majFin } from './regles/fin.js';
-import { majJoueur } from './regles/joueur.js';
+import { majJoueur, SOUFFLE_MAX } from './regles/joueur.js';
 import { propager, souffler } from './regles/lumiere.js';
 import { majRegles } from './regles/monde.js';
 import { majPersos } from './regles/persos.js';
@@ -59,6 +59,7 @@ const nouveauJoueur = (): Joueur => ({
   souffle: 1,
   repit: 0,
   eteint: false,
+  souffleReste: SOUFFLE_MAX,
   air: 1,
   fanal: null,
   vu: 0,
