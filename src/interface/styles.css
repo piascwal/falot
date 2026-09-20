@@ -114,15 +114,31 @@ canvas {
   gap: 0.4rem;
 }
 
-.forme {
-  font-size: 0.82rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  font-weight: 700;
-  transition: color 0.4s ease;
+/* Les cinq paliers d'éclat. Des losanges, pas des ronds : un rond ici, c'est
+     une lumière livrée, et les deux rangées se seraient confondues. Ils ne
+     changent pas de couleur en montant — ils s'allument plus fort, comme lui. */
+.rangs {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
 }
 
-/* la forme suivante, en creux : c'est elle qui donne un sens à la barre */
+.rangs i {
+  width: 7px;
+  height: 7px;
+  transform: rotate(45deg);
+  border: 1.5px solid rgba(143, 208, 255, 0.34);
+  transition:
+    background 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.rangs i.pleine {
+  background: #8fd0ff;
+  border-color: #8fd0ff;
+}
+
+/* la légende, en creux : c'est elle qui donne un sens à la barre */
 .suite {
   font-style: normal;
   font-size: 0.68rem;

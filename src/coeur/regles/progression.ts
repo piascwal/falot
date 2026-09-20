@@ -38,7 +38,11 @@ export function evoluer(partie: Partie): void {
   // une ligne passagère nomme ce qu'il sait faire de plus.
   partie.signaux.pierre++;
   partie.signaux.forme++;
-  montrerToast(partie, `${suivant.nom} — ${suivant.verbe.toLowerCase()}`);
+  // Le bandeau ne le RENOMME plus. « Curieux », « Veilleur », « Solaire » :
+  // on lisait un autre personnage à chaque palier, alors qu'il n'y a qu'un
+  // petit peureux qui brille plus fort. On annonce donc la puissance, et ce
+  // qu'elle donne — jamais qui il serait devenu.
+  montrerToast(partie, `Ta lumière grandit — ${suivant.verbe.toLowerCase()}`);
 }
 
 export function gagnerEclat(partie: Partie, n: number): void {

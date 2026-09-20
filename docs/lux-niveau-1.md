@@ -910,3 +910,54 @@ que le joueur **avait vu**, halo compris, donc traverser un couloir suffisait
 reprises et braises laissées — et jamais le halo, le faisceau, ni la torche
 qu'on porte. Le chiffre monte plus lentement, ne redescend jamais, et un
 100 % se construit torche par torche.
+
+## Cinquième tour : une montée en puissance, pas un autre personnage
+
+### Il ne change plus de couleur
+
+Falot passait de bleu à jaune, à vert, à orange, à blanc, et la jauge annonçait
+« PEUREUX → CURIEUX ». On lisait donc **un autre personnage à chaque palier**,
+alors qu'il n'y a qu'un petit peureux inquiet qui brille plus fort — et le
+jaune, en particulier, « ne va pas du tout » avec le reste.
+
+Les cinq formes partagent maintenant **le même bleu**. Ce qui monte, c'est ce
+qu'il **émet** :
+
+- le **halo chaud** est multiplié par un `eclat` propre à chaque palier
+  (1 → 1,35 → 1,7 → 2,1 → 2,6), et le faisceau avec lui ;
+- une **aura** s'ouvre autour de lui dès le deuxième palier : une couronne qui
+  respire, plus large et plus dense à chaque fois.
+
+Dans le bandeau d'état, plus de nom : **cinq losanges** qui s'allument, chacun
+plus fort que le précédent, et la barre qui mène au suivant. Le bandeau de
+passage ne le renomme plus non plus — il dit *« Ta lumière grandit — la pierre
+couve »*, la puissance puis ce qu'elle donne.
+
+### Le regard d'un Guet est une lumière
+
+Un Falot soufflé qui traversait un cône rouge **disparaissait**, alors que ce
+cône perce le noir comme une torche : le jeu le dessine ainsi depuis toujours.
+S'y tenir, c'est donc être éclairé, même si le Guet n'a rien remarqué —
+`eclaireParAutrui()` compte désormais les cônes rouges (et le rayon de l'œil).
+On l'y voit **en entier et vidé**, comme dans une torche. Se couvrir n'est pas
+devenir invisible dans la lumière.
+
+### La fin, deuxième passe
+
+- **Les fils suivent les cadres.** Ils montaient en courbe à travers les cases
+  et passaient par-dessus les scènes sans rien dire. Ils remontent maintenant
+  la gouttière centrale, prennent le bras horizontal de la croix, et ne
+  quittent le cadre qu'au dernier moment, d'un seul trait perpendiculaire.
+- **Une case éteinte est vraiment noire.** Le gris des silhouettes partait
+  au-dessus du fond : on voyait les quatre scènes attendre leur lumière, et la
+  montée du fil ne révélait plus rien.
+- **Le couple est attablé.** Les deux silhouettes étaient dessinées au-dessus
+  du plateau : ils avaient l'air posés *dessus*. C'est l'ordre du tracé qui
+  fait qu'on est attablé — le corps derrière, le plateau devant — et ils sont
+  désormais de part et d'autre, chacun sur sa chaise.
+- **La scène de Falot est une cinquième case.** C'était un bonhomme devant une
+  fenêtre, et personne ne comprenait. Maintenant qu'on vient d'en voir quatre,
+  on sait ce qu'est une case allumée : il essaie **deux fois** d'entrer dans la
+  sienne, et **à chaque fois qu'il franchit le bord, elle s'éteint**. La phrase
+  ne tombe qu'après la deuxième tentative — dite plus tôt, elle expliquait une
+  image qu'on n'avait pas encore vue.

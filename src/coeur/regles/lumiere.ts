@@ -6,7 +6,7 @@
  * il ne voit que des lampes. Ce qu'on PORTE trahit ; ce qui est POSÉ efface.
  */
 
-import { D } from '../dimensions.js';
+import { D, PORTEE_OEIL, PORTEE_VUE } from '../dimensions.js';
 import { EMOTIONS } from '../formes.js';
 import { coneFaisceau, porteeFaisceau, rayonHalo } from '../lectures.js';
 import { dansLeCone, vueLibre } from '../monde/grille.js';
@@ -106,14 +106,28 @@ export const aLAbri = (z: Zone, x: number, y: number, portee?: Torche | null): b
 export function eclaireParAutrui(partie: Partie, x: number, y: number): boolean {
   const { zone } = partie;
   if (aLAbri(zone, x, y, partie.joueur.fanal)) return true;
-  return zone.persos.some(
-    (q) =>
+  return zone.persos.some((q) => {
+    if (q.livre || q.aveugle > 0 || q.cligne > 0) return false;
+    // LE REGARD D'UN GUET EST UNE LUMIÈRE. Il perce le noir comme une torche —
+    // le jeu le dessine ainsi depuis toujours — donc s'y tenir, c'est être
+    // éclairé, même s'il n'a rien remarqué. Un Falot soufflé qui traverse un
+    // cône rouge doit se voir : vidé, sans couleur, mais entier. Sans ça il
+    // disparaissait DANS la lumière, ce qui est l'inverse de la règle.
+    if (q.emotion === EMOTIONS.COLERE) {
+      if (q.oeil)
+        return Math.hypot(q.x - x, q.y - y) < PORTEE_OEIL && vueLibre(zone, q.x, q.y, x, y);
+      return (
+        dansLeCone(q.x, q.y, q.regard, x, y, PORTEE_VUE, 0.42) &&
+        vueLibre(zone, q.x, q.y, x, y)
+      );
+    }
+    return (
       q.calme &&
       !q.eteint &&
-      !q.livre &&
       dansLeCone(q.x, q.y, q.regard, x, y, D.portee * 5, D.cone) &&
-      vueLibre(zone, q.x, q.y, x, y),
-  );
+      vueLibre(zone, q.x, q.y, x, y)
+    );
+  });
 }
 
 /** « Est-ce que ce point est actuellement éclairé » — sert à la mémoire des objets. */

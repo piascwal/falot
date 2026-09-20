@@ -41,8 +41,14 @@ export interface Hud {
 
 export function creerHud(): Hud {
   const elZone = el('zone');
-  const elForme = el('forme');
-  const elFormeSuite = el('forme-suite');
+  const elRangs = el('rangs');
+  // Cinq losanges, posés une fois pour toutes : on ne reconstruit pas du DOM
+  // soixante fois par seconde pour cinq nœuds qui ne bougent jamais.
+  const rangs = FORMES.map(() => {
+    const i = document.createElement('i');
+    elRangs.append(i);
+    return i;
+  });
   const elBarre = el('barre');
   const elBarreBoite = document.querySelector<HTMLElement>('.barre');
   const elJauge = el('jauge');
@@ -81,10 +87,17 @@ export function creerHud(): Hud {
       // --- la jauge de confiance ---
       const bas = f.seuil;
       const haut = suivant ? suivant.seuil : f.seuil + 60;
-      elForme.textContent = f.nom;
-      elForme.style.color = f.couleur;
-      // vers quoi cette barre mène : sans ça elle se remplit sans rien promettre
-      elFormeSuite.textContent = suivant ? `→ ${suivant.nom}` : '';
+      // LA MONTÉE EN PUISSANCE, et rien d'autre. Chaque palier allume un
+      // losange de plus, et le dernier allumé brille plus fort que le premier :
+      // c'est ce qu'on ressent en jouant — pas un autre personnage, le même en
+      // plus fort.
+      for (let i = 0; i < rangs.length; i++) {
+        const pleine = i <= joueur.niveau;
+        rangs[i].classList.toggle('pleine', pleine);
+        rangs[i].style.boxShadow = pleine
+          ? `0 0 ${4 + i * 2.5}px rgba(143,208,255,${0.5 + i * 0.12})`
+          : 'none';
+      }
       elBarre.style.width = `${clamp((joueur.eclat - bas) / (haut - bas), 0, 1) * 100}%`;
       elBarre.style.background = f.couleur;
       elZone.textContent = `ZONE ${zone.numero}`;

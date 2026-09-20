@@ -26,6 +26,7 @@ import { lancerLeBilan, partEclairee, sansFaute } from '../src/coeur/regles/bila
 import { prendreOuLacherLeFanal } from '../src/coeur/regles/fanal.js';
 import { DUREE_FIN, tempsFin } from '../src/coeur/regles/fin.js';
 import { SOUFFLE_MAX } from '../src/coeur/regles/joueur.js';
+import { eclaireParAutrui } from '../src/coeur/regles/lumiere.js';
 import { eteindre } from '../src/coeur/regles/progression.js';
 import type { Partie, Perso, PointRonde } from '../src/coeur/types.js';
 
@@ -658,6 +659,26 @@ describe('le souffle — ce qu’on en voit', () => {
     p.entrees.manche.force = 1;
     for (let i = 0; i < 30; i++) avancer(p, PAS);
     expect(Math.abs(p.joueur.regard)).toBeLessThan(0.5);
+  });
+
+  it('se montre VIDÉ dans le regard d’un Guet, même tranquille', () => {
+    // Le regard d'un Guet perce le noir comme une torche — le jeu le dessine
+    // ainsi. S'y tenir, c'est donc être éclairé : soufflé, Falot doit s'y voir
+    // en entier et sans couleur. Il y disparaissait, ce qui est l'inverse de
+    // la règle : on se couvre, on ne devient pas invisible dans la lumière.
+    const p = creerPartie({ grain: 'SOUFFLE', etage: 3 });
+    const g = guets(p)[0];
+    poser(g, g.x, g.y);
+    g.alerte = 0;
+    g.charge = 0;
+    g.enAlerte = false;
+    const a = faceAFace(p, g, CASE * 2);
+    expect(eclaireParAutrui(p, p.joueur.x, p.joueur.y), 'dans le cône').toBe(true);
+
+    // et hors du cône, dos à lui, il n'est plus qu'une paire d'yeux
+    p.joueur.x = g.x + Math.cos(a + Math.PI) * CASE * 2;
+    p.joueur.y = g.y + Math.sin(a + Math.PI) * CASE * 2;
+    expect(eclaireParAutrui(p, p.joueur.x, p.joueur.y), 'derrière lui').toBe(false);
   });
 });
 

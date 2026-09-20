@@ -327,6 +327,34 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
   // sa couleur, exactement comme une lumière qu'on n'a pas encore rallumée : ce
   // n'est plus sa lumière qui le montre, c'est celle des autres.
   const vuParAutrui = joueur.eteint && eclaireParAutrui(partie, joueur.x, joueur.y);
+  // L'AURA. Une couronne qui respire autour de lui, plus large et plus dense à
+  // chaque palier. C'est le SEUL signe visible de sa progression : il ne change
+  // ni de couleur, ni de taille, ni de nom — il émet davantage, voilà tout.
+  if (partie.eclosion > 0.02 && !joueur.eteint && joueur.niveau > 0) {
+    const ra =
+      D.taille *
+      (1.2 + joueur.niveau * 0.34) *
+      (1 + Math.sin(temps * 1.6) * 0.06) *
+      partie.eclosion;
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    const ga = ctx.createRadialGradient(
+      joueur.x - cam.x,
+      joueur.y - cam.y,
+      ra * 0.4,
+      joueur.x - cam.x,
+      joueur.y - cam.y,
+      ra,
+    );
+    ga.addColorStop(0, rgba(f.couleur, 0));
+    ga.addColorStop(0.5, rgba(f.couleur, 0.055 * joueur.niveau * partie.eclosion));
+    ga.addColorStop(1, rgba(f.couleur, 0));
+    ctx.fillStyle = ga;
+    ctx.beginPath();
+    ctx.arc(joueur.x - cam.x, joueur.y - cam.y, ra, 0, TAU);
+    ctx.fill();
+    ctx.restore();
+  }
   if (partie.eclosion > 0.02 && vuParAutrui) {
     dessinerOmbre(ecran, joueur, D.taille * 1.06 * partie.eclosion, partie.eclosion * 0.7);
     dessinerTete(
@@ -730,7 +758,10 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
   ctx.globalCompositeOperation = 'lighter';
   const couleurLumiere = joueur.bonus ? BONUS[joueur.bonus].couleur : f.couleur;
   const chaud = ctx.createRadialGradient(jx, jy, 0, jx, jy, r);
-  chaud.addColorStop(0, rgba(couleurLumiere, 0.16));
+  // C'EST ICI QUE LA PROGRESSION SE VOIT. Le halo ne change pas de couleur en
+  // montant — il chauffe. Un Solaire éclaire deux fois et demie plus fort
+  // qu'un Peureux, avec exactement le même bleu.
+  chaud.addColorStop(0, rgba(couleurLumiere, Math.min(0.42, 0.14 * f.eclat)));
   chaud.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.fillStyle = chaud;
   tracerRond(ctx, jx, jy, joueur.rayonsHalo ?? [], r);
@@ -738,7 +769,7 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
 
   if (portee) {
     const gf = ctx.createRadialGradient(jx, jy, 0, jx, jy, portee);
-    gf.addColorStop(0, rgba(couleurLumiere, 0.14));
+    gf.addColorStop(0, rgba(couleurLumiere, Math.min(0.34, 0.12 * f.eclat)));
     gf.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = gf;
     tracerCone(ctx, jx, jy, joueur.regard, cone, joueur.rayons ?? []);

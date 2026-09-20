@@ -123,9 +123,16 @@ function cone(
   ctx.fill();
 }
 
-/** Le gris d'une silhouette, du presque noir au tiède selon ce qui l'éclaire. */
+/**
+ * Le gris d'une silhouette, selon ce qui l'éclaire.
+ *
+ * À zéro c'est EXACTEMENT le fond : une case pas encore allumée doit être
+ * vide. Elle partait d'un gris un peu au-dessus du noir, et on voyait les
+ * quatre scènes attendre leur lumière — toute la montée du fil ne révélait
+ * plus rien.
+ */
 const teinte = (k: number) =>
-  `rgb(${Math.round(22 + k * 122)},${Math.round(22 + k * 100)},${Math.round(28 + k * 74)})`;
+  `rgb(${Math.round(8 + k * 136)},${Math.round(8 + k * 114)},${Math.round(14 + k * 88)})`;
 
 /** Une tête ronde sur des épaules : on ne dessine jamais un visage d'en haut,
  *  ce sont des gens et pas des personnages. */
@@ -141,6 +148,20 @@ function silhouette(ecran: Ecran, x: number, sol: number, h: number, k: number):
   ctx.arc(x, sol - h * 0.82, l * 0.36, 0, TAU);
   ctx.fill();
 }
+
+/**
+ * OÙ BRÛLE LA LUMIÈRE DE CHAQUE CASE, en fraction de la case.
+ *
+ * Une seule source de vérité : la scène la dessine là, et le fil s'y rend. Les
+ * deux se déduisaient de nombres écrits deux fois, et ça dérivait dès qu'on
+ * déplaçait un lit.
+ */
+const FEU = [
+  [0.77, 0.42], // la veilleuse, sur sa table de chevet
+  [0.5, 0.41], // la flamme de la bougie
+  [0.64, 0.16], // la tête du lampadaire
+  [0.19, 0.1], // la lanterne du phare
+] as const;
 
 // ---------------------------------------------------------------------------
 // LES QUATRE SCÈNES
@@ -161,28 +182,33 @@ function veilleuse(
   k: number,
 ): void {
   const { ctx } = ecran;
-  const lit = y + h * 0.52; // le haut du matelas
-  const sol = y + h * 0.76;
-  const lx = x + w * 0.77;
-  const ly = lit - h * 0.1;
-  halo(ecran, lx, ly, w * 0.6, OR, 0.5 * k);
-  // IL EST ASSIS, et il vient de l'allumer. Couché, il fallait trois formes
-  // pour dire « une tête sur un oreiller » et ça se lisait comme un tas ;
-  // assis, une silhouette suffit — et surtout c'est ce qu'il fait : il a eu
-  // peur, il a tendu la main, il a allumé.
+  const lit = y + h * 0.56; // le haut du matelas
+  const sol = y + h * 0.78;
+  const lx = x + w * FEU[0][0];
+  const ly = y + h * FEU[0][1];
+  halo(ecran, lx, ly, w * 0.62, OR, 0.5 * k);
+  // IL EST ASSIS DANS SON LIT, contre la tête de lit, la couverture sur les
+  // jambes, la main du côté de la lampe — et il vient de l'allumer. Couché, il
+  // fallait trois formes pour dire « une tête sur un oreiller » et ça se lisait
+  // comme un tas ; assis, une silhouette suffit. Et surtout, c'est ce qu'il
+  // fait : il a eu peur, il a tendu le bras, il a allumé.
   ctx.fillStyle = teinte(k * 0.45);
   ctx.beginPath();
-  ctx.roundRect(x + w * 0.1, lit, w * 0.52, sol - lit, h * 0.025);
+  ctx.roundRect(x + w * 0.08, lit, w * 0.56, sol - lit, h * 0.02);
   ctx.fill();
-  silhouette(ecran, x + w * 0.38, lit + h * 0.02, h * 0.2, k);
-  ctx.fillStyle = teinte(k * 0.72); // la couette, tirée jusqu'à lui
+  ctx.fillStyle = teinte(k * 0.6); // la tête de lit, du côté de la lampe
   ctx.beginPath();
-  ctx.roundRect(x + w * 0.3, lit - h * 0.035, w * 0.34, h * 0.075, h * 0.03);
+  ctx.roundRect(x + w * 0.6, lit - h * 0.15, w * 0.04, h * 0.17, h * 0.015);
+  ctx.fill();
+  silhouette(ecran, x + w * 0.53, lit + h * 0.015, h * 0.19, k);
+  ctx.fillStyle = teinte(k * 0.72); // la couverture, tirée sur ses jambes
+  ctx.beginPath();
+  ctx.roundRect(x + w * 0.09, lit - h * 0.03, w * 0.38, h * 0.07, h * 0.028);
   ctx.fill();
   // la table de chevet, à portée de main, et la veilleuse posée dessus
   ctx.fillStyle = teinte(k * 0.4);
-  ctx.fillRect(x + w * 0.71, lit - h * 0.02, w * 0.12, sol - lit + h * 0.02);
-  ctx.fillStyle = `rgba(${OR},${0.2 + 0.8 * k})`;
+  ctx.fillRect(x + w * 0.71, y + h * 0.47, w * 0.12, sol - y - h * 0.47);
+  ctx.fillStyle = `rgba(${OR},${k})`;
   ctx.beginPath();
   ctx.roundRect(lx - w * 0.032, ly - h * 0.045, w * 0.064, h * 0.09, h * 0.028);
   ctx.fill();
@@ -192,24 +218,32 @@ function veilleuse(
  *  lumière exactement entre elles : c'est tout le sujet du plan. */
 function bougie(ecran: Ecran, x: number, y: number, w: number, h: number, k: number): void {
   const { ctx } = ecran;
-  const sol = y + h * 0.8;
-  const cx = x + w * 0.5;
-  const table = sol - h * 0.18;
-  const fy = table - h * 0.2;
+  const table = y + h * 0.62; // le plateau
+  const cx = x + w * FEU[1][0];
+  const fy = y + h * FEU[1][1] + h * 0.014;
   halo(ecran, cx, fy, w * 0.66, OR, 0.52 * k);
-  silhouette(ecran, x + w * 0.22, table + h * 0.03, h * 0.34, k);
-  silhouette(ecran, x + w * 0.78, table + h * 0.03, h * 0.34, k);
-  // la table par-dessus : elle les coupe à mi-corps, et ils sont attablés
-  ctx.fillStyle = teinte(k * 0.55);
+  // ILS SONT DE PART ET D'AUTRE, et le plateau leur coupe le buste. Dessinés
+  // au-dessus de la table, ils avaient l'air posés DESSUS : c'est l'ordre du
+  // tracé qui fait qu'on est attablé — le corps derrière, le plateau devant.
+  silhouette(ecran, x + w * 0.2, table + h * 0.16, h * 0.4, k);
+  silhouette(ecran, x + w * 0.8, table + h * 0.16, h * 0.4, k);
+  // les deux chaises, à peine : deux dossiers qui dépassent derrière eux
+  ctx.fillStyle = teinte(k * 0.32);
+  ctx.fillRect(x + w * 0.11, table - h * 0.04, w * 0.025, h * 0.22);
+  ctx.fillRect(x + w * 0.865, table - h * 0.04, w * 0.025, h * 0.22);
+  // le plateau, par-dessus les deux, et son pied
+  ctx.fillStyle = teinte(k * 0.6);
   ctx.beginPath();
-  ctx.roundRect(x + w * 0.14, table, w * 0.72, h * 0.06, h * 0.02);
+  ctx.roundRect(x + w * 0.16, table, w * 0.68, h * 0.055, h * 0.02);
   ctx.fill();
-  // la bougie, un trait et une flamme
-  ctx.fillStyle = teinte(0.5 + k * 0.5);
-  ctx.fillRect(cx - w * 0.012, fy, w * 0.024, h * 0.2);
-  ctx.fillStyle = `rgba(255,236,196,${0.25 + 0.75 * k})`;
+  ctx.fillStyle = teinte(k * 0.42);
+  ctx.fillRect(cx - w * 0.03, table + h * 0.05, w * 0.06, h * 0.16);
+  // la bougie, un trait et une flamme, exactement entre eux
+  ctx.fillStyle = teinte(k * 0.85);
+  ctx.fillRect(cx - w * 0.011, fy, w * 0.022, h * 0.19);
+  ctx.fillStyle = `rgba(255,236,196,${k})`;
   ctx.beginPath();
-  ctx.arc(cx, fy - h * 0.012, h * 0.026, 0, TAU);
+  ctx.arc(cx, fy - h * 0.014, h * 0.024, 0, TAU);
   ctx.fill();
 }
 
@@ -227,19 +261,19 @@ function lampadaire(
 ): void {
   const { ctx } = ecran;
   const sol = y + h * 0.82;
-  const px = x + w * 0.64;
-  const py = y + h * 0.16;
+  const px = x + w * FEU[2][0];
+  const py = y + h * FEU[2][1];
   cone(ecran, px, py + h * 0.03, Math.PI / 2, h * 0.72, 0.85, OR, 0.95 * k);
   halo(ecran, px, py, w * 0.3, OR, 0.6 * k);
   // le mât et sa potence
   ctx.fillStyle = teinte(k * 0.45);
   ctx.fillRect(px - w * 0.014, py, w * 0.028, sol - py);
   ctx.fillRect(px - w * 0.08, py - h * 0.02, w * 0.096, h * 0.026);
-  ctx.fillStyle = `rgba(${OR},${0.18 + 0.82 * k})`;
+  ctx.fillStyle = `rgba(${OR},${k})`;
   ctx.fillRect(px - w * 0.05, py + h * 0.004, w * 0.04, h * 0.022);
   // la pluie : des traits, jamais des gouttes — une goutte ronde se lit comme
   // une lumière, et il y en a déjà partout
-  ctx.strokeStyle = `rgba(190,206,230,${0.1 + 0.18 * k})`;
+  ctx.strokeStyle = `rgba(190,206,230,${0.28 * k})`;
   ctx.lineWidth = 1;
   ctx.beginPath();
   for (let i = 0; i < 46; i++) {
@@ -256,7 +290,7 @@ function lampadaire(
   silhouette(ecran, mx, sol, h * 0.3, k * (0.22 + 0.78 * sous));
   // le trottoir mouillé rend la lumière : c'est ça qui fait la pluie, pas les
   // traits — donc un dégradé écrasé au sol, jamais un rectangle
-  ctx.fillStyle = '#0d0d14';
+  ctx.fillStyle = '#08080e';
   ctx.fillRect(x, sol, w, y + h - sol);
   ctx.save();
   ctx.translate(px, sol);
@@ -279,8 +313,8 @@ function phare(
 ): void {
   const { ctx } = ecran;
   const horizon = y + h * 0.44;
-  const tx = x + w * 0.19;
-  const ty = y + h * 0.1;
+  const tx = x + w * FEU[3][0];
+  const ty = y + h * FEU[3][1];
   const roche = horizon + h * 0.06; // le rocher est DANS l'eau, pas devant
   // LE CIEL ET LA MER. Deux dégradés, jamais deux rectangles : un aplat qui
   // s'arrête à l'horizontale se lit comme un carton posé sur l'image, et on
@@ -289,14 +323,14 @@ function phare(
   // case entière un rectangle de couleur posé à côté de trois cases noires —
   // et c'est la case qu'on regardait, pas ce qu'il y avait dedans. La nuit du
   // large, c'est du noir : une ligne d'horizon et trois reflets suffisent.
-  ctx.strokeStyle = `rgba(150,180,220,${0.07 + 0.08 * k})`;
+  ctx.strokeStyle = `rgba(150,180,220,${0.15 * k})`;
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(x, horizon);
   ctx.lineTo(x + w, horizon);
   ctx.stroke();
   // les reflets couchés : c'est ça qui fait de l'eau, pas la couleur
-  ctx.strokeStyle = `rgba(150,180,220,${0.05 + 0.07 * k})`;
+  ctx.strokeStyle = `rgba(150,180,220,${0.12 * k})`;
   ctx.beginPath();
   for (let i = 1; i < 8; i++) {
     const ly = horizon + (i * i * (y + h - horizon)) / 50;
@@ -321,7 +355,7 @@ function phare(
   ctx.beginPath(); // le rocher
   ctx.ellipse(tx, roche, w * 0.075, h * 0.025, 0, 0, TAU);
   ctx.fill();
-  ctx.fillStyle = `rgba(${OR},${0.2 + 0.8 * k})`;
+  ctx.fillStyle = `rgba(${OR},${k})`;
   ctx.fillRect(tx - w * 0.016, ty - h * 0.022, w * 0.032, h * 0.04);
   // le bateau : une coque, un feu, et un cap qui se redresse quand il a vu
   const vu = clamp(k * 1.2 - 0.3, 0, 1);
@@ -330,25 +364,68 @@ function phare(
   ctx.save();
   ctx.translate(bx, by);
   ctx.rotate(0.24 * (1 - vu)); // il gîtait vers la côte ; il se redresse
-  ctx.fillStyle = teinte(0.2 + k * 0.45);
+  ctx.fillStyle = teinte(k * 0.55);
   ctx.beginPath();
   ctx.roundRect(-w * 0.05, -h * 0.011, w * 0.1, h * 0.024, h * 0.011);
   ctx.fill();
-  ctx.fillStyle = `rgba(${OR},${0.45 + 0.45 * vu})`;
+  ctx.fillStyle = `rgba(${OR},${k * (0.45 + 0.45 * vu)})`;
   ctx.beginPath();
   ctx.arc(0, -h * 0.028, h * 0.01, 0, TAU);
   ctx.fill();
   ctx.restore();
 }
 
+/** Un point du chemin, et de quoi le parcourir. */
+type Etape = { x: number; y: number };
+
+/** Longueur cumulée d'une polyligne : on s'en sert pour avancer dessus à
+ *  vitesse constante, sinon un coude court se parcourt aussi vite qu'un long. */
+function longueurs(pts: Etape[]): number[] {
+  const l = [0];
+  for (let i = 1; i < pts.length; i++)
+    l.push(l[i - 1] + Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y));
+  return l;
+}
+
+/** Trace le chemin jusqu'à la fraction `t`, et rend le point qu'on y atteint. */
+function tracerChemin(ecran: Ecran, pts: Etape[], t: number): Etape {
+  const { ctx } = ecran;
+  const l = longueurs(pts);
+  const cible = l[l.length - 1] * t;
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  let bout = pts[0];
+  for (let i = 1; i < pts.length; i++) {
+    if (l[i] <= cible) {
+      ctx.lineTo(pts[i].x, pts[i].y);
+      bout = pts[i];
+      continue;
+    }
+    const u = (cible - l[i - 1]) / (l[i] - l[i - 1]);
+    bout = {
+      x: pts[i - 1].x + (pts[i].x - pts[i - 1].x) * u,
+      y: pts[i - 1].y + (pts[i].y - pts[i - 1].y) * u,
+    };
+    ctx.lineTo(bout.x, bout.y);
+    break;
+  }
+  ctx.stroke();
+  return bout;
+}
+
 /**
- * L'ÉCRAN COUPÉ EN QUATRE, et le fil qui y mène.
+ * L'ÉCRAN COUPÉ EN QUATRE, et les fils qui y mènent.
  *
- * Le fil est exactement celui que Falot laisse derrière lui en jouant : c'est
- * la seule chose du jeu qui dise « quelqu'un est passé par là », et c'est par
- * là qu'elles s'en vont.
+ * LES FILS SUIVENT LES CADRES. Ils montaient en courbe à travers les cases,
+ * chacun sur sa diagonale, et ça passait par-dessus les scènes sans rien dire.
+ * Maintenant ils remontent la gouttière centrale, prennent le bras horizontal
+ * de la croix, et ne quittent le cadre qu'au dernier moment, d'un seul trait
+ * perpendiculaire, pour tomber sur la lumière qu'ils vont allumer.
+ *
+ * C'est le fil que Falot laisse derrière lui en jouant : la seule chose du jeu
+ * qui dise « quelqu'un est passé par là ».
  */
-function dessinerQuatre(ecran: Ecran, k: number, filSeul: boolean, temps: number): void {
+function dessinerQuatre(ecran: Ecran, k: number, enRoute: boolean, temps: number): void {
   const { ctx, W, H } = ecran;
   const cw = W / 2;
   const ch = H / 2;
@@ -358,9 +435,22 @@ function dessinerQuatre(ecran: Ecran, k: number, filSeul: boolean, temps: number
     [0, ch],
     [cw, ch],
   ];
-  // Le fil part d'en bas — des Dessous — et se sépare en quatre.
-  const depart = { x: W / 2, y: H + 20 };
-  const buts = cases.map(([cx, cy]) => ({ x: cx + cw / 2, y: cy + ch / 2 }));
+  // le chemin de chacune : la gouttière verticale, le bras de la croix, la
+  // descente (ou la montée) dans la case
+  const chemins = cases.map(([cx, cy], i): Etape[] => {
+    const bx = cx + cw * FEU[i][0];
+    const by = cy + ch * FEU[i][1];
+    return [
+      { x: cw, y: H + 24 },
+      { x: cw, y: ch },
+      { x: bx, y: ch },
+      { x: bx, y: by },
+    ];
+  });
+  // Elles partent l'une après l'autre : quatre fils qui montent ensemble font
+  // un bouquet, quatre qui se suivent font un convoi — et c'en est un.
+  const avance = (i: number) => (enRoute ? clamp((k - i * 0.1) / 0.62, 0, 1) : 1);
+  const allume = (i: number) => (enRoute ? clamp((avance(i) - 0.86) / 0.14, 0, 1) : 1);
 
   for (let i = 0; i < 4; i++) {
     const [cx, cy] = cases[i];
@@ -370,14 +460,12 @@ function dessinerQuatre(ecran: Ecran, k: number, filSeul: boolean, temps: number
     ctx.clip();
     ctx.fillStyle = '#08080e';
     ctx.fillRect(cx, cy, cw, ch);
-    // chacune s'allume à son tour, et aucune ne s'éteint ensuite
-    const allume = filSeul ? 0 : clamp((k - 0.06 - i * 0.14) / 0.3, 0, 1);
     // Chaque scène prend TOUTE sa case : une marge laissait les fonds (la
     // mer, le trottoir) s'arrêter net au milieu du noir, et ça se voyait.
-    if (i === 0) veilleuse(ecran, cx, cy, cw, ch, allume);
-    else if (i === 1) bougie(ecran, cx, cy, cw, ch, allume);
-    else if (i === 2) lampadaire(ecran, cx, cy, cw, ch, allume, temps);
-    else phare(ecran, cx, cy, cw, ch, allume, temps);
+    if (i === 0) veilleuse(ecran, cx, cy, cw, ch, allume(i));
+    else if (i === 1) bougie(ecran, cx, cy, cw, ch, allume(i));
+    else if (i === 2) lampadaire(ecran, cx, cy, cw, ch, allume(i), temps);
+    else phare(ecran, cx, cy, cw, ch, allume(i), temps);
     ctx.restore();
   }
 
@@ -386,137 +474,139 @@ function dessinerQuatre(ecran: Ecran, k: number, filSeul: boolean, temps: number
   ctx.fillRect(cw - 3, 0, 6, H);
   ctx.fillRect(0, ch - 3, W, 6);
 
-  // les quatre fils, par-dessus les cases, et la lumière qui glisse dessus
+  // les fils par-dessus, et la lumière qui glisse dessus
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
   for (let i = 0; i < 4; i++) {
-    const but = buts[i];
-    const avance = filSeul
-      ? clamp((k - i * 0.05) / 0.62, 0, 1)
-      : clamp(1 - (k - 0.06 - i * 0.14) / 0.3, 0, 1);
-    if (avance <= 0.01) continue;
-    const mx = (depart.x + but.x) / 2 + (i % 2 === 0 ? -W * 0.1 : W * 0.1);
-    const my = (depart.y + but.y) / 2;
-    ctx.strokeStyle = `rgba(${VERT},${0.34 * (filSeul ? 1 : avance)})`;
-    ctx.lineWidth = 1.4;
-    ctx.beginPath();
-    ctx.moveTo(depart.x, depart.y);
-    ctx.quadraticCurveTo(mx, my, but.x, but.y);
-    ctx.stroke();
-    // sa position sur la courbe, à la main : une Bézier de degré deux
-    const t = filSeul ? avance : 1 - avance;
-    const u = 1 - t;
-    const px = u * u * depart.x + 2 * u * t * mx + t * t * but.x;
-    const py = u * u * depart.y + 2 * u * t * my + t * t * but.y;
-    lumiere(ecran, px, py, 3.4, filSeul ? 1 : avance);
+    const t = avance(i);
+    if (t <= 0.001) continue;
+    // une fois posée, la lumière n'a plus de fil : il s'efface derrière elle
+    const reste = enRoute ? 1 : 0;
+    if (reste > 0) {
+      ctx.strokeStyle = `rgba(${VERT},0.3)`;
+      ctx.lineWidth = 1.5;
+    } else {
+      ctx.strokeStyle = 'rgba(0,0,0,0)';
+      ctx.lineWidth = 0;
+    }
+    const bout = tracerChemin(ecran, chemins[i], t);
+    if (t < 1) lumiere(ecran, bout.x, bout.y, 3.6);
   }
 }
 
 /**
- * LA SIENNE.
+ * LA SIENNE, et pourquoi il n'y entre pas.
  *
- * Elle est là, derrière une vitre, et il ne peut pas la rejoindre. Pas parce
- * qu'on l'en empêche, pas parce qu'elle l'aurait oublié : parce qu'il EST la
- * lumière, et qu'une lumière se tient toujours à l'autre bout de son faisceau.
- * Plus il avance, plus le cône se raccourcit et plus la pièce s'éteint ;
- * collé à la vitre, il n'éclaire plus rien et elle n'est plus là non plus.
+ * C'est UNE CINQUIÈME CASE, dessinée comme les quatre autres : un cadre, une
+ * scène dedans, quelqu'un. La seule différence, c'est que la lumière ne vient
+ * pas du dedans — elle vient de lui, resté dehors.
  *
- * Alors il recule, la fenêtre se rallume, et il tient la distance. C'est la
- * seule chose qu'il puisse faire pour elle, et il la fait.
+ * Il essaie deux fois. À chaque fois qu'il franchit le bord du cadre, la
+ * scène s'éteint : il n'est plus la lumière de l'image, il est DANS l'image,
+ * et une image n'éclaire personne. Il ressort, tout se rallume.
+ *
+ * Le cadre était une fenêtre, avant, et personne ne comprenait la scène : on
+ * voyait un bonhomme devant une vitre, pas une lumière qui ne peut pas entrer
+ * dans ce qu'elle éclaire. Le cadre le dit, parce qu'on vient d'en voir quatre.
  */
+
+/** Où il en est de son approche : 0 = à sa place, 1 = à l'intérieur du cadre.
+ *  Deux tentatives — une seule se lit comme un accident. */
+function approche(k: number): number {
+  if (k < 0.1) return 0;
+  if (k < 0.3) return (k - 0.1) / 0.2; // il avance, doucement
+  if (k < 0.4) return 1; // il est dedans, et tout est noir
+  if (k < 0.52) return 1 - (k - 0.4) / 0.12; // il ressort
+  if (k < 0.62) return (k - 0.52) / 0.1; // il réessaie, plus vite
+  if (k < 0.7) return 1;
+  if (k < 0.82) return 1 - (k - 0.7) / 0.12;
+  return 0; // il reste à sa place
+}
+
 function dessinerLaSienne(ecran: Ecran, k: number, temps: number): void {
   const { ctx, W, H } = ecran;
-  const fx = W * 0.68; // la fenêtre
-  const fy = H * 0.42;
-  const fw = Math.min(W * 0.26, 190);
-  const fh = fw * 0.82;
+  const cw = Math.min(W * 0.62, 460);
+  const chh = cw * 0.72;
+  const cx = W * 0.56 - cw / 2; // décalé à droite : il lui faut la place à gauche
+  const cy = H * 0.44 - chh / 2;
 
-  // Sa trajectoire, en quatre gestes : il monte, il s'approche, il touche la
-  // vitre, il recule et il reste. `colle` = 1 quand il est contre le carreau.
-  const monte = clamp(k / 0.14, 0, 1);
-  const colle = clamp((k - 0.16) / 0.3, 0, 1) - clamp((k - 0.52) / 0.2, 0, 1);
-  const lx = fx - (W * 0.3 - W * 0.26 * colle);
-  const ly = fy + H * 0.1 - H * 0.1 * monte + H * 0.5 * (1 - monte);
+  const monte = clamp(k / 0.08, 0, 1);
+  const a = approche(k) * monte;
+  // La scène meurt VITE quand il approche : au quart du chemin il n'éclaire
+  // déjà presque plus. C'est ce qui fait comprendre que c'est lui, la lumière.
+  const clarte = (1 - a) * (1 - a) * monte;
+  // dehors, à gauche du cadre ; dedans, au tiers de la case
+  const lx = cx - W * 0.17 + (W * 0.17 + cw * 0.3) * a;
+  const ly = cy + chh * 0.52 + H * 0.4 * (1 - monte);
 
   ctx.fillStyle = '#08080e';
   ctx.fillRect(0, 0, W, H);
 
-  // LE MUR. Il n'est visible que par ce qu'elle éclaire : c'est la fenêtre qui
-  // fait la maison, et pas l'inverse.
-  const clarte = (1 - colle) * monte;
-  halo(ecran, fx, fy, fw * 3.4, OR, 0.16 * clarte);
-  // Il monte du bas du cadre jusqu'en haut : un rectangle qui s'arrête en
-  // l'air se lit comme un panneau posé là, pas comme la façade d'une maison.
-  // Son bord gauche se perd dans le noir, sinon c'est une porte de placard.
-  const g = Math.round(11 + clarte * 15);
-  const mur = ctx.createLinearGradient(W * 0.3, 0, W * 0.62, 0);
-  mur.addColorStop(0, 'rgba(8,8,14,0)');
-  mur.addColorStop(1, `rgb(${g},${g - 1},${g + 6})`);
-  ctx.fillStyle = mur;
-  ctx.fillRect(W * 0.3, 0, W * 0.7, H);
+  // LE CADRE. Il reste tracé même éteint : sans lui, quand la scène s'éteint,
+  // il ne reste rien à l'écran et on croit à une coupure.
+  ctx.strokeStyle = `rgba(${OR},${0.12 + 0.3 * clarte})`;
+  ctx.lineWidth = 2;
+  ctx.strokeRect(cx, cy, cw, chh);
 
-  // LE CÔNE qu'il envoie : il raccourcit exactement comme il s'approche, et
-  // c'est toute la scène — la lumière, c'est la distance.
-  const dx = fx - lx;
-  const dy = fy - ly;
+  // LE CÔNE qu'il envoie : il raccourcit exactement comme il s'approche. La
+  // lumière, c'est la distance — c'est toute la scène en une forme.
+  const vers = Math.atan2(cy + chh * 0.55 - ly, cx + cw * 0.5 - lx);
   cone(
     ecran,
     lx,
     ly,
-    Math.atan2(dy, dx),
-    Math.hypot(dx, dy) * 1.12,
-    0.62,
+    vers,
+    Math.hypot(cx + cw * 0.5 - lx, cy + chh * 0.55 - ly) * 1.1,
+    0.6,
     OR,
-    0.9 * clarte,
+    0.95 * clarte,
   );
 
-  // LA FENÊTRE, et elle dedans. Le carreau garde toujours un fond : une vitre
-  // parfaitement noire se lit comme un trou dans le mur.
-  ctx.fillStyle = `rgba(${OR},${0.04 + 0.4 * clarte})`;
-  ctx.beginPath();
-  ctx.roundRect(fx - fw / 2, fy - fh / 2, fw, fh, 6);
-  ctx.fill();
   ctx.save();
   ctx.beginPath();
-  ctx.roundRect(fx - fw / 2, fy - fh / 2, fw, fh, 6);
+  ctx.rect(cx, cy, cw, chh);
   ctx.clip();
-  // le carreau est plus chaud en son milieu : un aplat uniforme ne s'allume
-  // pas, il change de couleur
-  halo(ecran, fx, fy, fw * 0.8, OR, 0.55 * clarte);
-  // ELLE EST À CONTRE-JOUR. Éclairée, elle se confondait avec sa vitre ; il
-  // faut qu'elle soit SOMBRE sur le carreau clair — c'est comme ça qu'on voit
-  // quelqu'un chez lui depuis la rue, et c'est le seul plan où on la voit.
-  const tourne = clamp((k - 0.78) / 0.18, 0, 1);
-  silhouette(
-    ecran,
-    fx - fw * 0.1 + fw * 0.06 * tourne,
-    fy + fh * 0.62,
-    fh * 0.9,
-    clarte * 0.18,
-  );
-  ctx.restore();
-  ctx.strokeStyle = `rgba(${OR},${0.1 + 0.3 * clarte})`;
-  ctx.lineWidth = 2;
+  halo(ecran, cx + cw * 0.5, cy + chh * 0.45, cw * 0.62, OR, 0.42 * clarte);
+  // La scène : une pièce, une chaise, quelqu'un assis. RIEN QUI ÉCLAIRE —
+  // pas de lampe, pas de bougie. Toute la lumière de cette case vient de
+  // dehors, et c'est ça qu'il faut comprendre avant qu'il essaie d'entrer.
+  const sol = cy + chh * 0.8;
+  const sx = cx + cw * 0.46;
+  // Pas d'aplat au sol : un rectangle plus clair sous la ligne se lit comme
+  // une marche. Une ligne suffit à poser le plancher.
+  ctx.strokeStyle = teinte(clarte * 0.4);
+  ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.roundRect(fx - fw / 2, fy - fh / 2, fw, fh, 6);
-  ctx.moveTo(fx, fy - fh / 2);
-  ctx.lineTo(fx, fy + fh / 2);
+  ctx.moveTo(cx, sol);
+  ctx.lineTo(cx + cw, sol);
   ctx.stroke();
+  // la chaise : un dossier derrière elle, une assise, deux pieds
+  ctx.fillStyle = teinte(clarte * 0.42);
+  ctx.beginPath();
+  ctx.roundRect(sx - cw * 0.085, sol - chh * 0.42, cw * 0.028, chh * 0.42, 3);
+  ctx.fill();
+  ctx.fillRect(sx - cw * 0.09, sol - chh * 0.17, cw * 0.17, chh * 0.025);
+  ctx.fillRect(sx + cw * 0.06, sol - chh * 0.16, cw * 0.02, chh * 0.16);
+  const tourne = clamp((k - 0.86) / 0.14, 0, 1);
+  silhouette(ecran, sx + cw * 0.02 * tourne, sol - chh * 0.14, chh * 0.34, clarte * 0.95);
+  ctx.restore();
 
   // LUI. Bleu, toujours : ce qu'il donne est doré, ce qu'il est ne l'a jamais
-  // été. Collé à la vitre il ne reste plus que lui de visible — c'est le
-  // moment où la scène dit tout sans une phrase.
+  // été. Dedans, il ne reste que lui de visible dans un cadre noir — c'est
+  // l'image qui dit tout, et elle n'a pas besoin de la phrase.
   corps.x = lx;
   corps.y = ly;
   corps.sx = 1;
   corps.sy = 1;
-  corps.regard = Math.atan2(dy, dx);
+  corps.regard = vers;
   dessinerTete(
     ecran,
     corps,
     BLEU,
-    D.taille * 0.72,
+    D.taille * 0.8,
     true,
     monte,
-    colle > 0.7 ? 'inquiet' : colle > 0.2 ? 'intrigue' : 'apaise',
+    a > 0.75 ? 'inquiet' : a > 0.2 ? 'intrigue' : 'apaise',
     temps,
     1,
   );
@@ -600,8 +690,11 @@ export function dessinerFin(ecran: Ecran, partie: Partie, temps: number): void {
   // --- 4. LA SIENNE ---
   if (etape === 'sienne') {
     dessinerLaSienne(ecran, k, temps);
-    if (k < 0.5) phrase(ecran, FIN.sienne, haut, clamp(k / 0.5, 0, 1));
-    else phrase(ecran, FIN.loin, haut, clamp((k - 0.52) / 0.48, 0, 1));
+    // La première phrase pose la scène, la seconde ne tombe qu'APRÈS la
+    // deuxième tentative : dite trop tôt, elle explique une image qu'on n'a pas
+    // encore vue, et c'est exactement ce qui ne marchait pas.
+    if (k < 0.42) phrase(ecran, FIN.sienne, haut, clamp(k / 0.42, 0, 1));
+    else if (k > 0.66) phrase(ecran, FIN.loin, haut, clamp((k - 0.68) / 0.32, 0, 1));
     return;
   }
 

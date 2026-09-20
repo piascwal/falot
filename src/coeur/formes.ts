@@ -10,7 +10,18 @@
 
 export interface Forme {
   readonly nom: string;
+  /**
+   * LA MÊME POUR TOUTES. Falot passait de bleu à jaune, à vert, à orange, à
+   * blanc : on lisait un changement de personnage là où il n'y a qu'une montée
+   * en puissance. Il reste ce petit bleu inquiet du début, du premier étage au
+   * dernier — ce qui grandit, c'est ce qu'il émet, pas ce qu'il est.
+   */
   readonly couleur: string;
+  /**
+   * Ce que sa lumière pèse, de 1 à 2,6. Multiplie le halo chaud et l'aura qui
+   * l'entoure : c'est LE signe de la progression, à la place de la couleur.
+   */
+  readonly eclat: number;
   /** Éclat à atteindre pour passer à cette forme. */
   readonly seuil: number;
   /** Multiplicateur du rayon de halo. */
@@ -44,10 +55,14 @@ export interface RangPierre {
 // récompense de fin d'aventure, pas un passage obligé. Premier calage tenté à
 // 30/70/120/180 : Ardent passait au-dessus du plafond de la zone 1 et Solaire
 // au-dessus de celui de la zone 6 — deux formes purement décoratives.
+/** Le bleu de Falot. Un seul, pour tous les paliers. */
+const BLEU = '#8fd0ff';
+
 export const FORMES: readonly Forme[] = [
   {
     nom: 'Peureux',
-    couleur: '#8fd0ff',
+    couleur: BLEU,
+    eclat: 1,
     seuil: 0,
     halo: 1.0,
     portee: 0,
@@ -58,7 +73,8 @@ export const FORMES: readonly Forme[] = [
   },
   {
     nom: 'Curieux',
-    couleur: '#ffd479',
+    couleur: BLEU,
+    eclat: 1.35,
     seuil: 26,
     halo: 1.28,
     portee: 5.2,
@@ -69,7 +85,8 @@ export const FORMES: readonly Forme[] = [
   },
   {
     nom: 'Veilleur',
-    couleur: '#a8f0c8',
+    couleur: BLEU,
+    eclat: 1.7,
     seuil: 55,
     halo: 1.45,
     portee: 6.0,
@@ -80,7 +97,8 @@ export const FORMES: readonly Forme[] = [
   },
   {
     nom: 'Ardent',
-    couleur: '#ff9a6b',
+    couleur: BLEU,
+    eclat: 2.1,
     seuil: 88,
     halo: 1.62,
     portee: 7.0,
@@ -91,7 +109,8 @@ export const FORMES: readonly Forme[] = [
   },
   {
     nom: 'Solaire',
-    couleur: '#fff2c4',
+    couleur: BLEU,
+    eclat: 2.6,
     seuil: 128,
     halo: 1.9,
     portee: 8.2,

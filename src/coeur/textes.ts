@@ -80,6 +80,6 @@ export const FIN = {
   escorte: 'Il les a toutes remontées.',
   quatre: 'Quelque part, quelqu’un a moins peur.',
   sienne: 'La sienne l’attend.',
-  loin: 'Mais on n’entre pas dans ce qu’on éclaire.',
+  loin: 'On n’entre pas dans ce qu’on éclaire.',
   chute: 'Alors il redescend. Il en reste à remonter.',
 } as const;

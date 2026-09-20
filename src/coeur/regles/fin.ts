@@ -30,14 +30,15 @@ import { lancerLaChute } from './seuil.js';
  *   — LE FIL : elles le quittent et prennent un fil, comme celui qu'il laisse
  *     derrière lui, qui se sépare en quatre ;
  *   — LES QUATRE : chacune allume sa scène, et on les voit toutes les quatre ;
- *   — LA SIENNE : sa fenêtre à lui, et ce qui se passe quand il s'approche ;
+ *   — LA SIENNE : une cinquième case, la sienne, et ce qui arrive quand il
+ *     essaie d'y entrer ;
  *   — LA CHUTE : il redescend.
  */
 export const TEMPS_FIN = {
   escorte: 5,
-  fil: 2.6,
-  quatre: 8,
-  sienne: 9,
+  fil: 5.5,
+  quatre: 5,
+  sienne: 12,
   chute: 4.5,
 } as const;
 export type EtapeFin = keyof typeof TEMPS_FIN;

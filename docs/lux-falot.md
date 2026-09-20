@@ -258,6 +258,8 @@ peut pas ouvrir un mur avec de la lumière.
 | Un Guet qui n'a pas de dos | Il ne cherche pas une direction, il regarde ce qui est éclairé. Une torche te dénonce au lieu de te couvrir |
 | Des lumières qui reculent devant ta lumière | Elles en ont trop vu de près. Il faut venir les chercher dans le noir |
 | Une porte qui tient tant qu'on pèse dessus | Les Dessous ne sont pas bâtis, ils sont entassés : ce qui tient, tient par le poids |
+| Falot ne change jamais de couleur | Il reste ce petit bleu inquiet du premier étage au dernier. Ce qui monte, c'est ce qu'il ÉMET : le halo chauffe, une aura s'ouvre autour de lui. Une autre couleur à chaque palier faisait croire à un autre personnage |
+| Le regard d'un Guet est une lumière | Il perce le noir comme une torche — donc s'y tenir, c'est être éclairé. Un Falot soufflé qui traverse un cône rouge s'y voit, vidé : se couvrir n'est pas devenir invisible |
 | Ce qu'on remonte, ce sont des lumières | Pas des âmes, pas des gens : ce qui est tombé quand quelqu'un a débranché une veilleuse ou soufflé une flamme. Une seule histoire, pas deux |
 | Il ne rejoint jamais ce qu'il éclaire | Une lumière se tient toujours à l'autre bout de son faisceau. S'approcher, c'est cesser d'éclairer ; il recule, et ça reste allumé |
 | Un premier étage écrit à la main, les suivants tirés au sort | Le bas du puits a une forme ; au-dessus, plus personne ne sait |

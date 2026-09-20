@@ -69,12 +69,17 @@ Cinq temps, sans un bouton :
 3. **Les quatre.** L'écran se coupe en quatre, et chacune va allumer quelque
    chose : *un enfant qui allume sa veilleuse, un couple qui allume une bougie
    à table, un lampadaire qui allume un piéton sous la pluie, un phare qui
-   éclaire un bateau au large.* Une seule phrase : « Quelque part, quelqu'un a
+   éclaire un bateau au large.* Les fils **suivent les cadres** — la gouttière
+   centrale, puis le bras de la croix, puis un seul trait perpendiculaire pour
+   tomber sur la lumière qu'ils vont allumer. Une case reste **noire** tant que
+   la sienne n'est pas arrivée. Une seule phrase : « Quelque part, quelqu'un a
    moins peur. »
-4. **La sienne.** Sa fenêtre. Elle l'attend, elle est là — et **plus il
-   s'approche, moins il l'éclaire.** Le cône se raccourcit à mesure, la pièce
-   s'éteint, et collé à la vitre il n'éclaire plus rien du tout. Alors il
-   recule, la fenêtre se rallume, et il tient la distance.
+4. **La sienne.** **Une cinquième case**, dessinée comme les quatre autres :
+   un cadre, une pièce, quelqu'un assis — et rien qui éclaire dedans. La
+   lumière vient de lui, resté dehors. Il essaie **deux fois** d'y entrer, et
+   **à chaque fois qu'il franchit le bord, la case s'éteint** : il n'est plus
+   la lumière de l'image, il est DANS l'image, et une image n'éclaire
+   personne. Il ressort, tout se rallume, et il tient la distance.
 5. **La chute.** Il redescend, et sa fenêtre reste allumée derrière lui.
 
 ### Pourquoi il ne peut pas la rejoindre
@@ -89,6 +94,10 @@ veut dire, et **c'est la règle que le joueur apprend depuis le premier
 mur éclaire la salle ; celle qu'on tient ne protège personne. Douze étages
 durant, il apprend que la lumière qu'on garde ne sert à rien. Au bout, la même
 règle lui prend la seule chose qu'il voulait.
+
+Et c'est pour ça que sa scène est **une case, pas une fenêtre** : on vient
+d'en voir quatre, on sait ce qu'est une case allumée, donc on comprend d'un
+seul coup ce que sa case perd quand il y entre.
 
 C'est aussi pour ça que la quatrième scène est **un phare** : c'est la seule
 des quatre où la lumière ne rencontre jamais celui qu'elle sauve. Le plan
