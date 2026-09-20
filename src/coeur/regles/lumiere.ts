@@ -96,6 +96,26 @@ export const procheDuneTorche = (
 export const aLAbri = (z: Zone, x: number, y: number, portee?: Torche | null): boolean =>
   prochedUneBraise(z, x, y) || procheDuneTorche(z, x, y, portee);
 
+/**
+ * ÉCLAIRÉ PAR QUELQU'UN D'AUTRE. La question n'est pas la même que « est-ce
+ * éclairé » : à zéro distance de lui-même, Falot est toujours dans son propre
+ * halo, si petit soit-il. Soufflé, il fallait donc savoir si une AUTRE
+ * lumière le touche — une torche, une braise, le faisceau d'une âme rallumée.
+ * Sans ça, « on ne voit que ses yeux dans le noir » n'arrivait jamais.
+ */
+export function eclaireParAutrui(partie: Partie, x: number, y: number): boolean {
+  const { zone } = partie;
+  if (aLAbri(zone, x, y, partie.joueur.fanal)) return true;
+  return zone.persos.some(
+    (q) =>
+      q.calme &&
+      !q.eteint &&
+      !q.livre &&
+      dansLeCone(q.x, q.y, q.regard, x, y, D.portee * 5, D.cone) &&
+      vueLibre(zone, q.x, q.y, x, y),
+  );
+}
+
 /** « Est-ce que ce point est actuellement éclairé » — sert à la mémoire des objets. */
 export function estEclaire(partie: Partie, x: number, y: number): boolean {
   const { zone, joueur } = partie;

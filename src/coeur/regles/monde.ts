@@ -138,7 +138,11 @@ export function majRegles(partie: Partie, dt: number): void {
   }
 
   for (const t of zone.torches) {
-    if (t.reste > 0) t.reste -= dt;
+    // UNE TORCHE REPRISE NE S'ÉTEINT PLUS. Elle brûlait vingt-six secondes
+    // puis mourait : on revenait sur ses pas et la salle qu'on avait allumée
+    // était redevenue noire, sans qu'on ait rien fait de mal. C'est le joueur
+    // qui l'a rallumée ; elle lui reste.
+    t.reste = Math.max(t.reste, 0);
     // On se souvient d'une torche croisée, allumée ou non : c'est un repère, et
     // savoir où aller rallumer fait partie du jeu. (Le POC posait ce drapeau
     // dans le rendu ; c'est de la mémoire de jeu, sa place est ici.)
@@ -159,8 +163,8 @@ export function majRegles(partie: Partie, dt: number): void {
     // donne plus de lumière — il n'en prend pas non plus.
     if (joueur.eteint) continue;
     const dt2 = Math.hypot(t.x - joueur.x, t.y - joueur.y);
-    if (dt2 < CASE * 1.15 && t.reste < t.duree * 0.6) {
-      if (t.reste <= 0) emettre(partie, t.x, t.y, '#ffb45c', 8, 55);
+    if (dt2 < CASE * 1.15 && t.reste <= 0) {
+      emettre(partie, t.x, t.y, '#ffb45c', 8, 55);
       t.reste = t.duree;
     }
   }

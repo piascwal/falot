@@ -94,7 +94,7 @@ la règle d'or du projet : la situation enseigne, le texte confirme au mieux.
 | 7 | **Les farouches** | Des âmes qui **fuient une lumière trop vive** : il faut s'approcher éteint | Une salle où chaque âme recule d'autant qu'on avance. Le souffle de l'étage 3 est la réponse |
 | 8 | **Le voile** | La portée est **divisée par deux** sur tout l'étage | Les torches cessent d'être un confort et deviennent la carte |
 | 9 | **La pesée** | Une dalle qu'il faut charger : **laisser une âme dessus** pour tenir une porte ouverte | Une porte qui se referme dès qu'on la lâche, et un convoi qu'on croyait indivisible |
-| 10 | **L'œil** | Un Guet qui ne balaye pas : il voit **toute la salle éclairée** | La salle est pleine de torches allumées. Il faut les **souffler** pour traverser — l'inverse de tout ce qu'on a appris |
+| 10 | **L'œil** | Un Guet qui ne balaye pas : il voit **toute la salle éclairée** | Une salle et ses torches. Chacune qu'on reprend éclaire pour toujours, donc dénonce pour toujours. On traverse soufflé, en laissant le mur noir derrière soi |
 | 11 | **La meute** | Les Guets patrouillent **à deux**, et se relaient | Tout ce qui précède, sans nouveauté de règle : l'étage de la maîtrise |
 | 12 | **Le dernier Seuil** | Le portail demande plus que ce qu'on a | La fin |
 
@@ -161,6 +161,26 @@ Ce qui reste : **rejouer l'équilibrage** étage par étage comme on l'a fait po
 le prologue (des pilotes sans tête, vingt essais par passage), et **écrire à la
 main les étages qui le méritent** — le 12 en particulier, qui est encore tiré
 au sort alors que c'est la fin.
+
+## Le bilan de fin d'étage
+
+Avant la cage, l'étage se dézoome et se raconte en trois chiffres, sur le
+canvas et sans bouton : **la part du monde mise en lumière**, **les âmes
+sauvées sur le nombre total**, **le nombre de fois où un Guet nous a pris**.
+Un étage sans faute se dit d'un mot, et la progression retient la meilleure
+valeur de chaque colonne (`interface/sauvegarde.ts`).
+
+Le pourcentage ne compte que **la lumière posée** : une torche reprise, une
+braise qu'on a laissée. Ni le halo, ni le faisceau, ni la torche qu'on porte
+— sinon il suffirait de traverser l'étage pour l'avoir « éclairé », et le
+chiffre ne voudrait plus rien dire. C'est aussi ce qui en fait un objectif :
+un 100 % se construit torche par torche, et il ne se perd plus.
+
+**Une torche reprise ne s'éteint plus.** Elle brûlait avant qu'on arrive et
+elle brûlera après ; seule celle qu'on **porte** se consume, parce qu'on la
+vide en la promenant. C'est la condition pour qu'un 100 % tienne — et ça
+change la couleur d'un étage : un abri allumé reste un abri, et un mur qu'on
+éclaire reste un mur éclairé, y compris pour l'œil.
 
 ### La cage d'escalier — ce qui change
 

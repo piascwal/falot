@@ -55,11 +55,14 @@ export function prendreOuLacherLeFanal(partie: Partie): void {
 }
 
 /** La torche portée suit la main : un peu devant, un peu au-dessus. */
-export function majFanal(partie: Partie, _dt: number): void {
+export function majFanal(partie: Partie, dt: number): void {
   const { joueur } = partie;
   const t = joueur.fanal;
   if (!t) return;
-  // elle meurt aussi dans la main : `majRegles` la fait brûler comme les autres
+  // CELLE QU'ON PORTE BRÛLE, elle. Une torche accrochée au mur ne s'éteint
+  // plus une fois reprise ; celle qu'on décroche se consume dans la main, et
+  // c'est tout ce qui empêche le fanal d'être gratuit.
+  t.reste -= dt;
   if (t.reste <= 0) {
     joueur.fanal = null;
     montrerToast(partie, 'Le fanal s’est éteint');

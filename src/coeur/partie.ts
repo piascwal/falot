@@ -61,6 +61,7 @@ const nouveauJoueur = (): Joueur => ({
   repit: 0,
   eteint: false,
   souffleReste: SOUFFLE_MAX,
+  souffleBloque: false,
   air: 1,
   fanal: null,
   vu: 0,

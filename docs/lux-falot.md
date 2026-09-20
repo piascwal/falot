@@ -179,6 +179,11 @@ elles ne peuvent pas « brûler encore un peu » en l'attendant. Ce sont des
 d'approcher : ce qu'il reste de lumière à Falot suffit à les reprendre — et ce
 qu'il donne là, il ne l'a plus sur lui.
 
+Une fois reprise, une torche **ne s'éteint plus**. Ce n'est pas une commodité :
+c'est la seule chose ici qu'on puisse laisser derrière soi. Un étage traversé
+garde la forme qu'on lui a donnée, et c'est ce qui rend un 100 % possible — et
+ce qui rend une torche allumée devant un œil définitivement regrettable.
+
 ## L'objet — pourquoi une pierre
 
 Dans les Dessous, tout est lumière ou noir. Une pierre n'est ni l'un ni l'autre :
@@ -228,6 +233,8 @@ peut pas ouvrir un mur avec de la lumière.
 | Les âmes livrées restent, le convoi se disperse | Ce qui a franchi le Seuil est hors d'atteinte ; ce qu'il portait encore tombe avec lui |
 | Un fil marque le chemin déjà parcouru | Il ne connaît pas les Dessous, seulement ce qu'il a déjà traversé |
 | Des torches éteintes au mur, qu'on rallume en passant | Laissées par ceux qui sont passés avant. Elles ne brûlent plus : c'est Falot qui les reprend, avec ce qu'il lui reste |
+| Une torche reprise ne s'éteint plus | Ce qu'on redonne au monde, on ne le reprend pas. Seule celle qu'on **porte** se consume : elle se vide parce qu'on la promène |
+| Le bilan ne compte que la lumière posée | Traverser n'est pas éclairer. Ce qui compte est ce qui brûle encore quand on est parti |
 | Une torche allumée met à l'abri | Un Guet cherche une petite lumière seule dans le noir. Dans une plus grande, Falot n'a plus cette forme-là |
 | Ton halo et ton faisceau te trahissent | Ce sont précisément la forme qu'il guette : une lampe isolée qui se déplace |
 | Des murs fêlés qu'une pierre ouvre | Personne n'a bâti les Dessous : on y a entassé. Ça tient mal, et la lumière ne perce pas la pierre — seule la chose qui ne brille pas le peut |

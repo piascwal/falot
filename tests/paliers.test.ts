@@ -659,13 +659,39 @@ describe('le souffle — ce qu’il coûte', () => {
     expect(p.joueur.souffleReste).toBeCloseTo(1, 1);
     // au bout de trois secondes il reprend sa lumière, doigt posé ou non
     for (let i = 0; i < Math.round(1.2 / PAS); i++) avancer(p, PAS);
-    // la réserve est vide, et il a repris sa lumière tout seul
-    expect(p.joueur.souffleReste).toBeLessThan(0.05);
+    // la réserve s'est vidée, et il a repris sa lumière tout seul
+    expect(p.joueur.souffleBloque).toBe(true);
+    expect(p.joueur.souffleReste).toBeLessThan(0.3);
     expect(p.joueur.eteint).toBe(false);
     // et il respire : la réserve revient, moitié moins vite
     p.entrees.souffle = false;
+    const avant = p.joueur.souffleReste;
     for (let i = 0; i < Math.round(2 / PAS); i++) avancer(p, PAS);
-    expect(p.joueur.souffleReste).toBeCloseTo(1, 1);
+    expect(p.joueur.souffleReste - avant).toBeCloseTo(1, 1);
+  });
+
+  it('ne resert qu’une fois la réserve PLEINE : pas de souffle par à-coups', () => {
+    const p = creerPartie({ grain: 'SOUFFLE', etage: 3 });
+    p.entrees.souffle = true;
+    for (let i = 0; i < Math.round(3.2 / PAS); i++) avancer(p, PAS);
+    expect(p.joueur.souffleBloque).toBe(true);
+    expect(p.joueur.eteint).toBe(false);
+
+    // une seconde de repos, puis on réappuie : toujours rien
+    p.entrees.souffle = false;
+    for (let i = 0; i < Math.round(1 / PAS); i++) avancer(p, PAS);
+    p.entrees.souffle = true;
+    for (let i = 0; i < Math.round(0.2 / PAS); i++) avancer(p, PAS);
+    expect(p.joueur.eteint).toBe(false);
+
+    // il faut attendre que ce soit plein — six secondes, puisque ça se refait
+    // deux fois plus lentement que ça ne se dépense
+    p.entrees.souffle = false;
+    for (let i = 0; i < Math.round(6 / PAS); i++) avancer(p, PAS);
+    expect(p.joueur.souffleBloque).toBe(false);
+    p.entrees.souffle = true;
+    avancer(p, PAS);
+    expect(p.joueur.eteint).toBe(true);
   });
 
   it('repart plein à chaque étage', () => {
@@ -681,8 +707,13 @@ describe('le bilan d’un étage', () => {
     const p = creerPartie({ grain: 'BILAN', etage: 4 });
     p.chute = null;
     p.eclosion = 1;
-    // rien d'éclairé au départ, et le halo marque en avançant
+    // SON HALO NE COMPTE PAS : marcher n'éclaire rien, ça se pose
     expect(partEclairee(p.zone)).toBe(0);
+    for (let i = 0; i < 60; i++) avancer(p, PAS);
+    expect(partEclairee(p.zone)).toBe(0);
+    // une torche reprise, si
+    const t = p.zone.torches[0];
+    t.reste = t.duree;
     avancer(p, PAS);
     const apres = partEclairee(p.zone);
     expect(apres).toBeGreaterThan(0);
@@ -721,10 +752,78 @@ describe('le bilan d’un étage', () => {
   it('repart de zéro à chaque étage', () => {
     const p = creerPartie({ grain: 'BILAN', etage: 4 });
     p.morts = 3;
+    p.zone.torches[0].reste = p.zone.torches[0].duree;
     for (let i = 0; i < 40; i++) avancer(p, PAS);
     expect(partEclairee(p.zone)).toBeGreaterThan(0);
     chargerZone(p, 5);
     expect(p.morts).toBe(0);
     expect(partEclairee(p.zone)).toBe(0);
+  });
+});
+
+describe('les torches reprises', () => {
+  it('ne s’éteignent plus : la salle qu’on a allumée reste allumée', () => {
+    // On revenait sur ses pas et le couloir qu'on avait éclairé était
+    // redevenu noir, sans qu'on ait rien fait de mal.
+    const p = creerPartie({ grain: 'TORCHE', etage: 1 });
+    p.chute = null;
+    p.eclosion = 1;
+    const t = p.zone.torches.find((q) => q.reste <= 0);
+    if (!t) throw new Error('il faut une torche éteinte sur cet étage');
+    p.joueur.x = t.x;
+    p.joueur.y = t.y;
+    avancer(p, PAS);
+    expect(t.reste).toBeGreaterThan(0);
+    // trente secondes plus loin, à l'autre bout de l'étage : elle brûle encore
+    p.joueur.x = p.zone.depart.x;
+    p.joueur.y = p.zone.depart.y;
+    for (let i = 0; i < Math.round(30 / PAS); i++) avancer(p, PAS);
+    expect(t.reste).toBeGreaterThan(0);
+  });
+
+  it('sauf celle qu’on porte : le fanal se consume dans la main', () => {
+    const p = creerPartie({ grain: 'TORCHE', etage: 5 });
+    p.chute = null;
+    p.eclosion = 1;
+    p.zone.torches.length = 0;
+    const t = {
+      x: p.joueur.x,
+      y: p.joueur.y,
+      r: CASE * 2.1,
+      duree: 26,
+      reste: 26,
+      phase: 0,
+      ox: 0,
+      oy: 0,
+    };
+    p.zone.torches.push(t);
+    prendreOuLacherLeFanal(p);
+    expect(p.joueur.fanal).toBe(t);
+    for (let i = 0; i < Math.round(3 / PAS); i++) avancer(p, PAS);
+    expect(t.reste).toBeLessThan(24);
+  });
+
+  it('ne comptent dans le bilan que posées — pas celle qu’on porte', () => {
+    const p = creerPartie({ grain: 'TORCHE', etage: 5 });
+    p.chute = null;
+    p.eclosion = 1;
+    p.zone.torches.length = 0;
+    p.zone.torches.push({
+      x: p.joueur.x,
+      y: p.joueur.y,
+      r: CASE * 2.1,
+      duree: 26,
+      reste: 26,
+      phase: 0,
+      ox: 0,
+      oy: 0,
+    });
+    prendreOuLacherLeFanal(p);
+    for (let i = 0; i < 30; i++) avancer(p, PAS);
+    expect(partEclairee(p.zone)).toBe(0);
+    // reposée, elle éclaire pour de bon
+    prendreOuLacherLeFanal(p);
+    avancer(p, PAS);
+    expect(partEclairee(p.zone)).toBeGreaterThan(0);
   });
 });

@@ -857,3 +857,56 @@ Les deux battants d'un passage de deux cases prennent donc appui chacun sur
 SON montant, et s'ouvrent en sens inverse — avant, ils s'ouvraient du même
 côté et la partie fixe de l'un tenait « à du vent ». Un test le vérifie sur
 tous les étages, écrits comme tirés au sort.
+
+## Quatrième tour : se couvrir, et ce qui reste allumé
+
+### Le souffle se recharge entièrement, ou pas du tout
+
+La réserve tenait trois secondes et se refaisait deux fois plus lentement,
+mais **rien n'empêchait de resouffler sur une goutte** : on pianotait le
+bouton et on traversait tout l'étage par à-coups, ce qui annulait le prix du
+geste. Une fois vide, le souffle est désormais **verrouillé jusqu'à la
+réserve pleine** (`joueur.souffleBloque`), et le bouton se désactive pendant
+ce temps — l'anneau de recharge devient une attente, pas une suggestion.
+
+### Se couvrir, vu du dehors
+
+Deux états, et un seul était visible :
+
+- **dans le noir**, on ne voit plus que **ses yeux** ;
+- **dans la lumière de quelqu'un d'autre** — une torche, un faisceau — on le
+  voit **en entier mais vidé**, un contour sans couleur, comme une âme qu'on
+  n'a pas encore rallumée.
+
+Le second cas écrasait le premier à cause d'un détail : `estEclaire()` compte
+**le halo du joueur lui-même**, et à distance nulle il est toujours vrai. Un
+Falot soufflé se croyait donc éclairé par sa propre lumière, qu'il venait
+pourtant de couvrir. D'où `eclaireParAutrui()` (`coeur/regles/lumiere.ts`),
+qui ne regarde que **les sources extérieures** : les torches et braises
+posées, et les faisceaux des âmes déjà rallumées. L'état « deux yeux dans le
+noir » existe enfin.
+
+### Une torche reprise ne s'éteint plus
+
+Bug remonté en test : *« en remontant le niveau, des torches que j'avais
+allumées étaient éteintes. C'est pas normal. »* C'était exact — elles
+brûlaient 26 secondes puis mouraient, si bien que revenir sur ses pas rendait
+le chemin au noir.
+
+Une torche **posée** brûle maintenant pour toujours. Seule celle qu'on
+**porte** se consume, parce qu'on la vide en la promenant (`regles/fanal.ts`).
+Ce n'est pas qu'un confort :
+
+- un abri allumé **reste** un abri, donc un étage se construit ;
+- le retour par le même chemin n'est plus une punition ;
+- et devant un œil (étage 10), allumer devient une décision qu'on ne reprend
+  pas.
+
+### Le compte ne retient que ce qui brûle encore
+
+Le pourcentage de fin d'étage « semblait trop élevé » : il marquait tout ce
+que le joueur **avait vu**, halo compris, donc traverser un couloir suffisait
+à le déclarer éclairé. Il ne compte plus que **la lumière posée** — torches
+reprises et braises laissées — et jamais le halo, le faisceau, ni la torche
+qu'on porte. Le chiffre monte plus lentement, ne redescend jamais, et un
+100 % se construit torche par torche.

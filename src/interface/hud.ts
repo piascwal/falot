@@ -112,7 +112,9 @@ export function creerHud(): Hud {
       if (vu.souffle !== reste) {
         vu.souffle = reste;
         elSouffle.style.setProperty('--recharge', reste.toFixed(2));
-        elSouffle.disabled = reste <= 0;
+        // Tant que la réserve n'est pas PLEINE, le bouton reste coupé :
+        // l'anneau montre alors ce qu'il reste à attendre.
+        elSouffle.disabled = joueur.souffleBloque;
       }
 
       // Le fanal n'apparaît que s'il y a quelque chose à décrocher, ou qu'on

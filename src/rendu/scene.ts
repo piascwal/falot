@@ -26,7 +26,7 @@ import {
   rayonHalo,
 } from '../coeur/lectures.js';
 import { vueLibre } from '../coeur/monde/grille.js';
-import { estEclaire } from '../coeur/regles/lumiere.js';
+import { eclaireParAutrui, estEclaire } from '../coeur/regles/lumiere.js';
 import { decouper } from '../coeur/texte.js';
 import type { Partie, Perso } from '../coeur/types.js';
 import { dessinerBilan } from './bilan.js';
@@ -326,7 +326,7 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
   // Dans une torche ou dans un faisceau, on le voit en entier, mais VIDÉ de
   // sa couleur, exactement comme une âme qu'on n'a pas encore rallumée : ce
   // n'est plus sa lumière qui le montre, c'est celle des autres.
-  const vuParAutrui = joueur.eteint && estEclaire(partie, joueur.x, joueur.y);
+  const vuParAutrui = joueur.eteint && eclaireParAutrui(partie, joueur.x, joueur.y);
   if (partie.eclosion > 0.02 && vuParAutrui) {
     dessinerOmbre(ecran, joueur, D.taille * 1.06 * partie.eclosion, partie.eclosion * 0.7);
     dessinerTete(

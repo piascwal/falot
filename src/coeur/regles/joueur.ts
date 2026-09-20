@@ -50,12 +50,16 @@ export function majJoueur(partie: Partie, dt: number): void {
     !partie.vidange &&
     !partie.envol &&
     !partie.chute;
-  joueur.eteint = veut && joueur.souffleReste > 0;
+  joueur.eteint = veut && !joueur.souffleBloque && joueur.souffleReste > 0;
   joueur.souffleReste = clamp(
     joueur.souffleReste + (joueur.eteint ? -dt : dt * REPRISE_SOUFFLE),
     0,
     SOUFFLE_MAX,
   );
+  // À sec, il faut TOUT refaire avant de s'en resservir : sinon on souffle par
+  // à-coups d'un dixième de seconde, indéfiniment, et la limite ne limite rien.
+  if (joueur.souffleReste <= 0) joueur.souffleBloque = true;
+  else if (joueur.souffleReste >= SOUFFLE_MAX) joueur.souffleBloque = false;
 
   // clavier d'abord : sur ordinateur c'est lui qui commande
   const kx = (entrees.touches.droite ? 1 : 0) - (entrees.touches.gauche ? 1 : 0);

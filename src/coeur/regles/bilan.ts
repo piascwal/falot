@@ -12,7 +12,6 @@
 
 import { CASE } from '../dimensions.js';
 import { EMOTIONS } from '../formes.js';
-import { rayonHalo } from '../lectures.js';
 import type { Partie, Zone } from '../types.js';
 import { lancerLePuits } from './puits.js';
 
@@ -37,19 +36,25 @@ function marquerAutour(zone: Zone, x: number, y: number, r: number): void {
 }
 
 /**
- * CE QU'ON A ÉCLAIRÉ RESTE ÉCLAIRÉ. Appelé une fois par image : le halo de
- * Falot, chaque torche qui brûle, chaque braise, chaque âme rallumée. On ne
- * lance aucun rayon — une case derrière un mur sera marquée si elle est dans
- * le rayon, et c'est très bien : le bilan dit où l'on est passé avec de la
- * lumière, pas ce qu'on a vu au pixel près.
+ * CE QU'ON A LAISSÉ ALLUMÉ.
+ *
+ * Seules les lumières POSÉES comptent : les torches qu'on a reprises, les
+ * braises qu'on a laissées. Pas le halo qu'on porte — sinon le pourcentage
+ * mesurait les pas et non la lumière, et il montait à soixante pour cent en
+ * traversant un étage sans avoir rien allumé du tout.
+ *
+ * C'est aussi ce qui donne enfin un prix aux torches : elles sont la seule
+ * façon de faire monter ce chiffre, et elles ne s'éteignent plus.
+ *
+ * On ne lance aucun rayon : une case derrière un mur est marquée si elle est
+ * dans le rayon. Le coût d'un vrai calcul par case ne vaut pas la précision
+ * qu'il gagnerait sur un bilan.
  */
 export function marquerVues(partie: Partie): void {
   const { zone, joueur } = partie;
-  if (!joueur.eteint) marquerAutour(zone, joueur.x, joueur.y, rayonHalo(partie));
-  for (const t of zone.torches) if (t.reste > 0) marquerAutour(zone, t.x, t.y, t.r * 0.8);
+  for (const t of zone.torches)
+    if (t.reste > 0 && t !== joueur.fanal) marquerAutour(zone, t.x, t.y, t.r * 0.8);
   for (const b of zone.braises) marquerAutour(zone, b.x, b.y, b.r * 0.8);
-  for (const q of zone.persos)
-    if (q.calme && !q.eteint && !q.livre) marquerAutour(zone, q.x, q.y, CASE * 1.1);
 }
 
 /** La part du plancher qu'on a éclairée, de 0 à 1. */

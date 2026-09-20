@@ -172,6 +172,12 @@ export interface Joueur extends Corps {
    * entier éteint, et plus rien n'existait. Ça se refait en respirant.
    */
   souffleReste: number;
+  /**
+   * La réserve est tombée à zéro : elle doit se REFAIRE ENTIÈREMENT avant de
+   * resservir. Sans ce verrou on soufflait par à-coups d'un dixième de
+   * seconde, indéfiniment, et la limite de trois secondes ne limitait rien.
+   */
+  souffleBloque: boolean;
   /** Lissage de « on me regarde », pour le rougissement des bords. */
   vu: number;
   /** Pierres en poche, et la fraction de recharge du prochain. */
