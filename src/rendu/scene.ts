@@ -48,7 +48,7 @@ import { dessinerSol } from './sol.js';
 import { flecheVers, texteCerne } from './texte.js';
 import { dessinerTorche } from './torches.js';
 import { dessinerVidange } from './vidange.js';
-import { dessinerTete } from './visages.js';
+import { dessinerOmbre, dessinerTete, dessinerYeuxSeuls } from './visages.js';
 
 function preparerRayons(
   ecran: Ecran,
@@ -267,6 +267,8 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
         : p.calme
           ? 1
           : clamp((p.compteCalme || 0) / DUREE_CALME, 0, 1);
+    // elle flotte : son ombre le dit, et elle seule
+    dessinerOmbre(ecran, p, D.taille, p.eclaire || p.calme ? 1 : 0.6);
     dessinerTete(
       ecran,
       p,
@@ -314,7 +316,11 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
   const opac = aBonus(joueur, 'souffle') ? 0.5 : 1;
   // Pendant la scène d'ouverture il n'est pas encore là : on ne le dessine pas,
   // puis il gonfle depuis rien quand la lumière touche le sol.
-  if (partie.eclosion > 0.02) {
+  // SOUFFLÉ, IL N'A PLUS DE CORPS. On ne voit plus de lui que ses yeux — et
+  // on ne dirige plus que son regard. Ils sont dessinés bien plus tard, avec
+  // ceux des inconnus, parce qu'ils doivent passer PAR-DESSUS l'obscurité.
+  if (partie.eclosion > 0.02 && !joueur.eteint) {
+    dessinerOmbre(ecran, joueur, D.taille * 1.06 * partie.eclosion, partie.eclosion);
     dessinerTete(
       ecran,
       joueur,
@@ -617,36 +623,15 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
     const cache = !vueLibre(zone, p.x, p.y, joueur.x, joueur.y);
     const portee = Math.hypot(W, H);
 
-    const demi = D.taille * 0.5;
-    const ecart = demi * 0.36;
-    const oeilY = -demi * 0.14;
-    const rOeil = demi * 0.22;
-    const px = Math.cos(p.regard) * rOeil * 0.42;
-    const py = Math.sin(p.regard) * rOeil * 0.42;
     const a = (clamp(1 - dj / portee, 0, 1) * 0.5 + 0.35) * (cache ? 0.34 : 1);
-
-    for (const dx of [-ecart, ecart]) {
-      const ox = p.x - cam.x + dx,
-        oy = p.y - cam.y + oeilY;
-      // la lueur autour de l'œil, qui le fait exister dans le noir
-      const g = ctx.createRadialGradient(ox, oy, 0, ox, oy, rOeil * 3.2);
-      g.addColorStop(0, `rgba(226,232,246,${a * 0.55})`);
-      g.addColorStop(1, 'rgba(226,232,246,0)');
-      ctx.fillStyle = g;
-      ctx.beginPath();
-      ctx.arc(ox, oy, rOeil * 3.2, 0, TAU);
-      ctx.fill();
-      // blanc de l'œil + pupille : la même forme que de jour
-      ctx.fillStyle = `rgba(255,255,255,${a})`;
-      ctx.beginPath();
-      ctx.arc(ox, oy, rOeil, 0, TAU);
-      ctx.fill();
-      ctx.fillStyle = `rgba(10,10,16,${a})`;
-      ctx.beginPath();
-      ctx.arc(ox + px, oy + py, rOeil * 0.5, 0, TAU);
-      ctx.fill();
-    }
+    dessinerYeuxSeuls(ecran, p, D.taille, a);
   }
+
+  // Et Falot soufflé : deux yeux qui flottent dans le noir, comme n'importe
+  // quel inconnu d'ici. C'est tout ce que les autres verraient de lui, et
+  // c'est tout ce que le joueur en garde.
+  if (joueur.eteint && partie.eclosion > 0.02)
+    dessinerYeuxSeuls(ecran, joueur, D.taille * 1.06, 0.85 * partie.eclosion);
 
   // --- les gains qui montent vers la jauge, et les phrases du décor ---
   for (const f of partie.flottants) {

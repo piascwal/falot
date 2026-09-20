@@ -131,7 +131,7 @@ sont celles du code, pas des intentions.
 | 7 | Les farouches | Toutes les âmes de l'étage. Elles reculent tant qu'on brille à moins de **3,4 cases** ; elles se rallument si l'on vient à **1,15 case**, éteint |
 | 8 | Le voile | Halo et faisceau à **0,55**. Ce que voient les Guets ne change pas |
 | 9 | La pesée | Une porte scellée et sa dalle. La porte retombe en **~4 s** une fois lâchée. Jamais un passage obligé : vérifié plan par plan |
-| 10 | L'œil | Pas de cône, pas de dos : il voit à **5 cases** tout ce qui est **éclairé**. Une torche allumée le dénonce au lieu de le cacher — il faut souffler la salle |
+| 10 | L'œil | Pas de cône, pas de dos : il voit à **5 cases** tout ce qui est **éclairé**. Une torche allumée le dénonce au lieu de le cacher : il faut passer soufflé, et loin de ce qui brûle |
 | 11 | La meute | Deux Guets sur la même ronde, décalés d'une étape |
 | 12 | Le dernier Seuil | La fin, en quatre temps, et le Puits sans fin ensuite |
 
@@ -141,8 +141,8 @@ vérifié par les tests :
 - le **traqueur** (6) ne se sème qu'en **soufflant** (3), parce qu'un Falot
   éteint ne laisse pas de fil ;
 - les **farouches** (7) ne se reprennent qu'en **soufflant** (3) ;
-- l'**œil** (10) ne se passe qu'en soufflant **et** en éteignant les torches —
-  or souffler éteint aussi les torches qu'on frôle ;
+- l'**œil** (10) ne se passe qu'en soufflant, et en restant loin de ce qui
+  brûle — ce qu'on allumait pour se protéger devient ce qui dénonce ;
 - la **pesée** (9) casse le convoi appris à l'étage 1.
 
 ## Ce que ça impose au code

@@ -414,7 +414,9 @@ describe('l’œil (étage 10)', () => {
     expect(o.corpsVus).toBe(1);
   });
 
-  it('souffler éteint aussi les torches qu’on touche', () => {
+  it('ne touche pas aux torches : soufflé, il ne donne ni ne prend', () => {
+    // Il les soufflait en passant. On vidait une salle de sa lumière par
+    // mégarde, et les abris disparaissaient sans qu'on l'ait demandé.
     const p = creerPartie({ grain: 'OEIL', etage: 10 });
     const t = {
       x: p.joueur.x,
@@ -429,12 +431,13 @@ describe('l’œil (étage 10)', () => {
     p.zone.torches.length = 0;
     p.zone.torches.push(t);
     p.entrees.souffle = true;
-    avancer(p, PAS);
-    expect(t.reste).toBe(0);
-    // et il la reprend dès qu'il se rallume
-    p.entrees.souffle = false;
-    avancer(p, PAS);
+    for (let i = 0; i < 30; i++) avancer(p, PAS);
+    expect(p.joueur.eteint).toBe(true);
     expect(t.reste).toBeGreaterThan(0);
+    // et il ne la rallume pas non plus : une torche mourante reste mourante
+    t.reste = 1;
+    for (let i = 0; i < 30; i++) avancer(p, PAS);
+    expect(t.reste).toBeLessThan(2);
   });
 });
 
@@ -621,5 +624,23 @@ describe('la pesée (étage 9)', () => {
     p.joueur.x = dl.x + CASE * 0.9;
     avancer(p, PAS);
     expect(q.pese).toBe(false);
+  });
+});
+
+describe('le souffle — ce qu’on en voit', () => {
+  it('efface le corps et ne laisse que le regard', () => {
+    // C'est le rendu qui le dessine, mais c'est le cœur qui décide : soufflé,
+    // Falot n'est plus qu'une paire d'yeux, et on ne dirige plus que ça.
+    const p = creerPartie({ grain: 'SOUFFLE', etage: 3 });
+    p.entrees.souffle = true;
+    avancer(p, PAS);
+    expect(p.joueur.eteint).toBe(true);
+    // il tourne toujours le regard là où on le pousse
+    p.entrees.manche.actif = true;
+    p.entrees.manche.dx = 1;
+    p.entrees.manche.dy = 0;
+    p.entrees.manche.force = 1;
+    for (let i = 0; i < 30; i++) avancer(p, PAS);
+    expect(Math.abs(p.joueur.regard)).toBeLessThan(0.5);
   });
 });

@@ -43,6 +43,77 @@ export function carreArrondi(
 // lumière dans le corps, par le bas, comme on remplit une lampe : un simple
 // contour sombre au départ, plein et vert à l'arrivée. Sans ça le passage se
 // faisait d'un coup et on ne voyait pas qu'on était en train de réussir.
+/**
+ * L'OMBRE. Une tache sous le corps, et le personnage cesse d'être posé sur le
+ * sol : il flotte. C'est le même truc que dans un jeu de plateforme, et il ne
+ * coûte qu'un dégradé — mais sans elle, une âme et un mur se lisent sur le
+ * même plan.
+ */
+export function dessinerOmbre(ecran: Ecran, p: Corps, taille: number, opacite = 1): void {
+  const { ctx, cam } = ecran;
+  const x = p.x - cam.x;
+  // Elle tombe NETTEMENT sous le corps : c'est l'écart entre les deux qui dit
+  // qu'il flotte. Collée, elle ne fait que salir le sol.
+  const y = p.y - cam.y + taille * 0.8;
+  const rx = taille * 0.38 * p.sx;
+  const ry = taille * 0.13;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(1, ry / rx);
+  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
+  g.addColorStop(0, `rgba(0,0,0,${0.66 * opacite})`);
+  g.addColorStop(0.55, `rgba(0,0,0,${0.3 * opacite})`);
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(0, 0, rx, 0, TAU);
+  ctx.fill();
+  ctx.restore();
+}
+
+/**
+ * DES YEUX, ET RIEN D'AUTRE. Ce qu'on distingue d'un inconnu dans le noir —
+ * et ce qu'il reste de Falot quand il a soufflé sa lumière : son corps
+ * disparaît, on ne dirige plus que son regard.
+ *
+ * La géométrie est EXACTEMENT celle des yeux éclairés, blanc et pupille
+ * décalée par le regard : c'est le même personnage, sans son corps.
+ */
+export function dessinerYeuxSeuls(
+  ecran: Ecran,
+  p: Corps,
+  taille: number,
+  opacite: number,
+): void {
+  const { ctx, cam } = ecran;
+  const demi = taille * 0.5;
+  const ecart = demi * 0.36;
+  const oeilY = -demi * 0.14;
+  const rOeil = demi * 0.22;
+  const px = Math.cos(p.regard) * rOeil * 0.42;
+  const py = Math.sin(p.regard) * rOeil * 0.42;
+  for (const dx of [-ecart, ecart]) {
+    const ox = p.x - cam.x + dx;
+    const oy = p.y - cam.y + oeilY;
+    // la lueur autour de l'œil, qui le fait exister dans le noir
+    const g = ctx.createRadialGradient(ox, oy, 0, ox, oy, rOeil * 3.2);
+    g.addColorStop(0, `rgba(226,232,246,${opacite * 0.55})`);
+    g.addColorStop(1, 'rgba(226,232,246,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(ox, oy, rOeil * 3.2, 0, TAU);
+    ctx.fill();
+    ctx.fillStyle = `rgba(255,255,255,${opacite})`;
+    ctx.beginPath();
+    ctx.arc(ox, oy, rOeil, 0, TAU);
+    ctx.fill();
+    ctx.fillStyle = `rgba(10,10,16,${opacite})`;
+    ctx.beginPath();
+    ctx.arc(ox + px, oy + py, rOeil * 0.5, 0, TAU);
+    ctx.fill();
+  }
+}
+
 export function dessinerTete(
   ecran: Ecran,
   p: Corps,
@@ -60,6 +131,11 @@ export function dessinerTete(
   const inquiet = humeur === HUMEURS.INQUIET; // la peur au repos
   const peur = affole || inquiet; // mêmes yeux, mêmes sourcils
   const acharne = humeur === HUMEURS.ACHARNE;
+  // LA COURSE. Elle portait le visage de l'acharnement — sourcils froncés,
+  // l'air décidé — et Falot cessait d'être ce petit inquiet qu'on a envie de
+  // suivre. Il court maintenant avec ses sourcils de toujours et la bouche
+  // ouverte par l'effort : c'est le même personnage, essoufflé.
+  const court = humeur === HUMEURS.COURSE;
   const visee = humeur === HUMEURS.VISEE;
   const apaise = humeur === HUMEURS.APAISE;
   const w = taille * p.sx,
@@ -122,8 +198,12 @@ export function dessinerTete(
   // --- yeux ---
   const ecart = demi * 0.36 * p.sx;
   const oeilY = -demi * 0.14 * p.sy;
-  // l'œil s'ouvre grand quand on a peur, se plisse quand on s'acharne
-  const rOeil = demi * 0.22 * (peur ? 1.22 : acharne ? 0.94 : apaise ? 0.92 : 1);
+  // L'ŒIL NE CHANGE JAMAIS DE TAILLE. Il s'ouvrait grand dans la peur et se
+  // plissait dans l'acharnement : le personnage n'avait plus tout à fait la
+  // même tête d'une humeur à l'autre, et il perdait ce qui le rend attachant.
+  // L'humeur passe par les sourcils, la bouche et la pupille — jamais par la
+  // géométrie du visage.
+  const rOeil = demi * 0.22;
   // en visée on ferme un œil : c'est le geste universel de qui ajuste
   const clinDoeil = visee ? 1 : 0;
   const px = Math.cos(p.regard) * rOeil * 0.42;
@@ -144,8 +224,7 @@ export function dessinerTete(
     // La pupille rétrécit dans la peur : c'est ce contraste avec le blanc
     // grand ouvert qui fait l'œil affolé, bien plus que sa taille.
     const rPupille = rOeil * (peur ? 0.36 : acharne ? 0.58 : 0.5);
-    // apaisé : l'œil se détend à demi. Pas fermé — fermé, c'est « aveuglé ».
-    const hOeil = acharne ? rOeil * 0.62 : apaise ? rOeil * 0.72 : rOeil;
+    const hOeil = rOeil;
     const frisson = affole ? Math.sin(temps * 17 + (p.tremble || 0)) * rOeil * 0.07 : 0;
     for (const dx of [-ecart, ecart]) {
       if (clinDoeil && dx > 0) {
@@ -198,7 +277,7 @@ export function dessinerTete(
     ctx.moveTo(ecart - lg * 0.5, oeilY - rOeil * 1.5);
     ctx.lineTo(ecart + lg * 0.5, oeilY - rOeil * 1.25);
     ctx.stroke();
-  } else if (peur) {
+  } else if (peur || court) {
     // Pointes INTÉRIEURES relevées, extérieures qui tombent, et le tout
     // remonté loin au-dessus de l'œil : c'est le sourcil inquiet.
     const sy = oeilY - rOeil * 1.95;
@@ -249,6 +328,9 @@ export function dessinerTete(
     // bouche poussée sur le côté, comme on mord sa joue en ajustant
     ctx.moveTo(-bl * 0.1, by + bl * 0.06);
     ctx.quadraticCurveTo(bl * 0.22, by + bl * 0.02, bl * 0.46, by - bl * 0.12);
+  } else if (court) {
+    // la bouche ouverte de qui court : ronde, petite, et immobile
+    ctx.ellipse(0, by, bl * 0.26, bl * 0.34, 0, 0, TAU);
   } else if (affole) {
     // petite bouche ouverte qui tremble
     const t = Math.sin(temps * 18 + (p.tremble || 0)) * demi * 0.03;

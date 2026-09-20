@@ -153,16 +153,13 @@ export function majRegles(partie: Partie, dt: number): void {
     // celle qu'on tient ne se reprend pas et ne se souffle pas : elle brûle
     // dans la main jusqu'au bout, et c'est tout le marché
     if (t === joueur.fanal) continue;
+    // SOUFFLÉ, IL NE TOUCHE À RIEN. Il a essayé d'éteindre les torches en
+    // passant : une salle qu'on pouvait vider de sa lumière par mégarde, et
+    // des abris qui disparaissaient sans qu'on l'ait demandé. Couvert, il ne
+    // donne plus de lumière — il n'en prend pas non plus.
+    if (joueur.eteint) continue;
     const dt2 = Math.hypot(t.x - joueur.x, t.y - joueur.y);
-    // ET IL SOUFFLE AUSSI CELLES-LÀ. Se couvrir, c'est éteindre ce qu'on
-    // porte — et ce qu'on touche. C'est ce qui permet de faire le noir dans
-    // une salle entière, et c'est tout ce que l'étage de l'œil demande.
-    if (joueur.eteint) {
-      if (dt2 < CASE * 1.15 && t.reste > 0) {
-        t.reste = 0;
-        emettre(partie, t.x, t.y, '#6b7183', 7, 40);
-      }
-    } else if (dt2 < CASE * 1.15 && t.reste < t.duree * 0.6) {
+    if (dt2 < CASE * 1.15 && t.reste < t.duree * 0.6) {
       if (t.reste <= 0) emettre(partie, t.x, t.y, '#ffb45c', 8, 55);
       t.reste = t.duree;
     }
