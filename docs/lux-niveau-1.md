@@ -969,6 +969,19 @@ expliquer à la dernière image n'est pas une fin.
 
 À la place, une scène qui se regarde : **il erre dans un monde déjà allumé.**
 
+**Et il faut un décor.** Le premier jet se jouait sur le noir du jeu : on se
+croyait encore dans les Dessous, et tout le propos tombait. Les Dessous n'ont
+pas de ciel — donc là-haut il en faut un. Il y a maintenant un ciel dégradé
+avec des étoiles et un croissant de lune, une ville au fond en parallaxe avec
+son phare, des immeubles au premier plan dont **toutes** les fenêtres sont
+dessinées (une fenêtre éteinte se voit, sinon une fenêtre allumée flotte dans
+le vide et on ne comprend pas qu'il y a une maison derrière), un trottoir, une
+bordure, une chaussée et ses pointillés, et des réverbères avec leur cône et
+leur flaque au sol. Le trou par lequel il est sorti est une bouche ouverte
+**dans le trottoir**.
+
+Mesuré : aucune image perdue sur 120, sur un écran de 900 × 1000.
+
 - Des fenêtres, un réverbère, une bougie, un phare au loin. Il va vers l'une,
   puis une autre, puis une troisième. Chaque fois un fil se tend, chaque fois
   des grains de **sa** lumière partent dans la lampe et n'en reviennent pas.
@@ -999,3 +1012,12 @@ Tout le tunnel qu'il vient de monter défile à l'envers, avec **les petites
 lumières qu'il a laissées à chaque palier**. Il tombe en contour, vide — et à
 mi-chemin **sa propre lumière revient**. Ce n'est pas une consolation : c'est
 la raison pour laquelle il recommence.
+
+## Un timbre de version sur l'écran-titre
+
+GitHub Pages garde `index.html` en cache une dizaine de minutes. On pousse, on
+recharge, on voit l'ancienne version, et on croit que le déploiement a échoué —
+c'est arrivé une fois de trop. L'écran-titre affiche désormais, tout en bas et
+en tout petit, la **date de construction** (`version 2026-09-21 06:54`),
+injectée par Vite à la compilation. En développement elle n'existe pas : on ne
+se demande jamais si on a la dernière version d'un serveur qui recharge seul.

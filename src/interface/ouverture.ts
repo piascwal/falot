@@ -97,6 +97,8 @@ function ouvrir(partie: Partie): void {
  *
  * Pour le fermer le jour de la publication : `hidden = true` sur le lien.
  */
+declare const __BATI__: string | undefined;
+
 export function voirLaFin(partie: Partie): void {
   el('titre').classList.remove('on');
   chargerZone(partie, DERNIER_ETAGE);
@@ -157,5 +159,9 @@ export function poserLEcranTitre(partie: Partie, tout = false): void {
   el('titre-descendre').addEventListener('click', () => descendre(partie, 1));
   el('titre-plus-haut').addEventListener('click', () => descendre(partie, 2));
   el('titre-fin').addEventListener('click', () => voirLaFin(partie));
+  // Le timbre de construction, injecté par Vite. En développement il n'existe
+  // pas : on ne se demande jamais si on a la dernière version d'un serveur qui
+  // recharge tout seul.
+  el('bati').textContent = typeof __BATI__ === 'string' ? `version ${__BATI__}` : '';
   poserLaGrille(partie, tout);
 }

@@ -733,3 +733,12 @@ canvas {
   letter-spacing: 0.06em;
   color: rgba(232, 232, 240, 0.3);
 }
+
+/* Le timbre de construction. Il doit se lire si on le cherche, et disparaître
+   si on ne le cherche pas : c'est un outil, pas une signature. */
+.bati {
+  margin-top: 1.4rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: rgba(232, 232, 240, 0.22);
+}

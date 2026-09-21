@@ -523,31 +523,34 @@ const ROUGE = [255, 122, 107] as const;
 /** Largeur du monde d'en haut, en écrans. */
 const MONDE = 3.4;
 
+/** Le sol de là-haut : le haut du trottoir. Tout s'y accroche. */
+const SOL = 0.8;
+
 /**
- * UN FOYER : une lumière qui appartient déjà à quelqu'un.
- * `wx` est sa place dans le monde (0 à 1), `y` sa hauteur à l'écran, et
- * `mort` le moment où l'on s'y couche.
+ * Un pseudo-hasard stable : la ville doit être la même à chaque fois. Un
+ * `Math.random()` ici et les immeubles clignoteraient d'une image à l'autre.
+ */
+function graine(i: number): number {
+  const x = Math.sin(i * 127.1 + 311.7) * 43758.5453;
+  return x - Math.floor(x);
+}
+
+/**
+ * LES TROIS LUMIÈRES QU'IL TENTE. `wx` est leur place dans le monde (0 à 1),
+ * `y` leur hauteur à l'écran, et `mort` le moment où l'on s'y couche. Ce sont
+ * les seules posées à la main : tout le reste de la ville est tiré de `graine`.
  */
 const FOYERS = [
-  { wx: 0.06, y: 0.36, r: 26, genre: 'fenetre', mort: 0.52 },
-  { wx: 0.13, y: 0.52, r: 22, genre: 'fenetre', mort: 0.3 },
-  { wx: 0.22, y: 0.3, r: 30, genre: 'bougie', mort: 0.86 },
-  { wx: 0.3, y: 0.44, r: 34, genre: 'fenetre', mort: 0.74 }, // la première qu'il tente
-  { wx: 0.38, y: 0.6, r: 24, genre: 'fenetre', mort: 0.4 },
-  { wx: 0.46, y: 0.26, r: 26, genre: 'fenetre', mort: 0.62 },
-  { wx: 0.56, y: 0.5, r: 40, genre: 'lampadaire', mort: 0.9 }, // la deuxième
-  { wx: 0.64, y: 0.34, r: 24, genre: 'fenetre', mort: 0.47 },
-  { wx: 0.72, y: 0.56, r: 22, genre: 'fenetre', mort: 0.58 },
-  { wx: 0.82, y: 0.38, r: 32, genre: 'bougie', mort: 0.93 }, // la troisième
-  { wx: 0.9, y: 0.6, r: 24, genre: 'fenetre', mort: 0.66 },
-  { wx: 0.97, y: 0.28, r: 30, genre: 'phare', mort: 0.97 },
+  { wx: 0.3, y: 0.52, r: 46, genre: 'fenetre', mort: 0.74 },
+  { wx: 0.56, y: 0.6, r: 40, genre: 'lampadaire', mort: 0.9 },
+  { wx: 0.82, y: 0.56, r: 42, genre: 'bougie', mort: 0.93 },
 ] as const;
 
 /** Les trois qu'il tente, et quand. */
 const TENTATIVES = [
-  { foyer: 3, debut: 0.12, fin: 0.26 },
-  { foyer: 6, debut: 0.36, fin: 0.5 },
-  { foyer: 9, debut: 0.58, fin: 0.72 },
+  { foyer: 0, debut: 0.12, fin: 0.26 },
+  { foyer: 1, debut: 0.36, fin: 0.5 },
+  { foyer: 2, debut: 0.58, fin: 0.72 },
 ] as const;
 
 /**
@@ -604,36 +607,187 @@ function bascule(k: number): number {
   return clamp(Math.max(a * 0.72, b), 0, 1);
 }
 
-/** LA VILLE. Des blocs, et rien d'autre : ce sont les fenêtres allumées qui
- *  la racontent, et il faut qu'elles tiennent DANS les immeubles — au-dessus,
- *  elles flottaient dans le ciel et la ville n'était qu'une frise en bas. */
-function toits(ecran: Ecran, cam: number, nuit: number): void {
+/**
+ * LE CIEL. C'est lui, et lui seul, qui dit qu'on est SORTI.
+ *
+ * Le premier jet de cette scène se jouait sur le noir du jeu : on se croyait
+ * encore dans les Dessous, et tout le propos tombait à l'eau. Les Dessous
+ * n'ont pas de ciel — donc là-haut il en faut un, visible, avec des étoiles et
+ * une lune. Il fonce à mesure que la nuit avance, sans jamais redevenir noir.
+ */
+function ciel(ecran: Ecran, cam: number, nuit: number): void {
   const { ctx, W, H } = ecran;
-  const sol = H * 0.82;
-  const large = W * MONDE;
-  const bw = large / 52;
-  for (let i = -2; i < 56; i++) {
-    const bx = i * bw - cam;
-    if (bx > W + bw || bx < -bw * 2) continue;
-    // deux rangs : un fond plus bas et plus sombre, une avant-scène plus haute
-    const h1 = H * (0.22 + ((((i * 37) % 13) + 13) % 13) / 42);
-    ctx.fillStyle = '#0a0a11';
-    ctx.fillRect(bx, sol - h1, bw + 1, h1 + H);
-    if (i % 2 === 0) {
-      const h2 = H * (0.14 + ((((i * 53) % 9) + 9) % 9) / 40);
-      ctx.fillStyle = '#0d0d15';
-      ctx.fillRect(bx - bw * 0.3, sol - h2, bw * 1.6, h2 + H);
-    }
+  const sol = H * SOL;
+  const g = ctx.createLinearGradient(0, 0, 0, sol);
+  const f = 1 - nuit * 0.55; // il se referme, il ne s'éteint pas
+  g.addColorStop(
+    0,
+    `rgb(${Math.round(15 * f)},${Math.round(19 * f)},${Math.round(44 * f)})`,
+  );
+  g.addColorStop(
+    0.62,
+    `rgb(${Math.round(28 * f)},${Math.round(31 * f)},${Math.round(60 * f)})`,
+  );
+  g.addColorStop(
+    1,
+    `rgb(${Math.round(52 * f)},${Math.round(42 * f)},${Math.round(62 * f)})`,
+  );
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, sol);
+  // les étoiles : très loin, donc presque immobiles
+  for (let i = 0; i < 90; i++) {
+    const sx = (graine(i) * W * MONDE - cam * 0.08) % (W * 1.2);
+    const sy = graine(i + 500) * sol * 0.62;
+    const a = (0.1 + graine(i + 900) * 0.4) * (0.5 + nuit * 0.5);
+    ctx.fillStyle = `rgba(226,232,255,${a})`;
+    ctx.fillRect(sx, sy, 1.6, 1.6);
   }
-  ctx.strokeStyle = `rgba(255,255,255,${0.05 * (1 - nuit)})`;
-  ctx.lineWidth = 1;
+  // la lune, très haut à droite, et sa lueur froide
+  const lx = W * 0.82 - cam * 0.04;
+  const ly = sol * 0.16;
+  halo(ecran, lx, ly, 120, '198,214,255', 0.12);
+  ctx.fillStyle = 'rgba(232,238,255,0.72)';
   ctx.beginPath();
-  ctx.moveTo(0, sol);
-  ctx.lineTo(W, sol);
-  ctx.stroke();
+  ctx.arc(lx, ly, 17, 0, TAU);
+  ctx.fill();
+  ctx.fillStyle = `rgb(${Math.round(18 * f)},${Math.round(22 * f)},${Math.round(48 * f)})`;
+  ctx.beginPath(); // sa part d'ombre : un croissant, pas un disque
+  ctx.arc(lx + 7, ly - 4, 16, 0, TAU);
+  ctx.fill();
 }
 
-/** Une lumière qui a déjà quelqu'un. */
+/** LA VILLE DU FOND : une silhouette, plus claire que le premier plan parce
+ *  qu'elle baigne dans le ciel. C'est elle qui donne la profondeur. */
+function fond(ecran: Ecran, cam: number, nuit: number): void {
+  const { ctx, W, H } = ecran;
+  const sol = H * SOL;
+  const pas = (W * MONDE) / 60;
+  ctx.fillStyle = `rgba(26,30,56,${0.85 - nuit * 0.25})`;
+  for (let i = -2; i < 70; i++) {
+    const bx = i * pas - cam * 0.35;
+    if (bx > W + pas || bx < -pas * 2) continue;
+    const bh = H * (0.1 + graine(i + 40) * 0.16);
+    ctx.fillRect(bx, sol - H * 0.12 - bh, pas + 1, bh + H * 0.12);
+  }
+  // quelques fenêtres minuscules, là-bas : la ville continue sans lui
+  for (let i = -2; i < 70; i += 3) {
+    const bx = i * pas - cam * 0.35;
+    if (bx > W || bx < -pas) continue;
+    if (graine(i + 77) > 0.55 - nuit * 0.35) continue;
+    ctx.fillStyle = `rgba(255,214,140,${0.3 * (1 - nuit)})`;
+    ctx.fillRect(bx + pas * 0.3, sol - H * 0.16 - graine(i + 11) * H * 0.1, 2, 2.5);
+  }
+  // LE PHARE, tout au bout : la seule lumière qui ne s'éteindra pas
+  const px = W * MONDE * 0.97 - cam * 0.35;
+  if (px > -200 && px < W + 200) {
+    const py = sol - H * 0.3;
+    ctx.fillStyle = 'rgba(20,24,44,0.95)';
+    ctx.beginPath();
+    ctx.moveTo(px - 5, py);
+    ctx.lineTo(px + 5, py);
+    ctx.lineTo(px + 12, sol);
+    ctx.lineTo(px - 12, sol);
+    ctx.closePath();
+    ctx.fill();
+    halo(ecran, px, py, 70, OR, 0.5);
+    ctx.fillStyle = `rgba(${OR},0.9)`;
+    ctx.fillRect(px - 4, py - 6, 8, 10);
+  }
+}
+
+/**
+ * LES IMMEUBLES DU PREMIER PLAN, et leurs fenêtres.
+ *
+ * Une fenêtre éteinte est dessinée elle aussi, un ton au-dessus de la façade :
+ * sans la grille, une fenêtre allumée flotte dans le noir et on ne comprend
+ * pas qu'il y a une maison derrière, ni que les autres viennent de s'éteindre.
+ */
+function immeubles(ecran: Ecran, cam: number, nuit: number): void {
+  const { ctx, W, H } = ecran;
+  const sol = H * SOL;
+  const pas = (W * MONDE) / 26;
+  for (let i = -1; i < 30; i++) {
+    const bx = i * pas - cam;
+    const bw = pas * (0.78 + graine(i) * 0.26);
+    if (bx > W + pas || bx + bw < -pas) continue;
+    const bh = H * (0.26 + graine(i + 100) * 0.3);
+    const haut = sol - bh;
+    ctx.fillStyle = `rgb(${Math.round(17 - nuit * 5)},${Math.round(19 - nuit * 6)},${Math.round(34 - nuit * 10)})`;
+    ctx.fillRect(bx, haut, bw, bh);
+    // la corniche, un ton plus clair : c'est elle qui détache les toits
+    ctx.fillStyle = `rgba(52,58,92,${0.45 * (1 - nuit)})`;
+    ctx.fillRect(bx - 2, haut - 3, bw + 4, 3);
+    // la grille des fenêtres
+    const cols = Math.max(2, Math.round(bw / (H * 0.055)));
+    const rangs = Math.max(2, Math.round(bh / (H * 0.075)));
+    const fw = bw / cols;
+    const fh = bh / rangs;
+    for (let c = 0; c < cols; c++) {
+      for (let r = 0; r < rangs; r++) {
+        const fx = bx + c * fw + fw * 0.26;
+        const fy = haut + r * fh + fh * 0.26;
+        const lw = fw * 0.46;
+        const lh = fh * 0.44;
+        const cle = i * 131 + c * 17 + r * 7;
+        const allumee = graine(cle) < 0.44;
+        const mort = 0.18 + graine(cle + 3000) * 0.78;
+        const vif = allumee ? clamp((mort - nuit) / 0.05, 0, 1) : 0;
+        if (vif > 0.02) {
+          halo(ecran, fx + lw / 2, fy + lh / 2, lw * 2.4, OR, 0.15 * vif);
+          // toutes n'ont pas la même lampe : un aplat uniforme fait un damier
+          ctx.fillStyle = `rgba(${OR},${(0.52 + graine(cle + 60) * 0.34) * vif})`;
+        } else {
+          ctx.fillStyle = 'rgba(38,42,66,0.5)'; // éteinte, mais toujours là
+        }
+        ctx.fillRect(fx, fy, lw, lh);
+      }
+    }
+  }
+}
+
+/** LA RUE : un trottoir, une bordure, la chaussée. Trois bandes, et on sait
+ *  qu'on marche dessus — c'est tout ce qu'on lui demande. */
+function rue(ecran: Ecran, cam: number, nuit: number): void {
+  const { ctx, W, H } = ecran;
+  const sol = H * SOL;
+  ctx.fillStyle = `rgb(${Math.round(24 - nuit * 8)},${Math.round(25 - nuit * 8)},${Math.round(38 - nuit * 12)})`;
+  ctx.fillRect(0, sol, W, H - sol);
+  ctx.fillStyle = `rgba(66,72,104,${0.45 - nuit * 0.2})`;
+  ctx.fillRect(0, sol, W, 2.5); // le nez du trottoir
+  const bord = sol + H * 0.055;
+  ctx.fillStyle = `rgb(${Math.round(15 - nuit * 5)},${Math.round(16 - nuit * 5)},${Math.round(26 - nuit * 8)})`;
+  ctx.fillRect(0, bord, W, H - bord); // la chaussée, plus sombre
+  ctx.fillStyle = `rgba(120,130,170,${0.16 - nuit * 0.08})`;
+  const pas = W * 0.09;
+  for (let i = -1; i < W / pas + 2; i++) {
+    const dx = i * pas - (cam % pas);
+    ctx.fillRect(dx, bord + H * 0.07, pas * 0.4, 2); // la ligne discontinue
+  }
+}
+
+/** Un réverbère : un mât, une potence, une lampe, et sa flaque au sol. */
+function reverbere(ecran: Ecran, x: number, vif: number): void {
+  const { ctx, H } = ecran;
+  const sol = H * SOL;
+  const ty = sol - H * 0.2;
+  ctx.fillStyle = 'rgba(30,34,56,0.95)';
+  ctx.fillRect(x - 2, ty, 4, sol - ty);
+  ctx.fillRect(x - 12, ty - 3, 16, 4);
+  if (vif > 0.02) {
+    cone(ecran, x - 6, ty + 2, Math.PI / 2, H * 0.28, 0.75, OR, 0.3 * vif);
+    halo(ecran, x - 6, ty, 40, OR, 0.45 * vif);
+    ctx.save(); // la flaque sur le trottoir, écrasée
+    ctx.translate(x - 6, sol + H * 0.012);
+    ctx.scale(1, 0.2);
+    halo(ecran, 0, 0, H * 0.12, OR, 0.5 * vif);
+    ctx.restore();
+  }
+  ctx.fillStyle = `rgba(${OR},${0.25 + 0.7 * vif})`;
+  ctx.fillRect(x - 10, ty - 1, 8, 6);
+}
+
+/** Une des trois lumières qu'il tente : plus grosse et plus chaude que le
+ *  reste de la ville, sinon on ne voit pas vers quoi il va. */
 function foyer(
   ecran: Ecran,
   x: number,
@@ -642,31 +796,33 @@ function foyer(
   genre: string,
   vif: number,
 ): void {
-  const { ctx } = ecran;
+  const { ctx, H } = ecran;
   if (vif <= 0.01) return;
-  halo(ecran, x, y, r * 3.4, OR, 0.34 * vif);
-  ctx.fillStyle = `rgba(${OR},${0.85 * vif})`;
-  if (genre === 'fenetre') {
-    ctx.fillRect(x - r * 0.34, y - r * 0.4, r * 0.68, r * 0.8);
-  } else if (genre === 'bougie') {
-    ctx.beginPath();
-    ctx.arc(x, y, r * 0.2, 0, TAU);
-    ctx.fill();
-  } else if (genre === 'lampadaire') {
-    ctx.fillRect(x - r * 0.24, y - r * 0.24, r * 0.48, r * 0.34);
-    ctx.fillStyle = `rgba(${OR},${0.22 * vif})`;
-    ctx.fillRect(x - r * 0.05, y, r * 0.1, r * 2.4);
-  } else {
-    ctx.beginPath();
-    ctx.arc(x, y, r * 0.26, 0, TAU);
-    ctx.fill();
-    ctx.fillStyle = `rgba(${OR},${0.16 * vif})`; // son balayage, au loin
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.arc(x, y, r * 8, Math.PI * 0.86, Math.PI * 0.98);
-    ctx.closePath();
-    ctx.fill();
+  if (genre === 'lampadaire') {
+    reverbere(ecran, x + 6, vif);
+    return;
   }
+  halo(ecran, x, y, r * 4.2, OR, 0.55 * vif);
+  if (genre === 'fenetre') {
+    // une grande baie, avec sa croisée : on doit la distinguer des autres
+    ctx.fillStyle = `rgba(${OR},${0.85 * vif})`;
+    ctx.fillRect(x - r * 0.5, y - r * 0.62, r, r * 1.24);
+    ctx.fillStyle = 'rgba(26,28,48,0.75)';
+    ctx.fillRect(x - 1, y - r * 0.62, 2, r * 1.24);
+    ctx.fillRect(x - r * 0.5, y - 1, r, 2);
+  } else {
+    // une bougie derrière un carreau, et la petite flamme dedans
+    ctx.fillStyle = `rgba(${OR},${0.4 * vif})`;
+    ctx.fillRect(x - r * 0.42, y - r * 0.5, r * 0.84, r);
+    ctx.fillStyle = `rgba(255,236,196,${0.95 * vif})`;
+    ctx.beginPath();
+    ctx.arc(x, y + r * 0.1, r * 0.13, 0, TAU);
+    ctx.fill();
+    ctx.fillStyle = `rgba(${OR},${0.7 * vif})`;
+    ctx.fillRect(x - r * 0.05, y + r * 0.18, r * 0.1, r * 0.3);
+  }
+  ctx.globalAlpha = 1;
+  void H;
 }
 
 function dessinerErrance(ecran: Ecran, k: number, temps: number): void {
@@ -675,10 +831,19 @@ function dessinerErrance(ecran: Ecran, k: number, temps: number): void {
   const nuit = clamp(k / 0.95, 0, 1);
   const force = reste(k);
   const rouge = bascule(k);
+  const sol = H * SOL;
 
-  ctx.fillStyle = '#08080e';
-  ctx.fillRect(0, 0, W, H);
-  toits(ecran, cam, nuit);
+  ciel(ecran, cam, nuit);
+  fond(ecran, cam, nuit);
+  immeubles(ecran, cam, nuit);
+  rue(ecran, cam, nuit);
+  // les réverbères de la rue, un sur quatre immeubles, qui s'éteignent tard
+  const pasR = (W * MONDE) / 7;
+  for (let i = -1; i < 9; i++) {
+    const rx = i * pasR + pasR * 0.4 - cam;
+    if (rx < -60 || rx > W + 60) continue;
+    reverbere(ecran, rx, clamp((0.88 + graine(i + 7) * 0.12 - nuit) / 0.06, 0, 1));
+  }
 
   // LUI. Il reste à sa place dans le cadre, c'est le monde qui défile — sinon
   // on le perd de vue à chaque arrêt, et c'est lui qu'on regarde.
@@ -689,29 +854,29 @@ function dessinerErrance(ecran: Ecran, k: number, temps: number): void {
   const creux = vide(k);
   const fx = W * 0.44;
   const troux = W * 0.44;
-  const trouy = H * 0.79;
+  const trouy = sol + H * 0.028;
   const fy =
-    H * (0.38 + (1 - force) * 0.22) +
+    H * (0.36 + (1 - force) * 0.24) +
     Math.sin(temps * 0.9) * H * 0.02 * force +
-    (trouy - H * 0.58) * creux * creux;
+    (trouy - H * 0.6) * creux * creux;
 
-  // LE TROU par lequel il est sorti, et par lequel il va repartir. Il apparaît
-  // bien avant la fin : on doit le voir l'attendre.
+  // LE TROU par lequel il est sorti : une bouche ouverte dans le trottoir. Il
+  // apparaît bien avant la fin, on doit le voir l'attendre.
   const ouvert = clamp((k - 0.62) / 0.16, 0, 1);
   if (ouvert > 0.01) {
-    ctx.fillStyle = `rgba(0,0,0,${0.9 * ouvert})`;
+    ctx.fillStyle = `rgba(0,0,0,${0.92 * ouvert})`;
     ctx.beginPath();
     ctx.ellipse(troux, trouy, D.taille * 2.4 * ouvert, D.taille * 0.8 * ouvert, 0, 0, TAU);
     ctx.fill();
-    ctx.strokeStyle = `rgba(143,208,255,${0.14 * ouvert})`;
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = `rgba(120,130,170,${0.3 * ouvert})`;
+    ctx.lineWidth = 2;
     ctx.stroke();
   }
 
   for (let i = 0; i < FOYERS.length; i++) {
     const f = FOYERS[i];
     const x = f.wx * MONDE * W - cam;
-    if (x < -160 || x > W + 160) continue;
+    if (x < -200 || x > W + 200) continue;
     foyer(ecran, x, f.y * H, f.r, f.genre, clamp((f.mort - k) / 0.05, 0, 1));
   }
 
@@ -740,14 +905,15 @@ function dessinerErrance(ecran: Ecran, k: number, temps: number): void {
   const bleu = [143, 208, 255] as const;
   const melange = bleu.map((v, i) => Math.round(v + (ROUGE[i] - v) * rouge));
   const teint = `rgb(${melange[0]},${melange[1]},${melange[2]})`;
-  // l'aura de ce qui lui reste, et le sursaut quand il se secoue
+  // Son halo est plus fort que celui d'une fenêtre : au milieu d'une ville
+  // allumée, un petit bleu discret se noie dans le doré et on le perd.
   halo(
     ecran,
     fx,
     fy,
-    D.taille * (2.2 + force * 2.6),
+    D.taille * (2.6 + force * 3.2),
     melange.join(','),
-    0.1 + 0.16 * force,
+    0.16 + 0.24 * force,
   );
   corps.x = fx;
   corps.y = fy;
