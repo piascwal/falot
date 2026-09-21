@@ -102,19 +102,26 @@ export function dessinerSol(
   // loin, on le laisse dans le noir.
   const libre = (cx: number, cy: number) =>
     cx >= 0 && cy >= 0 && cx < zone.cols && cy < zone.lignes && zone.mur[cy][cx] !== 1;
+  // Une pierre est bordée si DU SOL la touche, côté ou coin.
+  const borde = (cx: number, cy: number) => {
+    for (let dy = -1; dy <= 1; dy++)
+      for (let dx = -1; dx <= 1; dx++)
+        if ((dx || dy) && libre(cx + dx, cy + dy)) return true;
+    return false;
+  };
   for (let cy = c0y; cy <= c1y; cy++)
     for (let cx = c0x; cx <= c1x; cx++) {
       const mur = zone.mur[cy][cx] === 1;
       // Une pierre enfouie au milieu d'un massif n'est jamais visible : aucune
       // lumière ne l'atteint, et rien ne la borde. On ne la dessine pas.
-      if (
-        mur &&
-        !libre(cx - 1, cy) &&
-        !libre(cx + 1, cy) &&
-        !libre(cx, cy - 1) &&
-        !libre(cx, cy + 1)
-      )
-        continue;
+      //
+      // LES HUIT VOISINS, pas les quatre. La pierre d'un angle rentrant n'a que
+      // de la pierre en face d'elle sur ses quatre côtés — elle passait donc
+      // pour enfouie et n'était pas dessinée. Mais elle EST visible : c'est
+      // elle qu'on a dans l'œil quand on braque le faisceau dans un coin, et
+      // `coinsDeSalle` l'éclaire. On éclairait donc le fond noir : un aplat
+      // pâle en travers de la case, sans texture, à la place du mur.
+      if (mur && !borde(cx, cy)) continue;
       const v = variante(cx, cy);
       ctx.drawImage(
         mur ? t.mur : t.sol,

@@ -511,7 +511,7 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
   // puisqu'il se déplace.
   if (r > 1) {
     joueur.rayonsHalo = portéesRond(zone, joueur.x, joueur.y, r);
-    percerRond(lctx, jx, jy, r, 1, joueur.rayonsHalo);
+    percerRond(lctx, jx, jy, r, 1, joueur.rayonsHalo, ecran, zone, joueur.x, joueur.y);
   }
   if (portee)
     percerCone(
@@ -540,7 +540,18 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
       p.rayonsRelais,
     );
   for (const b of zone.braises)
-    percerRond(lctx, b.x - cam.x, b.y - cam.y, b.r, 0.92, rayonsSource(zone, b, b.r));
+    percerRond(
+      lctx,
+      b.x - cam.x,
+      b.y - cam.y,
+      b.r,
+      0.92,
+      rayonsSource(zone, b, b.r),
+      ecran,
+      zone,
+      b.x,
+      b.y,
+    );
   // La pierre en vol et sa trace. Sans ça on lance dans le noir et on ne
   // sait jamais où c'est retombé — or c'est précisément l'information dont on
   // a besoin pour décider par où passer.
@@ -584,6 +595,10 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
       t.r * (0.55 + k * 0.45),
       0.9,
       rayonsSource(zone, t, t.r),
+      ecran,
+      zone,
+      t.x,
+      t.y,
     );
   }
   // Le cône d'une sentinelle n'apparaît que DE PRÈS. De loin on ne voit que

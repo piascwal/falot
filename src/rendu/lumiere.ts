@@ -13,7 +13,7 @@
 
 import { CASE } from '../coeur/dimensions.js';
 import { TAU } from '../coeur/geometrie.js';
-import { solide } from '../coeur/monde/grille.js';
+import { solide, vueLibre } from '../coeur/monde/grille.js';
 import type { Source, Zone } from '../coeur/types.js';
 import type { Ecran } from './ecran.js';
 
@@ -244,6 +244,57 @@ export function tracerRond(
   c.closePath();
 }
 
+/**
+ * LES COINS DE PIERRE D'UNE SALLE.
+ *
+ * La pierre qui fait l'angle RENTRANT d'une salle n'est atteinte par aucun
+ * rayon : les deux murs qui la bordent bloquent la diagonale. Mesuré dans un
+ * cachot de trois cases sur trois — les quatre coins sortaient à 10 sur 255,
+ * c'est-à-dire exactement le noir du fond, pendant que leurs voisines étaient
+ * entre 13 et 44. Quatre trous carrés dans l'anneau de murs, et c'est ce qu'on
+ * voit en premier.
+ *
+ * On les ajoute donc à la main, mais **dans le même chemin que le polygone**,
+ * donc percées par le MÊME dégradé en UN SEUL passage. C'est la leçon de
+ * l'essai précédent : une passe séparée, avec son propre dégradé, se lisait
+ * comme une série d'arcs de cercle découpés par les cases.
+ *
+ * Un seul cas, et rien d'autre : la case est de la pierre, sa diagonale VERS
+ * LA SOURCE est du sol qu'on voit, et les deux cases entre les deux sont de la
+ * pierre. C'est la définition d'un coin de salle, et ça n'attrape rien de plus.
+ */
+function coinsDeSalle(
+  ecran: Ecran,
+  chemin: Path2D,
+  zone: Zone,
+  wx: number,
+  wy: number,
+  portee: number,
+): void {
+  const sx = Math.floor(wx / CASE);
+  const sy = Math.floor(wy / CASE);
+  const c0x = Math.max(0, Math.floor((wx - portee) / CASE));
+  const c1x = Math.min(zone.cols - 1, Math.floor((wx + portee) / CASE));
+  const c0y = Math.max(0, Math.floor((wy - portee) / CASE));
+  const c1y = Math.min(zone.lignes - 1, Math.floor((wy + portee) / CASE));
+  for (let cy = c0y; cy <= c1y; cy++)
+    for (let cx = c0x; cx <= c1x; cx++) {
+      if (!solide(zone, cx, cy)) continue;
+      const dx = Math.sign(sx - cx);
+      const dy = Math.sign(sy - cy);
+      if (!dx || !dy) continue; // en face, pas en biais : les rayons y vont
+      if (solide(zone, cx + dx, cy + dy)) continue; // la diagonale doit être du sol
+      if (!solide(zone, cx + dx, cy) || !solide(zone, cx, cy + dy)) continue;
+      // et ce sol doit être vu : sans ça on allumerait le coin d'une salle où
+      // l'on n'est pas
+      const px = (cx + dx + 0.5) * CASE - wx;
+      const py = (cy + dy + 0.5) * CASE - wy;
+      if (Math.hypot(px, py) > portee) continue;
+      if (!vueLibre(zone, wx, wy, (cx + dx + 0.5) * CASE, (cy + dy + 0.5) * CASE)) continue;
+      chemin.rect(cx * CASE - ecran.cam.x, cy * CASE - ecran.cam.y, CASE + 1, CASE + 1);
+    }
+}
+
 export function percerRond(
   c: CanvasRenderingContext2D,
   x: number,
@@ -251,14 +302,31 @@ export function percerRond(
   r: number,
   force: number,
   portees: number[],
+  /** De quoi ajouter les coins de salle : l'écran pour la caméra, la zone pour
+   *  la pierre, et la position de la source dans le monde. Omis, on perce le
+   *  polygone seul — c'est ce que font les sources de second plan. */
+  ecran?: Ecran,
+  zone?: Zone,
+  wx = 0,
+  wy = 0,
 ): void {
   const g = c.createRadialGradient(x, y, 0, x, y, r);
   g.addColorStop(0, `rgba(0,0,0,${force})`);
   g.addColorStop(0.62, `rgba(0,0,0,${force * 0.88})`);
   g.addColorStop(1, 'rgba(0,0,0,0)');
   c.fillStyle = g;
-  tracerRond(c, x, y, portees, r);
-  c.fill();
+  const chemin = new Path2D();
+  for (let i = 0; i < RAYONS_ROND; i++) {
+    const a = (i / RAYONS_ROND) * TAU;
+    const d = Math.min(portees[i], r);
+    if (i === 0) chemin.moveTo(x + Math.cos(a) * d, y + Math.sin(a) * d);
+    else chemin.lineTo(x + Math.cos(a) * d, y + Math.sin(a) * d);
+  }
+  chemin.closePath();
+  // Les coins de salle, dans LE MÊME chemin : un seul perçage, un seul
+  // dégradé, aucune couture et aucun arc.
+  if (ecran && zone) coinsDeSalle(ecran, chemin, zone, wx, wy, r);
+  c.fill(chemin);
 }
 
 export function percerDisque(

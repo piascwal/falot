@@ -1217,3 +1217,42 @@ blocs retrouvent leur taille et surtout **beaucoup plus de contraste** — c'est
 gratuit, puisque la moyenne est recalée après coup : on peut pousser l'écart
 sans éclaircir le mur d'un cran. Et six éclats au lieu de quatorze : les petits
 faisaient des confettis, et c'étaient eux qu'on voyait au lieu des blocs.
+
+## Les angles rentrants : deux défauts, l'un dans l'autre
+
+Test demandé : le joueur planté dans le coin d'une salle carrée, le faisceau
+braqué en diagonale dans l'angle. Les mesures se font au pixel sur le canevas,
+case par case, sur une grille de sous-cases.
+
+**Premier défaut — l'angle ne recevait aucun rayon.** La pierre d'un angle
+rentrant est cachée par les deux murs qui l'encadrent : aucun rayon ne la
+touche, parce qu'aucun rayon ne peut l'atteindre autrement qu'en diagonale, et
+la diagonale est barrée des deux côtés. Mesuré dans une cellule de 3×3 : les
+quatre coins lisaient **exactement 10 sur 255, c'est-à-dire le noir du fond**,
+pendant que leurs voisins lisaient 13 à 44. Un carré noir franc dans le coin.
+
+Corrigé par `coinsDeSalle()` : on ajoute la pierre des angles rentrants **au
+même chemin, sous le même dégradé, en un seul remplissage**. C'est ce point qui
+avait été raté deux fois — deux perçages avec deux dégradés séparés, et le halo
+se lisait en arcs de cercle découpés case par case. Une seule passe, un seul
+dégradé, et la pierre d'angle est mesurée à **27** contre 35 pour les murs qui
+l'encadrent, tandis que la deuxième rangée reste à 10 : elle est éclairée, elle
+ne fuit pas.
+
+**Deuxième défaut — on éclairait le fond.** Retour de test sur la capture :
+*« dans l'angle dans lequel est dirigé le faisceau, il y a une tuile toute
+noire. »* Exact, et ce n'était plus la lumière. `dessinerSol` saute les pierres
+« enfouies », celles qu'aucun sol ne borde — mais il ne regardait que les
+**quatre côtés**. Or la pierre d'un angle rentrant n'a que de la pierre en face
+d'elle sur ses quatre côtés : elle passait pour enfouie et n'était pas
+dessinée. On éclairait donc le fond noir, ce qui donnait un aplat pâle sans
+texture en travers de la case, bordé de droites — exactement ce qu'on voyait.
+`borde()` regarde maintenant les **huit** voisins. La case d'angle lit 11 à 76
+selon ses sous-cases (de la vraie pierre, avec son contraste) au lieu de 9 à 51
+en dégradé plat.
+
+**Un flou d'ambiance, essayé puis retiré.** La lumière s'arrête sur une
+frontière de case, et la coupure se lit comme un trait droit en travers du mur.
+Un `filter = 'blur(4px)'` au moment de poser le calque d'obscurité l'adoucit
+bien — mais il coûte **50 à 80 images perdues sur 300**, contre 0 à 1 sans lui.
+Hors de prix pour un bord. Il faudra l'obtenir autrement, ou pas du tout.
