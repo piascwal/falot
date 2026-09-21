@@ -4,3 +4,8 @@ coverage/
 *.local
 .DS_Store
 captures/
+
+# La planche témoin : on la fabrique pour essayer le chemin par sprites
+# (`node outils/atlas-temoin.mjs`), on ne la livre jamais — elle est plus
+# laide que le tracé à la main qu'elle remplace.
+public/atlas/

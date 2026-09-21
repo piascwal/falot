@@ -14,6 +14,7 @@ import { assombrir, eclaircir } from '../coeur/couleurs.js';
 import { HUMEURS, type Humeur, RALLUME } from '../coeur/formes.js';
 import { TAU } from '../coeur/geometrie.js';
 import type { Corps } from '../coeur/types.js';
+import { aUneImage, dessinerSprite } from './atlas.js';
 import type { Ecran } from './ecran.js';
 
 /** Un rectangle aux coins ronds : la forme de tout le monde, ici. */
@@ -124,9 +125,36 @@ export function dessinerTete(
   humeur: Humeur,
   temps: number,
   recharge: number,
+  /** Qui c'est, pour aller chercher son image dans la planche. Par défaut
+   *  Falot : c'est lui qu'on dessine partout ailleurs que dans la zone. */
+  sujet = 'falot',
 ): void {
   const ctx = ecran.ctx;
   const cam = ecran.cam;
+
+  // --- LE CHEMIN PAR SPRITES ---
+  //
+  // Le corps est teinté ici (il est livré en niveaux de gris), le visage est
+  // posé par-dessus SANS déformation : c'est ce qui permet au corps de
+  // s'écraser et de s'étirer en courant pendant que les yeux gardent leur
+  // taille — la règle du jeu depuis les premiers tests.
+  //
+  // Une seule exception retombe sur le tracé à la main : le corps qu'on est en
+  // train de remplir. Le niveau qui monte se découpe dans la silhouette, et ça
+  // demande un masque que la planche ne fournit pas.
+  const nomCorps = `corps/${sujet}/${allume ? 'allume' : 'vide'}`;
+  if (recharge <= 0 && aUneImage(nomCorps)) {
+    const ferme = p.aveugle > 0 || p.cligne > 0 ? 1 : 0;
+    dessinerSprite(ecran, nomCorps, p.x, p.y, {
+      sx: p.sx,
+      sy: p.sy,
+      opacite,
+      couleur,
+    });
+    dessinerSprite(ecran, `visage/${humeur}/${ferme}`, p.x, p.y, { opacite });
+    return;
+  }
+
   const affole = humeur === HUMEURS.PEUR; // le vrai danger
   const inquiet = humeur === HUMEURS.INQUIET; // la peur au repos
   const peur = affole || inquiet; // mêmes yeux, mêmes sourcils

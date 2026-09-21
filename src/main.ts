@@ -13,6 +13,7 @@ import { brancherFanal, brancherPointeur, brancherSouffle } from './entrees/poin
 import { creerHud } from './interface/hud.js';
 import { descendre, poserLEcranTitre, retenirPrologue } from './interface/ouverture.js';
 import { retenirBilan, retenirLaFin } from './interface/sauvegarde.js';
+import { chargerAtlas, poserLAtlas } from './rendu/atlas.js';
 import {
   cadrer,
   creerEcran,
@@ -152,6 +153,12 @@ function corpsBoucle(maintenant: number): void {
 }
 
 requestAnimationFrame(boucle);
+
+// LA PLANCHE DE SPRITES, si elle existe. On ne l'attend pas : le jeu démarre
+// dessiné à la main, et chaque forme qui a une image la prend dès qu'elle est
+// arrivée. Absente, personne ne s'en aperçoit — c'est la même discipline que
+// pour la sauvegarde, un luxe et jamais une dépendance.
+chargerAtlas().then(poserLAtlas);
 
 // De quoi piloter le jeu depuis la console ou depuis un test de capture
 // d'écran : c'est le VRAI état, pas une copie.

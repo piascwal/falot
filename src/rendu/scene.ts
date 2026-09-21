@@ -285,6 +285,12 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
       p.humeur,
       temps,
       recharge,
+      // Qui c'est, pour la planche de sprites : un Guet, un bleu, un doré.
+      p.emotion === EMOTIONS.COLERE
+        ? 'guet'
+        : p.emotion === EMOTIONS.PEUR
+          ? 'frileux'
+          : 'errant',
     );
   }
 
