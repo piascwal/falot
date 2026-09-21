@@ -303,6 +303,212 @@ function contact(dir: number): HTMLCanvasElement {
   return t;
 }
 
+/**
+ * ---------------------------------------------------------------------------
+ * TROIS MURS À CHOISIR
+ * ---------------------------------------------------------------------------
+ *
+ * Le sol et le mur parlaient le MÊME vocabulaire : `caillou()`, c'est-à-dire
+ * des galets épars posés au hasard. Deux tailles, deux contrastes, mais le
+ * même motif — donc on confondait une paroi avec un dallage, et un trait de
+ * séparation ne suffit pas à dire « ça monte ».
+ *
+ * Le sol est parfait et on n'y touche pas. Ce qui change, c'est la GRAMMAIRE
+ * du mur : un sol est posé, un mur est BÂTI ou TAILLÉ. Trois propositions.
+ */
+
+/** Une tuile est un carré de T sur T : toute distance s'y mesure en faisant
+ *  le tour, sinon le motif ne se raccorde pas d'une case à l'autre. */
+function distanceBouclee(dx: number, dy: number): number {
+  const x = Math.min(Math.abs(dx), T - Math.abs(dx));
+  const y = Math.min(Math.abs(dy), T - Math.abs(dy));
+  return Math.hypot(x, y);
+}
+
+/**
+ * A — L'APPAREIL. De vraies assises : des blocs rectangulaires posés en
+ * rangées, décalés d'un demi-bloc d'une rangée à l'autre, et du mortier noir
+ * entre eux. C'est la grammaire d'un MUR, celle qu'on lit sans y penser —
+ * horizontale, régulière, empilée.
+ *
+ * Les mesures tombent juste sur la tuile (quatre assises de T/4, des blocs de
+ * T/2) : les rangées se prolongent donc d'une case à l'autre au lieu de se
+ * casser, et l'appareil traverse toute une paroi.
+ */
+const MUR_APPAREIL = (c: CanvasRenderingContext2D, d: () => number): void => {
+  const assise = T / 4;
+  const large = T / 2;
+  const joint = T * 0.026;
+  for (let rang = 0; rang < 4; rang++) {
+    const y = rang * assise;
+    const decal = rang % 2 ? large / 2 : 0;
+    for (let i = -1; i <= 2; i++) {
+      const x = decal + i * large;
+      const g = 16 + Math.round(d() * 42); // chaque pierre a son ton
+      const bx = x + joint;
+      const by = y + joint;
+      const bw = large - joint * 2;
+      const bh = assise - joint * 2;
+      c.fillStyle = `rgb(${g},${g},${g + 8})`;
+      c.fillRect(bx, by, bw, bh);
+      // Le lit et la table de la pierre, un ton de part et d'autre : sans eux
+      // un bloc est un rectangle, avec eux c'est une pierre posée sur une
+      // autre. Ce n'est pas de la lumière, c'est de l'usure — le haut d'une
+      // assise s'écaille, le bas retient la crasse.
+      c.fillStyle = `rgb(${g + 14},${g + 14},${g + 22})`;
+      c.fillRect(bx, by, bw, joint);
+      c.fillStyle = `rgb(${Math.max(0, g - 10)},${Math.max(0, g - 10)},${Math.max(0, g - 4)})`;
+      c.fillRect(bx, by + bh - joint, bw, joint);
+      // un éclat sur un bloc sur trois : la pierre a servi
+      if (d() < 0.34) {
+        const r = assise * (0.12 + d() * 0.16);
+        c.fillStyle = `rgb(${Math.max(0, g - 16)},${Math.max(0, g - 16)},${Math.max(0, g - 10)})`;
+        c.beginPath();
+        c.ellipse(bx + d() * bw, by + d() * bh, r, r * 0.7, d() * 3, 0, TAU);
+        c.fill();
+      }
+    }
+  }
+  nappes(c, d, 16);
+  grain(c, d, 14);
+  for (let i = 0; i < 3; i++) felure(c, d, 'rgba(0,0,0,0.85)');
+};
+
+/**
+ * B — LE CYCLOPÉEN. Pas d'assises : de grosses pierres polygonales ajustées
+ * les unes aux autres, chacune d'un ton différent, séparées par un joint noir
+ * épais. C'est du mur monté sans équerre — et c'est le plus loin possible du
+ * dallage régulier du sol.
+ *
+ * Le découpage est un Voronoï à distance bouclée : chaque pixel appartient à
+ * la pierre dont le germe est le plus proche, en faisant le tour de la tuile.
+ * C'est ce qui le rend raccordable sans une seule ligne de plus.
+ */
+const MUR_CYCLOPEEN = (c: CanvasRenderingContext2D, d: () => number): void => {
+  const n = 7;
+  const gx: number[] = [];
+  const gy: number[] = [];
+  const ton: number[] = [];
+  for (let i = 0; i < n; i++) {
+    gx.push(d() * T);
+    gy.push(d() * T);
+    ton.push(14 + Math.round(d() * 44));
+  }
+  const img = c.getImageData(0, 0, T, T);
+  const p = img.data;
+  const joint = T * 0.03;
+  for (let y = 0; y < T; y++)
+    for (let x = 0; x < T; x++) {
+      let d1 = 1e9;
+      let d2 = 1e9;
+      let quel = 0;
+      for (let i = 0; i < n; i++) {
+        const dd = distanceBouclee(x - gx[i], y - gy[i]);
+        if (dd < d1) {
+          d2 = d1;
+          d1 = dd;
+          quel = i;
+        } else if (dd < d2) d2 = dd;
+      }
+      // Près d'une frontière, c'est du mortier. Plus loin, c'est la pierre —
+      // et elle s'assombrit vers son bord, ce qui lui donne du galbe.
+      const bord = d2 - d1;
+      const g =
+        bord < joint
+          ? 2 + Math.round((bord / joint) * 6)
+          : ton[quel] - Math.round(Math.max(0, 1 - (bord - joint) / (T * 0.16)) * 12);
+      const k = (y * T + x) * 4;
+      p[k] = g;
+      p[k + 1] = g;
+      p[k + 2] = g + 8;
+      p[k + 3] = 255;
+    }
+  c.putImageData(img, 0, 0);
+  nappes(c, d, 18);
+  grain(c, d, 16);
+  for (let i = 0; i < 2; i++) felure(c, d, 'rgba(0,0,0,0.85)');
+};
+
+/**
+ * C — LA PAROI TAILLÉE. Pas de blocs du tout : de la roche creusée, avec ses
+ * strates horizontales et les coups de pic verticaux qui l'ont ouverte. C'est
+ * un couloir percé, pas un mur monté — et dans les Dessous, c'est peut-être
+ * plus juste que de la maçonnerie.
+ */
+const MUR_TAILLE = (c: CanvasRenderingContext2D, d: () => number): void => {
+  // LES COUPS DE PIC : des colonnes verticales de tons voisins. C'est la
+  // verticale qui dit « ça monte » — le sol n'a aucune direction, lui.
+  const img = c.getImageData(0, 0, T, T);
+  const p = img.data;
+  const pas = Math.round(T * 0.045);
+  const colonnes: number[] = [];
+  for (let x = 0; x < T; x += pas) colonnes.push(10 + Math.round(d() * 34));
+  // LES STRATES : quatre bandes horizontales, chacune d'un ton propre. Elles
+  // se prolongent d'une case à l'autre parce qu'elles tombent sur la tuile.
+  const strates = [0, 1, 2, 3].map(() => Math.round((d() - 0.5) * 18));
+  for (let y = 0; y < T; y++) {
+    const st = strates[Math.floor((y / T) * 4)];
+    // le creux d'une strate : plus sombre juste sous sa limite
+    const dans = ((y / T) * 4) % 1;
+    const creux = dans < 0.1 ? -10 : dans > 0.9 ? 6 : 0;
+    for (let x = 0; x < T; x++) {
+      const col = colonnes[Math.floor(x / pas) % colonnes.length];
+      // le coup de pic ondule : une colonne droite ferait un peigne
+      const onde = Math.round(Math.sin(y * 0.08 + x * 0.3) * 4);
+      const g = Math.max(0, Math.min(255, col + st + creux + onde));
+      const k = (y * T + x) * 4;
+      p[k] = g;
+      p[k + 1] = g;
+      p[k + 2] = g + 9;
+      p[k + 3] = 255;
+    }
+  }
+  c.putImageData(img, 0, 0);
+  // quelques saillies : la roche n'est pas plane
+  for (let i = 0; i < 5; i++) {
+    const w = T * (0.06 + d() * 0.1);
+    const h = T * (0.2 + d() * 0.5);
+    const g = 6 + Math.round(d() * 34);
+    caillou(
+      c,
+      d() * T,
+      d() * T,
+      w,
+      h,
+      T * 0.02,
+      (d() - 0.5) * 0.1,
+      `rgb(${g},${g},${g + 8})`,
+    );
+  }
+  nappes(c, d, 20);
+  grain(c, d, 15);
+  for (let i = 0; i < 4; i++) felure(c, d, 'rgba(0,0,0,0.8)');
+};
+
+/** Les trois propositions, pour pouvoir les comparer côte à côte. */
+export const MURS = {
+  appareil: MUR_APPAREIL,
+  cyclopeen: MUR_CYCLOPEEN,
+  taille: MUR_TAILLE,
+} as const;
+export type NomMur = keyof typeof MURS;
+
+/** Celui qui est en jeu. Provisoire : il n'en restera qu'un. */
+let murChoisi: NomMur = 'appareil';
+export function choisirMur(n: NomMur): void {
+  murChoisi = n;
+  planches = null;
+}
+
+/** Les trois murs dessinés, pour la planche de comparaison. Provisoire. */
+export function apercuMurs(): Record<NomMur, HTMLCanvasElement> {
+  return {
+    appareil: planche('#050509', 26, MUR_APPAREIL),
+    cyclopeen: planche('#050509', 26, MUR_CYCLOPEEN),
+    taille: planche('#050509', 26, MUR_TAILLE),
+  };
+}
+
 let planches: Tuiles | null = null;
 
 /** Fabrique les planches une fois, et les garde. */
@@ -335,57 +541,11 @@ export function tuiles(): Tuiles {
     for (let i = 0; i < 2; i++) felure(c, d, 'rgba(8,8,14,0.45)');
   });
 
-  // LE MUR : de gros blocs entassés, des JOINTS NOIRS ET ÉPAIS, et beaucoup
-  // plus de contraste que le sol.
-  //
-  // Les deux avaient la même texture, et on ne distinguait plus un couloir
-  // d'une salle : un trait de séparation ne suffit pas à dire « ça monte ».
-  // Ce qui le dit, c'est la STRUCTURE — le sol est lisse et fait de grandes
-  // dalles, le mur est un tas de blocs avec du noir entre eux.
-  const mur = planche('#050509', 26, (c, d) => {
-    for (let i = 0; i < 9; i++) {
-      // Des blocs francs, plus gros que les dalles du sol, avec du noir entre
-      // eux pour le mortier — mais jamais aussi larges que la case, sinon leur
-      // bord tombe sur le bord de la tuile et la grille revient.
-      //
-      // Et BEAUCOUP de contraste : la moyenne est recalée après coup, donc on
-      // peut pousser l'écart sans éclaircir le mur. Sans ça la paroi n'est que
-      // du bruit sombre, et même éclairée on n'y voit aucune pierre.
-      const w = T * (0.28 + d() * 0.34);
-      const h = T * (0.26 + d() * 0.3);
-      const g = 10 + Math.round(d() * 46);
-      caillou(
-        c,
-        d() * T - w * 0.3,
-        d() * T - h * 0.3,
-        w,
-        h,
-        T * 0.03,
-        (d() - 0.5) * 0.4,
-        `rgb(${g},${g},${g + 8})`,
-      );
-    }
-    // Quelques éclats : la pierre a été cassée pour être entassée, pas
-    // taillée. Peu nombreux — quatorze petits faisaient des confettis, et
-    // c'étaient eux qu'on voyait au lieu des blocs.
-    for (let i = 0; i < 6; i++) {
-      const r = T * (0.025 + d() * 0.05);
-      const g = 6 + Math.round(d() * 30);
-      caillou(
-        c,
-        d() * T,
-        d() * T,
-        r * 2,
-        r * 1.6,
-        r * 0.5,
-        d() * 3,
-        `rgb(${g},${g},${g + 6})`,
-      );
-    }
-    nappes(c, d, 22);
-    grain(c, d, 16);
-    for (let i = 0; i < 5; i++) felure(c, d, 'rgba(0,0,0,0.9)');
-  });
+  // LE MUR : voir les trois propositions plus haut. Le sol et lui parlaient
+  // le même vocabulaire — des galets épars — et on confondait une paroi avec
+  // un dallage. Ce qui les sépare maintenant, c'est la GRAMMAIRE : un sol est
+  // posé, un mur est bâti ou taillé.
+  const mur = planche('#050509', 26, MURS[murChoisi]);
 
   const cendre = planche('#2a2a38', 48, (c, d) => {
     // LE SOL BRÛLÉ : plus clair, grumeleux, et il craque sous qui se presse.
