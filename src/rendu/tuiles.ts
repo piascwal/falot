@@ -133,6 +133,34 @@ function grain(c: CanvasRenderingContext2D, d: () => number, force: number): voi
   c.putImageData(img, 0, 0);
 }
 
+/**
+ * ÉGALISE LA MOYENNE D'UNE TUILE.
+ *
+ * C'était LE défaut, et il n'avait rien à voir avec la lumière : les six
+ * variantes n'avaient pas la même luminosité moyenne, parce qu'une grande
+ * dalle claire ou une nappe sombre décale la moyenne de toute la case. Posées
+ * côte à côte, elles dessinaient donc une grille — et sous une lampe, ça se
+ * lit comme si chaque tuile s'éclairait toute seule, par paliers, au lieu
+ * d'un halo continu.
+ *
+ * On recale donc chaque tuile sur la MÊME moyenne après l'avoir dessinée. Le
+ * détail reste (le grain, les joints, les fêlures), la marche disparaît.
+ */
+function egaliser(c: CanvasRenderingContext2D, cible: number): void {
+  const img = c.getImageData(0, 0, T, T);
+  const p = img.data;
+  let somme = 0;
+  for (let i = 0; i < p.length; i += 4) somme += p[i] + p[i + 1] + p[i + 2];
+  const ecart = cible - somme / (p.length / 4) / 3;
+  if (Math.abs(ecart) < 0.4) return;
+  for (let i = 0; i < p.length; i += 4) {
+    p[i] = Math.max(0, Math.min(255, p[i] + ecart));
+    p[i + 1] = Math.max(0, Math.min(255, p[i + 1] + ecart));
+    p[i + 2] = Math.max(0, Math.min(255, p[i + 2] + ecart));
+  }
+  c.putImageData(img, 0, 0);
+}
+
 /** Une fêlure : une ligne brisée, plus sombre que la pierre. */
 function felure(c: CanvasRenderingContext2D, d: () => number, teinte: string): void {
   c.strokeStyle = teinte;
@@ -226,6 +254,8 @@ export interface Tuiles {
  */
 function planche(
   fond: string,
+  /** La luminosité moyenne que TOUTES les variantes auront, de 0 à 255. */
+  moyenne: number,
   dessiner: (c: CanvasRenderingContext2D, d: () => number) => void,
 ): HTMLCanvasElement {
   const t = document.createElement('canvas');
@@ -242,6 +272,7 @@ function planche(
     u.fillStyle = fond;
     u.fillRect(0, 0, T, T);
     dessiner(u, des(0x1a2b + v * 7919));
+    egaliser(u, moyenne);
     c.drawImage(une, v * T, 0);
   }
   return t;
@@ -279,11 +310,15 @@ export function tuiles(): Tuiles {
   if (planches) return planches;
   // LE SOL : lisse, poussiéreux, de grandes dalles à joints fins. Il doit se
   // faire oublier — c'est dessus qu'on marche, pas lui qu'on regarde.
-  const sol = planche('#20202e', (c, d) => {
-    for (let i = 0; i < 5; i++) {
-      const w = T * (0.42 + d() * 0.5);
-      const h = T * (0.38 + d() * 0.42);
-      const g = 34 + Math.round(d() * 12); // peu de contraste : c'est plat
+  const sol = planche('#20202e', 38, (c, d) => {
+    // DES DALLES PETITES. Une grande dalle occupe presque toute la case, donc
+    // son bord tombe sur le bord de la case : la grille se redessine toute
+    // seule. Plus nombreuses et plus petites, elles se lisent comme un
+    // appareillage irrégulier, et la case disparaît dedans.
+    for (let i = 0; i < 14; i++) {
+      const w = T * (0.16 + d() * 0.26);
+      const h = T * (0.14 + d() * 0.22);
+      const g = 34 + Math.round(d() * 10); // peu de contraste : c'est plat
       caillou(
         c,
         d() * T - w * 0.3,
@@ -295,7 +330,7 @@ export function tuiles(): Tuiles {
         `rgb(${g},${g},${g + 12})`,
       );
     }
-    nappes(c, d, 22);
+    nappes(c, d, 10);
     grain(c, d, 12);
     for (let i = 0; i < 2; i++) felure(c, d, 'rgba(8,8,14,0.45)');
   });
@@ -307,12 +342,13 @@ export function tuiles(): Tuiles {
   // d'une salle : un trait de séparation ne suffit pas à dire « ça monte ».
   // Ce qui le dit, c'est la STRUCTURE — le sol est lisse et fait de grandes
   // dalles, le mur est un tas de blocs avec du noir entre eux.
-  const mur = planche('#030307', (c, d) => {
-    for (let i = 0; i < 5; i++) {
-      // des blocs francs, bien plus gros que les dalles du sol ; le fond
-      // presque noir qui reste entre eux fait le mortier
-      const w = T * (0.4 + d() * 0.34);
-      const h = T * (0.36 + d() * 0.3);
+  const mur = planche('#030307', 17, (c, d) => {
+    for (let i = 0; i < 9; i++) {
+      // des blocs francs, plus gros que les dalles du sol ; le fond presque
+      // noir qui reste entre eux fait le mortier. Mais pas au point d'occuper
+      // la case : un bloc aussi large que la tuile redessine la grille.
+      const w = T * (0.26 + d() * 0.3);
+      const h = T * (0.24 + d() * 0.26);
       const g = 9 + Math.round(d() * 16); // beaucoup de contraste : c'est un tas
       caillou(
         c,
@@ -345,7 +381,7 @@ export function tuiles(): Tuiles {
     for (let i = 0; i < 4; i++) felure(c, d, 'rgba(0,0,0,0.75)');
   });
 
-  const cendre = planche('#2a2a38', (c, d) => {
+  const cendre = planche('#2a2a38', 48, (c, d) => {
     // LE SOL BRÛLÉ : plus clair, grumeleux, et il craque sous qui se presse.
     for (let i = 0; i < 90; i++) {
       const x = d() * T;

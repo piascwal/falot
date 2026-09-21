@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Lux &amp; Paranoïa</title>
+<!-- Pages garde index.html une dizaine de minutes. On ne contrôle pas ses
+     en-têtes, mais on peut au moins demander au navigateur de revérifier. -->
+<meta http-equiv="Cache-Control" content="no-cache">
 <meta name="description" content="Aventure procédurale dans le noir : un petit peureux n'a qu'une pierre, et escorte des lumières jusqu'au portail sans croiser les regards rouges.">
 <meta name="theme-color" content="#08080e">
 <link rel="stylesheet" href="./src/interface/styles.css">
@@ -57,6 +60,12 @@
 
 
 <div class="toast" id="toast"></div>
+
+<!-- LA VERSION, EN JEU. Elle était sur l'écran-titre seulement, et on ne la
+     voyait donc jamais au moment où on se demande si le cache a lâché : on
+     joue, on constate un défaut déjà corrigé, et on ne sait pas si on regarde
+     la dernière version ou celle d'il y a une heure. -->
+<small class="bati coin" id="bati-jeu"></small>
 
 <!-- L'écran-titre et l'écran noir d'ouverture. Ils ne servent qu'une fois par
      partie : passé le premier Seuil, le jeu ne s'arrête plus. -->

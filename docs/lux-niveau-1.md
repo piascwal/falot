@@ -1134,67 +1134,6 @@ Et une bêtise trouvée en mesurant : l'arête ouvrait un chemin et le traçait
 pour **chaque** case du sol, même celles qui ne touchent aucune pierre — deux
 cents appels par image pour rien.
 
-## Les angles, et deux corrections ratées avant la bonne
-
-Signalé en jouant : *« il y a un bug d'éclairage quand on est dans un coin de
-mur, la diagonale n'est pas éclairée »*. J'ai commencé par reproduire sur un
-plan en **croix**, c'est-à-dire sur des angles **saillants** — alors qu'il
-s'agissait des angles **rentrants**, les coins d'une salle. Deux essais pour
-rien, et le second a même empiré les choses. Pour mémoire :
-
-1. **Une morsure d'une profondeur fixe** (les rayons entrent de 0,85 case dans
-   la pierre). Ça creuse un coin noir en V dans les angles saillants : un rayon
-   à 45° entre dans la case par sa pointe, il n'a pas de quoi traverser la
-   diagonale (1,41 case), et ses deux voisins filent tout droit dans le couloir.
-2. **« Toute la case »** (le rayon va jusqu'à la face opposée). Plus de V, mais
-   chaque pierre s'allume d'un bloc : la salle devient un damier de tuiles
-   allumées ou éteintes, sans le moindre dégradé. C'est ce qu'on m'a renvoyé —
-   *« tu as rajouté des bugs d'éclairage tuile par tuile qui rendent la scène
-   incohérente »*, et c'était exact.
-
-Et aucune des deux ne règle le cas d'origine. Le coin d'une salle n'est atteint
-par **aucun** rayon : les deux murs qui le bordent bloquent la diagonale. Il
-reste noir entre deux murs éclairés, et c'est ce qui se voit le plus.
-
-### La règle est ailleurs
-
-Le polygone de lumière est une affaire de **sol** : il dit jusqu'où le sol est
-éclairé, il s'arrête sur la face du mur, et il n'entre pas dans la pierre.
-
-La pierre, elle, a sa propre passe (`percerPierres`), avec **une** règle :
-
-> **Une pierre est éclairée si elle touche, par un côté OU PAR UN COIN, une
-> case de sol que la source voit.**
-
-Le coin est ce qui sauve les angles rentrants — et cette règle règle les trois
-cas d'un coup, le saillant, le rentrant et le dégradé, puisqu'on peint la
-pierre avec **la lumière de la source** et pas avec un niveau par tuile.
-
-Elle est sortie à part du dessin (`pierreVue`) et testée : sur une salle carrée,
-les quatre coins sont éclairés, les murs aussi, et **le deuxième rang ne l'est
-pas** — c'est ce qui empêche la salle d'à côté d'exister.
-
-### Trois détails qui font la différence
-
-- **La pierre boit la lumière** plus vite que le sol : le dégradé s'éteint aux
-  trois quarts de la portée. Sans ça, la face opposée d'une case est presque
-  aussi claire que la face touchée, et la paroi se termine par un bord franc à
-  une case de profondeur — on lisait l'épaisseur du mur, qu'on n'est pas censé
-  voir d'en haut.
-- **Pour un cône, la pierre doit être DANS le cône.** Sans cette condition elle
-  s'allumait partout où une case de sol voisine était vue, donc le mur
-  s'éclairait une case plus large que le faisceau, des deux côtés.
-- **Un seul chemin, et un flou.** Une case remplie toute seule montre ses
-  quatre bords dès que sa voisine n'est pas allumée : la paroi se lisait comme
-  une file de rectangles.
-
-Le flou, justement, a d'abord été appliqué **par source** — dix appels par
-image avec huit torches à l'écran, et un filtre de canvas n'est pas gratuit :
-mesuré, on passait de une à deux images perdues sur trois cents à six ou dix.
-Toutes les sources déposent donc leur lumière de pierre dans un **tampon**
-commun, qu'on floute une seule fois avant de le reporter sur l'obscurité. On
-retombe à trois ou quatre.
-
 ## Le delta mur/sol, deuxième passe
 
 Toujours trop faible. Le sol monte (`#20202e`, dalles à 34-46), le mur descend
@@ -1216,3 +1155,45 @@ Même traitement, même règle — de la matière, aucune lumière peinte :
 Ce qui **brûle** reste peint par la scène, pas dans la planche : c'est elle qui
 sait ce qu'il reste de flamme, et de la braise ne se dessine pas dans une image
 figée.
+
+## « L'éclairage se fait tuile par tuile » — et ce n'était pas l'éclairage
+
+Trois allers-retours sur les angles pour rien. Le défaut signalé — *« au lieu
+d'avoir une lumière constante, on dirait que chaque tuile s'éclaire toute
+seule »* — n'était pas dans le moteur de lumière : il était dans la
+**texture**.
+
+Reproduit en posant simplement le sol case par case, sans aucune lumière : la
+grille se voyait à l'œil nu. Les six variantes n'avaient **pas la même
+luminosité moyenne** — une grande dalle claire ou une nappe sombre décale la
+moyenne de toute la case — et côte à côte elles dessinaient un damier. Sous une
+lampe, ce damier se lit comme si chaque tuile s'allumait par paliers.
+
+Deux corrections, dans la fabrication des tuiles :
+
+- **on recale chaque variante sur la même moyenne** après l'avoir dessinée. Le
+  détail reste (le grain, les joints, les fêlures), la marche disparaît ;
+- **les dalles sont petites**. Une dalle qui occupe presque toute la case a son
+  bord sur le bord de la case : la grille se redessine toute seule. Quatorze
+  petites plutôt que cinq grandes, et la case disparaît dans l'appareillage.
+  Même chose pour les blocs des murs.
+
+### Et l'éclairage est revenu en arrière
+
+Les deux tentatives sur les angles (la morsure « toute la case », puis la passe
+séparée `percerPierres`) sont **annulées**. La seconde ajoutait un défaut réel :
+deux perçages avec deux dégradés différents, donc un cercle qui se lisait,
+coupé par chaque case, en petits arcs. Le moteur de lumière est revenu à ce
+qu'il était avant qu'on touche aux angles, et il n'y a plus qu'une seule passe.
+
+La leçon, pour la prochaine fois : **reproduire le défaut isolément avant de
+corriger.** Trois essais ont porté sur des angles saillants dans un plan en
+croix alors que le défaut était ailleurs, et la texture n'a été suspectée qu'en
+la regardant seule, sans lumière.
+
+## La version s'affiche en jeu
+
+Elle n'était que sur l'écran-titre, donc jamais visible au moment où on se
+demande si le cache a lâché : on joue, on constate un défaut déjà corrigé, et
+on ne sait pas si on regarde la dernière version ou celle d'il y a une heure.
+Elle est maintenant dans un coin de l'écran de jeu, en tout petit.

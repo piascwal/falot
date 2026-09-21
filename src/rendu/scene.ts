@@ -36,17 +36,14 @@ import { dessinerFantomeManche, dessinerManche, dessinerVisee } from './gestes.j
 import {
   percerCone,
   percerDisque,
-  percerPierres,
   percerRond,
   portéesCone,
   portéesRond,
-  poserLesPierres,
   RAYONS_FOND,
   raccourcir,
   rayonsSource,
   tracerCone,
   tracerRond,
-  viderLesPierres,
 } from './lumiere.js';
 import { dessinerPuits } from './puits.js';
 import { dessinerSol } from './sol.js';
@@ -506,9 +503,6 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
   lctx.fillStyle = 'rgba(8,8,14,0.975)';
   lctx.fillRect(0, 0, W, H);
   lctx.globalCompositeOperation = 'destination-out';
-  // Le tampon des pierres : toutes les sources y déposent ce qu'elles mettent
-  // sur la paroi, et on le floute une seule fois, à la fin.
-  const pctx = viderLesPierres(ecran);
 
   const jx = joueur.x - cam.x,
     jy = joueur.y - cam.y;
@@ -518,12 +512,8 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
   if (r > 1) {
     joueur.rayonsHalo = portéesRond(zone, joueur.x, joueur.y, r);
     percerRond(lctx, jx, jy, r, 1, joueur.rayonsHalo);
-    // Puis la PIERRE qu'il touche. Le polygone s'arrête sur la face du mur :
-    // c'est cette passe-là qui allume la paroi, avec le dégradé de la source
-    // et les angles rentrants compris.
-    if (pctx) percerPierres(ecran, pctx, zone, joueur.x, joueur.y, r, 1, joueur.rayonsHalo);
   }
-  if (portee) {
+  if (portee)
     percerCone(
       ecran,
       lctx,
@@ -536,21 +526,6 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
       0.95,
       joueur.rayons,
     );
-    if (joueur.rayons)
-      if (pctx)
-        percerPierres(
-          ecran,
-          pctx,
-          zone,
-          joueur.x,
-          joueur.y,
-          portee,
-          0.95,
-          joueur.rayons,
-          joueur.regard,
-          cone,
-        );
-  }
   for (const p of eclaires)
     percerCone(
       ecran,
@@ -564,11 +539,8 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
       0.85,
       p.rayonsRelais,
     );
-  for (const b of zone.braises) {
-    const ry = rayonsSource(zone, b, b.r);
-    percerRond(lctx, b.x - cam.x, b.y - cam.y, b.r, 0.92, ry);
-    if (pctx) percerPierres(ecran, pctx, zone, b.x, b.y, b.r, 0.92, ry);
-  }
+  for (const b of zone.braises)
+    percerRond(lctx, b.x - cam.x, b.y - cam.y, b.r, 0.92, rayonsSource(zone, b, b.r));
   // La pierre en vol et sa trace. Sans ça on lance dans le noir et on ne
   // sait jamais où c'est retombé — or c'est précisément l'information dont on
   // a besoin pour décider par où passer.
@@ -605,10 +577,14 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
   for (const t of zone.torches) {
     if (t.reste <= 0) continue;
     const k = clamp(t.reste / (t.duree * 0.35), 0, 1); // elle faiblit en mourant
-    const ry = rayonsSource(zone, t, t.r);
-    const pr = t.r * (0.55 + k * 0.45);
-    percerRond(lctx, t.x - cam.x, t.y - cam.y, pr, 0.9, ry);
-    if (pctx) percerPierres(ecran, pctx, zone, t.x, t.y, pr, 0.9, ry);
+    percerRond(
+      lctx,
+      t.x - cam.x,
+      t.y - cam.y,
+      t.r * (0.55 + k * 0.45),
+      0.9,
+      rayonsSource(zone, t, t.r),
+    );
   }
   // Le cône d'une sentinelle n'apparaît que DE PRÈS. De loin on ne voit que
   // ses yeux, et on ignore encore si c'est un ami ou une sentinelle : c'est
@@ -638,9 +614,6 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
         p.rayonsVue,
       );
   }
-  // Et la pierre, d'un coup, floutée : c'est elle qui donne le bord doux des
-  // ombres portées par les murs.
-  if (pctx) poserLesPierres(ecran, lctx);
   lctx.globalCompositeOperation = 'source-over';
 
   ctx.save();

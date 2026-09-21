@@ -162,6 +162,8 @@ export function poserLEcranTitre(partie: Partie, tout = false): void {
   // Le timbre de construction, injecté par Vite. En développement il n'existe
   // pas : on ne se demande jamais si on a la dernière version d'un serveur qui
   // recharge tout seul.
-  el('bati').textContent = typeof __BATI__ === 'string' ? `version ${__BATI__}` : '';
+  const bati = typeof __BATI__ === 'string' ? `version ${__BATI__}` : '';
+  el('bati').textContent = bati;
+  el('bati-jeu').textContent = bati;
   poserLaGrille(partie, tout);
 }

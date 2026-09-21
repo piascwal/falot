@@ -742,3 +742,17 @@ canvas {
   letter-spacing: 0.08em;
   color: rgba(232, 232, 240, 0.22);
 }
+
+/* La même, mais posée en jeu : dans un coin, assez pâle pour ne pas exister
+   tant qu'on ne la cherche pas, assez lisible pour trancher une question de
+   cache en une seconde. */
+.bati.coin {
+  position: fixed;
+  left: 10px;
+  bottom: 8px;
+  margin: 0;
+  font-size: 0.58rem;
+  color: rgba(232, 232, 240, 0.3);
+  pointer-events: none;
+  z-index: 5;
+}
