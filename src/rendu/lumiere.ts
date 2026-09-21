@@ -32,26 +32,14 @@ export function portéesCone(
   demiAngle: number,
 ): number[] {
   const out = new Array<number>(RAYONS + 1);
-  const pas = CASE * 0.22;
   for (let i = 0; i <= RAYONS; i++) {
     const a = angle - demiAngle + (2 * demiAngle * i) / RAYONS;
-    const cx = Math.cos(a),
-      cy = Math.sin(a);
-    let d = 0;
-    while (d + pas < portee) {
-      if (
-        solide(
-          zone,
-          Math.floor((wx + cx * (d + pas)) / CASE),
-          Math.floor((wy + cy * (d + pas)) / CASE),
-        )
-      )
-        break;
-      d += pas;
-    }
-    // on s'arrête AVANT la pierre, pas dessus : garder le pas où le mur a été
-    // trouvé faisait déborder chaque rayon d'un cran dans le mur
-    out[i] = Math.min(d, portee);
+    // LE MÊME PARCOURS QUE LES SOURCES RONDES. Le cône avançait par pas fixes
+    // et s'arrêtait AVANT la pierre : un faisceau braqué sur un mur laissait
+    // ce mur noir, ce qui n'a aucun sens — et le pas fixe enjambait un coin
+    // rasé en diagonale. `distanceMur` saute de frontière en frontière, mord
+    // la paroi qu'il touche, et ne la traverse jamais.
+    out[i] = distanceMur(zone, wx, wy, Math.cos(a), Math.sin(a), portee);
   }
   return out;
 }
@@ -165,7 +153,13 @@ function distanceMur(
       // morsure on ne voyait qu'un liseré du haut de la case.
       const fendue =
         !porte && zone.fissureDe && zone.fissureDe[cy] && zone.fissureDe[cy][cx];
-      return Math.min(t + CASE * (porte ? 0.55 : fendue ? 0.95 : 0.2), tX, tY, portee);
+      // LA MORSURE FAIT MAINTENANT PRESQUE UNE CASE. À un cinquième, on ne
+      // voyait qu'un liseré du mur et la pierre restait noire : tout le
+      // travail sur les tuiles ne se voyait que par terre. Et ça ne fuit
+      // jamais, parce que le résultat est borné à la SORTIE de la case
+      // touchée — un rayon ne peut pas dépasser la pierre qu'il éclaire,
+      // quelle que soit la morsure qu'on lui donne.
+      return Math.min(t + CASE * (porte ? 0.55 : fendue ? 1 : 0.85), tX, tY, portee);
     }
   }
   return portee;

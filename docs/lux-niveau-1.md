@@ -1057,3 +1057,30 @@ l'atteint et rien ne la borde.
 **Mesuré** : 38 ms de fabrication, une fois, pendant l'écran-titre. Puis 0 à 4
 images perdues sur 300 selon les passes — c'est le bruit de mesure d'un
 navigateur sans écran, pas une chute.
+
+### La lumière mord enfin la paroi
+
+La pierre était là, et on ne la voyait que par terre : les rayons ne mordaient
+le mur que d'**un cinquième de case**, soit un liseré de douze pixels sur une
+paroi qui en fait soixante-deux. Et les **cônes** ne la mordaient pas du tout —
+ils s'arrêtaient *avant* la pierre, si bien qu'un faisceau braqué sur un mur
+laissait ce mur noir, ce qui n'a aucun sens.
+
+Deux changements dans `rendu/lumiere.ts` :
+
+- la morsure passe d'un cinquième à **0,85 case** : le mur qu'on éclaire se
+  voit sur presque toute sa profondeur ;
+- les cônes empruntent le même parcours que les sources rondes
+  (`distanceMur`), au lieu d'avancer par pas fixes. Ils mordent donc comme
+  elles — et au passage ils cessent d'enjamber un coin rasé en diagonale, ce
+  que le pas fixe faisait.
+
+**Et ça ne fuit pas.** Ce n'est pas une affaire de réglage : le résultat est
+borné à la **sortie de la case touchée**, donc un rayon ne peut pas dépasser la
+pierre qu'il éclaire, quelle que soit la morsure qu'on lui donne. Comme c'est
+désormais la seule chose qui empêche de voir la salle d'à côté gratuitement,
+`tests/lumiere.test.ts` la tient : on allume depuis des milliers de positions
+sur quatre étages tirés au sort, on suit chaque rayon jusqu'à son bout, et on
+vérifie qu'il ne traverse **jamais** plus d'une pierre. Un troisième test tient
+l'autre moitié du marché — que la morsure reste franche, sinon on retomberait
+dans le liseré sans s'en apercevoir.
