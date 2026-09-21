@@ -7,15 +7,34 @@
 
 html,
 body {
+  /* FIXÉE, pas seulement « sans débordement ». Sur iPad, `overflow: hidden`
+     seul ne suffit pas : la page reste dans le flux de défilement de Safari et
+     on peut la faire glisser vers le haut, ce qui décale tout le jeu. Sortie
+     du flux, il n'y a plus rien à faire défiler. */
+  position: fixed;
+  inset: 0;
   width: 100%;
   height: 100%;
   background: #08080e;
   overflow: hidden;
   overscroll-behavior: none;
+  touch-action: none;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: #e8e8f0;
   -webkit-user-select: none;
   user-select: none;
+}
+
+/* LA HAUTEUR VISIBLE, pas celle de la mise en page. Sur iPad, `100%` compte la
+   bande qui passe sous la barre du navigateur : la mémoire du canevas était
+   donc plus haute que le morceau qu'on voit, et le bas de la carte se
+   retrouvait coupé. `dvh` suit ce qui est réellement affiché ; les navigateurs
+   qui ne la connaissent pas gardent le `100%` ci-dessus. */
+@supports (height: 100dvh) {
+  html,
+  body {
+    height: 100dvh;
+  }
 }
 
 canvas {
@@ -32,7 +51,7 @@ canvas {
   top: 0;
   left: 0;
   right: 0;
-  padding: max(0.7rem, env(safe-area-inset-top)) 0.8rem 0.7rem;
+  padding: calc(env(safe-area-inset-top, 0px) + 0.7rem) 0.8rem 0.7rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -45,6 +64,11 @@ canvas {
 }
 
 .back {
+  /* C'était un lien, c'est devenu un bouton : sans ces trois lignes il arrive
+     avec la bordure et la police du navigateur. */
+  border: 0;
+  font-family: inherit;
+  cursor: pointer;
   color: rgba(232, 232, 240, 0.55);
   text-decoration: none;
   font-size: 0.95rem;
@@ -254,8 +278,11 @@ canvas {
 
 .actions {
   position: fixed;
-  right: max(0.9rem, env(safe-area-inset-right));
-  bottom: max(1.4rem, env(safe-area-inset-bottom));
+  /* Le retrait s'AJOUTE à la marge au lieu de la remplacer : avec `max()`,
+     une encoche de 20 px laissait le bouton à 22 px du tout bord, donc à
+     moitié sous l'indicateur d'accueil. */
+  right: calc(env(safe-area-inset-right, 0px) + 0.9rem);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 1.4rem);
   display: flex;
   flex-direction: column-reverse;
   gap: 0.6rem;

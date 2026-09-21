@@ -58,11 +58,28 @@ export const ETAGES_ECRITS: Readonly<Record<number, EtageEcrit>> = {
       // et rien d'autre que ce qu'on allume. Les deux blocs de pierre au
       // milieu coupent la vue : sans eux la salle se lit d'un seul coup d'œil
       // et il n'y a plus rien à explorer.
+      //
+      // LES LUEURS SONT SUR LE CHEMIN, et c'est tout le sujet. Elles étaient
+      // réparties dans les trois travées : la salle en CONTENAIT de quoi payer
+      // le faisceau, mais qui allait droit à la porte n'en croisait que trois.
+      // On sortait donc Peureux, on tombait sur un Guet sans rien à essayer,
+      // et on s'ennuyait avant d'avoir découvert le faisceau — mesuré, et
+      // c'est le pilote automatique du test qui le montre.
+      //
+      // SEPT LUEURS SONT DONC POSÉES SUR LA LIGNE 5, la route directe : sept
+      // fois quatre, c'est vingt-huit, et le faisceau en demande vingt-six. On
+      // ne peut plus sortir d'ici sans l'avoir. Trois autres traînent ailleurs
+      // — une à côté du réveil, deux sur la descente vers la porte — pour qui
+      // regarde autour de lui.
+      //
+      // Pas davantage : le budget d'éclat de TOUT l'étage doit rester sous le
+      // palier suivant (55), sinon on apprendrait deux verbes dans la même
+      // salle. Treize lueurs sur l'étage entier, soit cinquante-deux.
       '##.t...t...t...t...t...##', //  1
-      '##.....##.....##.......##', //  2
-      '##7@.o.##.o.o.##.o...o.##', //  3   le réveil, et la main qui le porte
-      '##.....##.....##.......##', //  4
-      '##..o.....8o.....o...o.##', //  5   huit lueurs : de quoi ouvrir le faisceau
+      '##.....##.....##..o....##', //  2
+      '##7@.o.##.....##.......##', //  3   le réveil, et la main qui le porte
+      '##.....##.....##..o....##', //  4   la descente vers la porte, payée
+      '##..o.o.o.8.o.o.o.o....##', //  5   LA VOIE DIRECTE : sept lueurs dessus
       '##...T...T...T...T...T.##', //  6
       '##################*######', //  7
       '##################=######', //  8

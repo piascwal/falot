@@ -147,10 +147,36 @@ function poserLaGrille(partie: Partie, tout: boolean): void {
   }
 }
 
+/** Vrai une fois les boutons de l'écran-titre branchés : on y revient en cours
+ *  de partie, et rebrancher à chaque retour empilerait les écouteurs. */
+let branche = false;
+
+/**
+ * REVENIR À L'ÉCRAN-TITRE, qui est le hub du jeu.
+ *
+ * La flèche en haut à gauche renvoyait au hub du SITE, c'est-à-dire hors du
+ * jeu : on quittait la page pour revenir choisir un étage. Elle ramène
+ * maintenant là où l'on choisit un étage, sans quitter quoi que ce soit.
+ *
+ * On repose la grille au passage : on vient peut-être de finir un étage, et
+ * elle doit le montrer.
+ */
+export function retourAuTitre(partie: Partie, tout = false): void {
+  partie.gele = true;
+  partie.fin = null;
+  el('titre').classList.add('on');
+  poserLaGrille(partie, tout);
+}
+
 /** L'écran-titre, et ses boutons. */
 export function poserLEcranTitre(partie: Partie, tout = false): void {
   partie.gele = true;
   el('titre').classList.add('on');
+  if (branche) {
+    poserLaGrille(partie, tout);
+    return;
+  }
+  branche = true;
   // Le saut reste visible en permanence. La règle « débloqué après une première
   // fin » est la bonne pour un jeu publié, mais elle rend l'étage 1 obligatoire
   // à chaque essai pendant qu'on le construit. Pour la rétablir :

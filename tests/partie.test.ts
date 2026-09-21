@@ -8,9 +8,10 @@ import { CASE, D, PORTEE_VUE } from '../src/coeur/dimensions.js';
 import { DUREE_CALME, EMOTIONS, FORMES, PIERRE } from '../src/coeur/formes.js';
 import { distances, solideEn } from '../src/coeur/monde/grille.js';
 import { avancer, creerPartie, PAS } from '../src/coeur/partie.js';
+import { majJelly } from '../src/coeur/regles/joueur.js';
 import { lancerPierre } from '../src/coeur/regles/pierre.js';
 import { eteindre, gagnerEclat } from '../src/coeur/regles/progression.js';
-import type { Partie, Perso } from '../src/coeur/types.js';
+import type { Corps, Partie, Perso } from '../src/coeur/types.js';
 
 const jouer = (p: Partie, secondes: number) => {
   for (let i = 0; i < Math.round(secondes / PAS); i++) avancer(p, PAS);
@@ -543,6 +544,50 @@ describe('l’abri', () => {
     for (let i = 0; i < 60; i++) avancer(p, PAS);
     expect(g.charge).toBe(0);
     expect(p.joueur.abri).toBe(true);
+  });
+});
+
+describe('la gelée', () => {
+  /** Le corps, secoué à une vitesse donnée pendant une demi-seconde. */
+  const secouer = (vx: number, vy: number) => {
+    const p: Corps = {
+      x: 0,
+      y: 0,
+      vx,
+      vy,
+      sx: 1,
+      sy: 1,
+      vsx: 0,
+      vsy: 0,
+      regard: 0,
+      tremble: 0,
+      aveugle: 0,
+      cligne: 0,
+    };
+    for (let i = 0; i < 30; i++) majJelly(p, 1 / 60);
+    return { sx: Math.round(p.sx * 1000) / 1000, sy: Math.round(p.sy * 1000) / 1000 };
+  };
+
+  it('déforme pareil à droite et à gauche', () => {
+    // Écrite avec la vitesse SIGNÉE, elle élargissait Falot vers la gauche et
+    // l'étirait en hauteur vers la droite : deux animations différentes pour
+    // le même pas. La déformation ne doit dépendre que de l'axe.
+    expect(secouer(-400, 0)).toEqual(secouer(400, 0));
+  });
+
+  it('déforme pareil en haut et en bas', () => {
+    expect(secouer(0, -400)).toEqual(secouer(0, 400));
+  });
+
+  it('étire toujours dans le sens de la course, jamais en travers', () => {
+    for (const v of [-400, 400] as const) {
+      const h = secouer(v, 0);
+      expect(h.sx, `horizontale à ${v}`).toBeGreaterThan(1);
+      expect(h.sy, `horizontale à ${v}`).toBeLessThan(1);
+      const w = secouer(0, v);
+      expect(w.sy, `verticale à ${v}`).toBeGreaterThan(1);
+      expect(w.sx, `verticale à ${v}`).toBeLessThan(1);
+    }
   });
 });
 

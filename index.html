@@ -17,7 +17,9 @@
 <div class="hud" id="hud">
   <!-- Lien absolu, et non plus « ../index.html » : le jeu vivait dans le repo du
        hub, il a son propre site maintenant. -->
-  <a class="back" href="https://piascwal.github.io/hub/" aria-label="Retour au hub">←</a>
+  <!-- LA FLÈCHE RAMÈNE AU HUB DU JEU, pas à celui du site : on revient
+       choisir un étage sans quitter la page. -->
+  <button type="button" class="back" id="retour" aria-label="Revenir au choix des étages">←</button>
   <span class="zone" id="zone">ZONE 1</span>
   <span class="lumieres" id="lumieres" aria-label="lumières livrées"></span>
   <!-- LA JAUGE D'ÉCLAT. Elle annonçait « PEUREUX → CURIEUX » : on lisait un

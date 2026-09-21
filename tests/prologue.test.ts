@@ -153,6 +153,28 @@ describe('le prologue — la salle du réveil', () => {
     expect(avant.length * 4).toBeGreaterThanOrEqual(FORMES[1].seuil);
   });
 
+  it('donne le faisceau à qui la traverse SANS chercher', () => {
+    // C'ÉTAIT LE DÉFAUT, et compter les lueurs ne le voyait pas : il y en
+    // avait de quoi payer le palier, mais pas SUR LE CHEMIN. Un joueur qui va
+    // droit à la porte n'en croisait que trois, sortait Peureux, tombait sur
+    // un Guet sans rien à essayer, et s'ennuyait avant d'avoir découvert le
+    // faisceau. Ce qu'on mesure ici n'est donc pas ce que la salle contient,
+    // c'est ce qu'elle DONNE à qui la traverse bêtement.
+    const p = creerPartie({ grain: 'TRAVERSEE', etage: 1 });
+    // La route naturelle : on descend dans l'allée du milieu et on file
+    // vers la porte. C'est ce que fait n'importe qui qui ne cherche rien.
+    const voie = [c(4, 5), c(18, 5), c(18, 6)];
+    let but = 0;
+    for (let i = 0; i < Math.round(30 / PAS) && but < voie.length; i++) {
+      pousser(p, voie[but]);
+      avancer(p, PAS);
+      if (Math.hypot(voie[but].x - p.joueur.x, voie[but].y - p.joueur.y) < CASE * 0.5)
+        but++;
+    }
+    expect(but, 'le pilote atteint bien la porte').toBe(voie.length);
+    expect(p.joueur.niveau, 'il en sort avec le faisceau').toBeGreaterThanOrEqual(1);
+  });
+
   it('est éclairée par des torches, et rien d’autre', () => {
     // « Plein de torches » : c'est ce qui fait comprendre en trois secondes
     // qu'on est dans un bâtiment noir où seule la lumière qu'on rallume

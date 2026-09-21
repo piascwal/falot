@@ -85,9 +85,30 @@ export function creerEcran(canvas: HTMLCanvasElement): Ecran {
   return ecran;
 }
 
+/**
+ * LA TAILLE VISIBLE, MESURÉE SUR LE CANEVAS LUI-MÊME.
+ *
+ * On lisait `window.innerHeight`, qui est la hauteur de la MISE EN PAGE. Sur
+ * iPad elle compte la bande qui passe sous la barre du navigateur : la mémoire
+ * du canevas était donc plus haute que le morceau qu'on voit, et le bas de la
+ * carte se retrouvait coupé hors de l'écran. Le canevas, lui, est étiré par le
+ * CSS sur la hauteur réellement affichée — c'est lui qui a raison, et le
+ * mesurer garantit que la mémoire et l'affichage disent la même chose.
+ *
+ * `clientWidth` vaut 0 tant que l'élément n'est pas dans la page : on retombe
+ * alors sur la fenêtre, faute de mieux.
+ */
+function vue(canvas: HTMLCanvasElement): { W: number; H: number } {
+  return {
+    W: canvas.clientWidth || window.innerWidth,
+    H: canvas.clientHeight || window.innerHeight,
+  };
+}
+
 export function redimensionner(ecran: Ecran): void {
-  ecran.W = window.innerWidth;
-  ecran.H = window.innerHeight;
+  const v = vue(ecran.canvas);
+  ecran.W = v.W;
+  ecran.H = v.H;
   const tenable = Math.sqrt(BUDGET_PIXELS / Math.max(1, ecran.W * ecran.H));
   ecran.DPR = clamp(
     Math.min(window.devicePixelRatio || 1, PALIERS[ecran.palier], tenable),
@@ -121,8 +142,7 @@ export function redimensionner(ecran: Ecran): void {
  * lectures et une affectation — c'est moins cher que d'y penser.
  */
 export function veillerSurLEcran(ecran: Ecran): boolean {
-  const W = window.innerWidth;
-  const H = window.innerHeight;
+  const { W, H } = vue(ecran.canvas);
   const derive =
     W !== ecran.W ||
     H !== ecran.H ||

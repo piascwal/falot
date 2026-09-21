@@ -13,14 +13,17 @@
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Ecran } from '../src/rendu/ecran.js';
-import { QLUM, veillerSurLEcran } from '../src/rendu/ecran.js';
+import { QLUM, redimensionner, veillerSurLEcran } from '../src/rendu/ecran.js';
 
-/** Un écran de papier : juste ce que le garde-fou regarde. */
+/** Un écran de papier : juste ce que le garde-fou regarde. Le canevas porte sa
+ *  taille AFFICHÉE (`clientWidth` / `clientHeight`), parce que c'est elle qu'on
+ *  mesure — et pas celle de la fenêtre. */
 function ecranFactice(W = 390, H = 700, DPR = 2): Ecran {
-  const toile = () => ({ width: 0, height: 0 }) as HTMLCanvasElement;
+  const toile = (cw = 0, ch = 0) =>
+    ({ width: 0, height: 0, clientWidth: cw, clientHeight: ch }) as HTMLCanvasElement;
   const ctx = { setTransform: vi.fn() } as unknown as CanvasRenderingContext2D;
   const e = {
-    canvas: toile(),
+    canvas: toile(W, H),
     ctx,
     lum: toile(),
     lctx: { setTransform: vi.fn() } as unknown as CanvasRenderingContext2D,
@@ -49,6 +52,30 @@ const fenetre = (w: number, h: number, dpr = 2) => {
 
 afterEach(() => vi.unstubAllGlobals());
 
+describe('la taille de l’écran', () => {
+  it('suit le canevas affiché, pas la fenêtre', () => {
+    // LE DÉFAUT D'IPAD. `window.innerHeight` est la hauteur de la MISE EN
+    // PAGE : elle compte la bande qui passe sous la barre du navigateur. La
+    // mémoire du canevas était donc plus haute que le morceau qu'on voit, et
+    // le bas de la carte se retrouvait coupé hors de l'écran. C'est le
+    // canevas, étiré par le CSS sur la hauteur réellement affichée, qui a
+    // raison.
+    fenetre(820, 1180); // ce que dit la fenêtre
+    const e = ecranFactice(820, 1024); // ce qu'on voit vraiment
+    redimensionner(e);
+    expect(e.H).toBe(1024);
+    expect(e.canvas.height).toBe(Math.round(1024 * e.DPR));
+  });
+
+  it('retombe sur la fenêtre tant que le canevas n’est pas dans la page', () => {
+    fenetre(390, 700);
+    const e = ecranFactice(0, 0);
+    redimensionner(e);
+    expect(e.W).toBe(390);
+    expect(e.H).toBe(700);
+  });
+});
+
 describe('veiller sur l’écran', () => {
   it('ne touche à rien quand tout est en place, mais repose la transformation', () => {
     fenetre(390, 700);
@@ -59,9 +86,12 @@ describe('veiller sur l’écran', () => {
     expect(e.ctx.setTransform).toHaveBeenCalledWith(2, 0, 0, 2, 0, 0);
   });
 
-  it('rattrape une fenêtre qui a changé de taille sans prévenir', () => {
-    fenetre(390, 480); // la barre d'adresse s'est dépliée pendant qu'on était ailleurs
+  it('rattrape un écran qui a changé de taille sans prévenir', () => {
+    fenetre(390, 700);
     const e = ecranFactice(390, 700);
+    // la barre d'adresse s'est dépliée pendant qu'on était ailleurs : c'est le
+    // CANEVAS qui rétrécit, puisque le CSS l'étire sur la hauteur visible
+    Object.defineProperty(e.canvas, 'clientHeight', { value: 480, configurable: true });
     expect(veillerSurLEcran(e)).toBe(true);
     expect(e.H).toBe(480);
     expect(e.canvas.height).toBe(Math.round(480 * e.DPR));

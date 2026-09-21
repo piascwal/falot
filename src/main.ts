@@ -11,7 +11,12 @@ import { montrerToast } from './coeur/voix.js';
 import { brancherClavier } from './entrees/clavier.js';
 import { brancherPointeur, brancherSouffle, brancherTorche } from './entrees/pointeur.js';
 import { creerHud } from './interface/hud.js';
-import { descendre, poserLEcranTitre, retenirPrologue } from './interface/ouverture.js';
+import {
+  descendre,
+  poserLEcranTitre,
+  retenirPrologue,
+  retourAuTitre,
+} from './interface/ouverture.js';
 import { retenirBilan, retenirLaFin } from './interface/sauvegarde.js';
 import { chargerAtlas, poserLAtlas } from './rendu/atlas.js';
 import {
@@ -80,6 +85,10 @@ if (demande) {
 } else {
   // `?debug` ouvre tous les étages dans la grille de l'écran-titre
   poserLEcranTitre(partie, reglages.has('debug'));
+  // La flèche du HUD : elle ramène au choix des étages, dans le jeu.
+  document
+    .getElementById('retour')
+    ?.addEventListener('click', () => retourAuTitre(partie, reglages.has('debug')));
 }
 
 // Le prologue franchi est la seule chose que le jeu retient d'une session à

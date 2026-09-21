@@ -1507,3 +1507,63 @@ Coût : **0 image perdue sur 300** pendant toute la cinématique.
 Ce qui reste faible et qui n'a pas été touché : le lit est encore une masse
 pâle, et le haut du mur est vide. On y reviendra si l'essai est validé — une
 scène à la fois.
+
+## Quatre retours d'iPad, et le prologue qu'on traversait sans rien comprendre
+
+**Le jeu défilait, et le bas de la carte était coupé.** Une seule cause : on
+lisait `window.innerHeight`, qui est la hauteur de la MISE EN PAGE. Sur iPad
+elle compte la bande qui passe sous la barre du navigateur — la mémoire du
+canevas était donc plus haute que le morceau qu'on voit. Trois corrections :
+
+- la taille se mesure désormais **sur le canevas lui-même**
+  (`clientWidth`/`clientHeight`) : c'est lui que le CSS étire sur la hauteur
+  visible, donc c'est lui qui a raison ;
+- `html, body` passent en `100dvh` (sous `@supports`, le `100%` reste en
+  secours) : `dvh` suit ce qui est réellement affiché ;
+- `html, body` passent en `position: fixed; inset: 0`. `overflow: hidden` seul
+  ne suffit pas sur iPad — la page reste dans le flux de défilement de Safari
+  et on peut la faire glisser. Sortie du flux, il n'y a plus rien à défiler.
+
+Et les retraits d'encoche **s'ajoutent** à la marge au lieu de la remplacer :
+avec `max(1.4rem, env(...))`, une encoche de 20 px laissait le bouton à 22 px
+du tout bord, donc à moitié sous l'indicateur d'accueil.
+
+Un test le verrouille : à fenêtre de 1180 et canevas affiché de 1024, la
+mémoire doit valoir 1024 × la densité, pas 1180. *(Le vrai Safari d'iOS n'est
+pas reproductible ici : sur un iPad émulé les deux hauteurs sont égales. C'est
+l'invariant qui est testé, pas le navigateur.)*
+
+**La gelée ne marchait que vers la gauche.** `majJelly` écrivait la
+déformation avec la vitesse SIGNÉE :
+
+```
+cibleX = 1 + vy·k − vx·k
+cibleY = 1 + vx·k − vy·k
+```
+
+Aller à gauche l'élargissait — étiré dans le sens de la marche, ce qui est
+juste. Aller à droite faisait exactement l'inverse : il s'étirait **en
+hauteur**, perpendiculairement à sa course. Idem entre le haut et le bas. On
+prend l'INTENSITÉ, pas le signe : les quatre directions donnent la même image,
+chacune tournée comme il faut. Trois tests le verrouillent, et les trois
+échouent sur l'ancienne formule — vérifié avant de les garder.
+
+**On sortait du prologue sans le faisceau.** Le compte disait pourtant
+l'inverse : 36 d'éclat dans la salle du réveil pour un seuil à 26. Mais le
+compte mesure ce que la salle CONTIENT, pas ce qu'elle DONNE — et la route
+directe vers la porte n'en croisait que trois, soit douze. On sortait donc
+Peureux, on tombait sur un Guet sans rien à essayer, et on s'ennuyait avant
+d'avoir découvert le faisceau.
+
+Sept lueurs sont maintenant posées **sur la ligne 5**, qui est la route
+directe : sept fois quatre, vingt-huit, et le faisceau en demande vingt-six.
+Trois autres traînent ailleurs. Pas davantage : le budget d'éclat de tout
+l'étage doit rester sous le palier suivant, sinon on apprendrait deux verbes
+dans la même salle. Le test ne compte plus les lueurs — il fait **traverser la
+salle par un pilote automatique** et vérifie qu'il arrive à la porte avec le
+faisceau.
+
+**La flèche quittait le jeu.** Elle renvoyait au hub du site : on sortait de la
+page pour revenir choisir un étage. Elle ramène maintenant à l'écran-titre, qui
+est le hub du jeu, et repose la grille au passage — on vient peut-être de finir
+un étage.
