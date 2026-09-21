@@ -1626,3 +1626,43 @@ voile — elle n'apparaît que dans le halo. La salle est donc réellement noire
 tant qu'on n'a pas rallumé une torche. C'est l'intention, mais si la traversée
 se révèle pénible à jouer, le réglage à toucher est l'espacement des lueurs de
 la ligne 5 (deux cases, pour un halo d'une case et demie), pas le nombre.
+
+## La cage prend la pierre du jeu, et une âme se remplit vraiment
+
+**La montée entre deux étages était un couloir vide.** Ses parois étaient un
+aplat `#12121a` avec un trait, et ses paliers deux traits — le commentaire
+disait pourtant « de la pierre, comme partout ailleurs », et c'était faux.
+Elles prennent maintenant les VRAIES TUILES : l'appareil du mur sur les côtés,
+le dallage du sol sur les dalles qu'on franchit, qui ont enfin une épaisseur.
+
+Deux choses la rendent juste :
+
+- **le motif défile avec la caméra** (`pattern.setTransform`). Collé à l'écran,
+  il aurait donné une texture fixe devant laquelle Falot glisse ; calé sur la
+  caméra, c'est la paroi qui descend, et c'est ça qui fait qu'on MONTE ;
+- **un creux** : un dégradé sombre du bord de l'écran vers le vide. Sans lui la
+  paroi est un mur plat collé au bord, et on ne sent pas qu'on est dans un trou.
+
+Et on la remonte à la découpe (×1,28 pour le mur, ×1,5 pour le sol) : la cage
+n'a pas de moteur de lumière — elle est dessinée telle quelle, sans voile à
+percer — alors qu'une tuile est faite pour être révélée par une lampe, moyenne
+26 sur 255. Posée brute, elle ne se voyait pas.
+
+*(Deux essais avant celui-là : le HUD, puis le menu des étages. Ce n'était ni
+l'un ni l'autre — c'était cette scène.)*
+
+**Une âme était pleine avant d'être remplie.** Retour de test, et le défaut
+était exactement décrit : on voit une âme vide, on met le faisceau dessus, elle
+devient pleine d'un coup — et elle se remplit quand même. Trois états pour deux.
+
+La cause tient dans un « ou » : le corps était peint plein dès que
+`p.eclaire` était vrai, au même titre que `p.calme`, et le niveau montait
+PAR-DESSUS un corps déjà rempli.
+
+Ce qui remplit un corps, c'est d'avoir été rallumé, rien d'autre — donc
+`plein = p.calme || repere`. Éclairée sans l'être encore, l'âme reste sombre
+avec le contour de sa couleur : on la voit, et on voit qu'il n'y a rien dedans.
+Le `repere` reste pour les Guets, qui se remplissent de leur colère quand ils
+ont repéré quelque chose ; ça n'a rien à voir avec un rallumage et ça ne bouge
+pas. Mesuré sur cinq captures à 0, 30, 60, 90 et 100 % : le vert monte du bas,
+et il n'y a plus de saut.

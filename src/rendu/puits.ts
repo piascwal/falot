@@ -19,6 +19,7 @@ import { RECIT_CAGE, RECIT_PLUS_HAUT } from '../coeur/textes.js';
 import type { Partie } from '../coeur/types.js';
 import type { Ecran } from './ecran.js';
 import { texteCerne } from './texte.js';
+import { tuiles } from './tuiles.js';
 import { dessinerTete } from './visages.js';
 
 /** Hauteur d'un étage dans la cage, et demi-largeur du conduit. */
@@ -42,6 +43,53 @@ const corps = {
   aveugle: 0,
   cligne: 0,
 };
+
+/**
+ * LA PIERRE DE LA CAGE.
+ *
+ * Les parois étaient un aplat `#12121a` avec un trait, et les paliers deux
+ * traits : le commentaire disait « de la pierre, comme partout ailleurs » et
+ * c'était faux — on montait dans un couloir vide. Elles prennent maintenant
+ * les VRAIES TUILES du jeu, l'appareil du mur sur les côtés et le dallage du
+ * sol sur les dalles qu'on franchit.
+ *
+ * ON LES REMONTE. Ici il n'y a pas de moteur de lumière : la cage est dessinée
+ * telle quelle, sans voile à percer, alors qu'une tuile est faite pour être
+ * révélée par une lampe — moyenne 26 sur 255. Posée brute, elle ne se voit
+ * pas. On la découpe donc une fois, plus claire, et le motif qu'on en tire
+ * défile avec la caméra : c'est ce défilement qui fait qu'on MONTE, au lieu de
+ * voir une texture collée sur l'écran.
+ */
+let pierres: { mur: CanvasPattern | null; sol: CanvasPattern | null } | null = null;
+
+function motifs(ctx: CanvasRenderingContext2D): {
+  mur: CanvasPattern | null;
+  sol: CanvasPattern | null;
+} {
+  if (pierres) return pierres;
+  const t = tuiles();
+  const couper = (
+    planche: HTMLCanvasElement,
+    v: number,
+    force: number,
+  ): CanvasPattern | null => {
+    const une = document.createElement('canvas');
+    une.width = t.taille;
+    une.height = t.taille;
+    const c = une.getContext('2d');
+    if (!c) return null;
+    c.filter = `brightness(${force}) contrast(1.15)`;
+    c.drawImage(planche, v * t.taille, 0, t.taille, t.taille, 0, 0, t.taille, t.taille);
+    return ctx.createPattern(une, 'repeat');
+  };
+  pierres = { mur: couper(t.mur, 2, 1.28), sol: couper(t.sol, 4, 1.5) };
+  return pierres;
+}
+
+/** Pose un motif calé sur la caméra : la pierre défile quand on monte. */
+function caler(m: CanvasPattern | null, cx: number, cy: number): void {
+  m?.setTransform(new DOMMatrix().translate(-cx, -cy));
+}
 
 /** Un Seuil : un rond de lumière, au milieu de la cage. */
 function portail(ecran: Ecran, x: number, y: number, r: number, force: number): void {
@@ -86,9 +134,28 @@ export function dessinerPuits(ecran: Ecran, partie: Partie, temps: number): void
   const ey = (y: number) => y - cam.y;
 
   // --- les parois : de la pierre, comme partout ailleurs ---
+  const pierre = motifs(ctx);
+  caler(pierre.mur, cam.x, cam.y);
   ctx.fillStyle = '#12121a';
   ctx.fillRect(0, 0, ex(-LARGE), H);
   ctx.fillRect(ex(LARGE), 0, W - ex(LARGE), H);
+  if (pierre.mur) {
+    ctx.fillStyle = pierre.mur;
+    ctx.fillRect(0, 0, ex(-LARGE), H);
+    ctx.fillRect(ex(LARGE), 0, W - ex(LARGE), H);
+  }
+  // L'OMBRE DU CONDUIT : la pierre s'assombrit en s'éloignant du vide. Sans
+  // elle la paroi est un mur plat collé au bord de l'écran, et on ne sent pas
+  // qu'on est dans un trou.
+  const creux = (x0: number, x1: number) => {
+    const g = ctx.createLinearGradient(x0, 0, x1, 0);
+    g.addColorStop(0, 'rgba(6,6,11,0.94)');
+    g.addColorStop(1, 'rgba(6,6,11,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(Math.min(x0, x1), 0, Math.abs(x1 - x0), H);
+  };
+  creux(0, ex(-LARGE));
+  creux(W, ex(LARGE));
   ctx.strokeStyle = 'rgba(255,255,255,0.13)';
   ctx.lineWidth = 1.5;
   ctx.beginPath();
@@ -111,7 +178,23 @@ export function dessinerPuits(ecran: Ecran, partie: Partie, temps: number): void
     const franchi = partie.montee.find((m) => m.etage === n);
     const futur = n > puits.arrivee;
 
-    // la dalle, avec son ouverture au milieu : c'est par là qu'on passe
+    // LA DALLE, avec son ouverture au milieu : c'est par là qu'on passe. Elle
+    // a maintenant une épaisseur, et c'est le dallage du jeu qu'on voit par la
+    // tranche — deux traits ne faisaient pas un plancher.
+    if (pierre.sol) {
+      caler(pierre.sol, cam.x, cam.y);
+      ctx.save();
+      ctx.globalAlpha = vu * (futur ? 0.4 : 1);
+      ctx.fillStyle = pierre.sol;
+      const ep = 11;
+      ctx.fillRect(ex(-LARGE), ey(y) - ep, LARGE - D.taille * 1.3, ep);
+      ctx.fillRect(ex(D.taille * 1.3), ey(y) - ep, LARGE - D.taille * 1.3, ep);
+      // le dessous de la dalle : une dalle vue d'en bas est sombre
+      ctx.fillStyle = 'rgba(6,6,11,0.55)';
+      ctx.fillRect(ex(-LARGE), ey(y) - 3, LARGE - D.taille * 1.3, 3);
+      ctx.fillRect(ex(D.taille * 1.3), ey(y) - 3, LARGE - D.taille * 1.3, 3);
+      ctx.restore();
+    }
     ctx.strokeStyle = `rgba(255,255,255,${0.1 * vu + (futur ? 0 : 0.06)})`;
     ctx.lineWidth = 2;
     ctx.beginPath();

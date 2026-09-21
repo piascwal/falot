@@ -284,6 +284,22 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
         : p.calme
           ? 1
           : clamp((p.compteCalme || 0) / DUREE_CALME, 0, 1);
+    /**
+     * UNE LUMIÈRE PAS ENCORE RALLUMÉE EST VIDE, MÊME ÉCLAIRÉE.
+     *
+     * Le corps était peint plein dès que le faisceau la touchait — `eclaire`
+     * entrait dans le même « ou » que `calme` — et le niveau montait
+     * PAR-DESSUS un corps déjà rempli. On voyait donc une âme vide, puis
+     * pleine d'un coup à l'instant où on la visait, puis qui se remplissait
+     * quand même. Trois états pour deux.
+     *
+     * Ce qui remplit un corps, c'est d'avoir été rallumé, rien d'autre.
+     * Éclairée sans l'être encore, elle reste sombre avec le contour de sa
+     * couleur : on la voit, et on voit qu'il n'y a rien dedans. Un Guet, lui,
+     * se remplit de sa colère quand il a repéré quelque chose — ça n'a rien à
+     * voir avec un rallumage, et ça ne bouge pas.
+     */
+    const plein = p.calme || repere;
     // elle flotte : son ombre le dit, et elle seule
     dessinerOmbre(ecran, p, D.taille, p.eclaire || p.calme ? 1 : 0.6);
     dessinerTete(
@@ -291,7 +307,7 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
       p,
       couleur,
       D.taille,
-      p.eclaire || p.calme || repere,
+      plein,
       1,
       p.humeur,
       temps,
