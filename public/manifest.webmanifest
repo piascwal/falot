@@ -1,0 +1,17 @@
+{
+  "name": "Lux & Paranoïa — Les Dessous",
+  "short_name": "Lux & Paranoïa",
+  "description": "Aventure procédurale dans le noir : un petit peureux n'a qu'une pierre, et escorte des lumières jusqu'au portail sans croiser les regards rouges.",
+  "lang": "fr",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#08080e",
+  "theme_color": "#08080e",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

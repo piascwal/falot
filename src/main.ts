@@ -173,6 +173,20 @@ requestAnimationFrame(boucle);
 // pour la sauvegarde, un luxe et jamais une dépendance.
 chargerAtlas().then(poserLAtlas);
 
+// LE SERVICE WORKER, qui rend le jeu installable et jouable hors ligne — même
+// discipline : s'il échoue (vieux navigateur, page ouverte en `file://`), le
+// jeu se joue pareil, juste sans ces deux extras.
+//
+// UNIQUEMENT EN PRODUCTION. En développement, `vite` sert des centaines de
+// petits modules non groupés et les recharge à chaud à chaque sauvegarde : un
+// tiroir hors ligne par-dessus ça ne ferait que servir une version d'il y a
+// trois secondes et nous faire chercher un bug qui n'existe plus.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {
+    /* pas grave : le jeu se joue pareil, juste en ligne et sans écran d'accueil */
+  });
+}
+
 // De quoi piloter le jeu depuis la console ou depuis un test de capture
 // d'écran : c'est le VRAI état, pas une copie.
 declare global {

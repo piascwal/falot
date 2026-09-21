@@ -1716,3 +1716,49 @@ lumière grandit.
 
 Vérifié au pixel dans la cage : `148,210,255`, à trois points près de
 `#8fd0ff`.
+
+## Une PWA : installable, et jouable sans réseau
+
+Demande : pouvoir installer le jeu comme une application. Trois pièces, et
+aucune ne dépend d'un service extérieur — tout tient dans le dépôt.
+
+**Les icônes sont Falot, pas un logo inventé.** `outils/pwa-icones.mjs`
+redessine — en JavaScript brut dans une page Playwright, comme
+`atlas-temoin.mjs` le fait déjà pour la planche de sprites — les mêmes
+formules que `dessinerTete()` : le même corps aux coins ronds, le même
+dégradé, et son visage *inquiet*, celui qu'on voit le plus dans le jeu (« je
+n'ai rien demandé à être ici »). Une seule planche maîtresse à 1024 px sert
+toutes les tailles ; Falot y tient sur 46 % du cadre, donc son coin le plus
+loin n'est qu'à 32 % du centre — largement dans le disque de sécurité des
+icônes « maskable » (80 % du cadre, rayon 40 %). Une seule image sert donc
+pour les usages `any` et `maskable` à la fois, pas quatre fichiers.
+
+**Le manifeste** (`public/manifest.webmanifest`) déclare le nom, les deux
+tailles d'icône, `display: standalone`, et les couleurs du jeu
+(`#08080e` partout — pas de flash blanc à l'ouverture). `start_url` et `scope`
+sont **relatifs** (`"./"`) : ils se résolvent par rapport à l'URL du manifeste
+lui-même, donc ça marche aussi bien à la racine d'un domaine que dans le
+sous-dossier de GitHub Pages, comme le reste du projet (`base: './'` dans
+`vite.config.ts`).
+
+**Le service worker** (`public/sw.js`) suit une règle unique : **réseau
+d'abord**. Vite change le nom des fichiers construits à chaque version (une
+empreinte dans `index-XXXXXXXX.js`) — un précache écrit à la main serait faux
+dès la prochaine construction. Chaque requête part donc au réseau, se range
+dans un tiroir au passage, et le tiroir ne répond que si le réseau a manqué.
+Le jeu reste donc aussi à jour qu'une page ordinaire ; il gagne seulement de
+continuer à fonctionner sans réseau. Enregistré uniquement en production
+(`import.meta.env.PROD`) : en développement, Vite sert des centaines de
+petits modules non groupés et les recharge à chaud — un tiroir hors ligne
+par-dessus aurait fait chercher des bugs qui n'existaient plus.
+
+Vérifié avec Playwright sur le vrai build (`vite preview`), faute d'un
+Lighthouse capable ici d'auditer une PWA (les audits dédiés ont disparu de sa
+version 13) :
+
+- le manifeste se charge et pointe vers les bonnes icônes ;
+- le service worker s'enregistre, s'active, et prend la main ;
+- après un premier chargement, le tiroir contient bien les quatre pièces du
+  jeu (page, script, style, police) ;
+- **réseau coupé, rechargement complet** : l'écran-titre s'affiche, on clique
+  sur Descendre, l'ouverture se joue — le jeu tourne entièrement hors ligne.

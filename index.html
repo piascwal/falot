@@ -9,6 +9,18 @@
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta name="description" content="Aventure procédurale dans le noir : un petit peureux n'a qu'une pierre, et escorte des lumières jusqu'au portail sans croiser les regards rouges.">
 <meta name="theme-color" content="#08080e">
+<!-- LA PWA. Le manifeste dit comment l'installer (nom, icône, plein écran) ;
+     `sw.js`, branché depuis `main.ts`, la rend jouable hors ligne une fois
+     ouverte une première fois. Les icônes sont Falot lui-même, fabriquées par
+     `outils/pwa-icones.mjs` avec les mêmes formes que dans le jeu. -->
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<!-- iOS ignore le manifeste pour l'écran plein : ces trois lignes lui parlent
+     directement. Safari seul comprend `apple-mobile-web-app-*`. -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Lux & Paranoïa">
 <link rel="stylesheet" href="./src/interface/styles.css">
 </head>
 <body>
