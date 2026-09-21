@@ -15,6 +15,7 @@ import { forme, rangPierre } from '../coeur/lectures.js';
 import { SOUFFLE_MAX } from '../coeur/regles/joueur.js';
 import { torcheSousLaMain } from '../coeur/regles/torche.js';
 import type { Partie } from '../coeur/types.js';
+import { tuiles } from '../rendu/tuiles.js';
 
 const el = <T extends HTMLElement>(id: string): T => {
   const e = document.getElementById(id);
@@ -39,7 +40,37 @@ export interface Hud {
   torche: HTMLButtonElement;
 }
 
+/**
+ * LA MATIÈRE DU JEU DANS L'INTERFACE.
+ *
+ * Le bandeau et les boutons étaient des aplats translucides : une interface
+ * d'application posée sur un souterrain. Ils prennent maintenant la PIERRE du
+ * jeu — la même planche que les murs pour ce qui encadre, le même dallage que
+ * le sol pour ce qui se remplit. On ne fabrique rien de plus : on découpe une
+ * tuile de chaque planche et on la donne au CSS en image de fond.
+ *
+ * Les tuiles sont sombres (moyenne 26 pour le mur, 38 pour le sol), donc elles
+ * se lisent comme un grain sous le texte et non comme une couleur : le HUD
+ * reste lisible, et il a l'air taillé dans le même bloc que le décor.
+ */
+function poserLaPierre(): void {
+  const t = tuiles();
+  const decouper = (planche: HTMLCanvasElement, v: number): string => {
+    const une = document.createElement('canvas');
+    une.width = t.taille;
+    une.height = t.taille;
+    const c = une.getContext('2d');
+    if (!c) return '';
+    c.drawImage(planche, v * t.taille, 0, t.taille, t.taille, 0, 0, t.taille, t.taille);
+    return `url("${une.toDataURL('image/png')}")`;
+  };
+  const r = document.documentElement.style;
+  r.setProperty('--pierre-mur', decouper(t.mur, 2));
+  r.setProperty('--pierre-sol', decouper(t.sol, 4));
+}
+
 export function creerHud(): Hud {
+  poserLaPierre();
   const elZone = el('zone');
   const elRangs = el('rangs');
   // Cinq losanges, posés une fois pour toutes : on ne reconstruit pas du DOM

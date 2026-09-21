@@ -1589,3 +1589,40 @@ Mesuré en jeu, manche à fond dans les quatre directions, à 222 de vitesse :
 `sx 1,12 / sy 0,88` — les quatre fois, au centième près. Deux tests le
 verrouillent : « tasse toujours, et jamais n'allonge », et « donne la même
 forme dans les quatre directions ».
+
+## La pierre du jeu dans l'interface, et un réveil dans le noir complet
+
+**Le HUD prend les tuiles.** Le bandeau et les boutons étaient des aplats
+translucides : une interface d'application posée sur un souterrain. Ils
+prennent maintenant la matière du jeu, et le partage suit une règle — **le mur
+pour ce qui encadre, le sol pour ce qui reçoit** :
+
+| | tuile |
+|---|---|
+| le bandeau du haut, la flèche, les boutons ronds | l'appareil du **mur** |
+| la barre d'éclat, celle du bonus | le dallage du **sol** |
+
+On ne fabrique rien de plus : `hud.ts` découpe une tuile dans chaque planche et
+la donne au CSS en variable (`--pierre-mur`, `--pierre-sol`). Les boutons la
+posent en `background-blend-mode: overlay`, ce qui garde le grain sans manger
+la teinte que chacun porte — le jaune du pierre, le bleu du souffle. Le bandeau
+reçoit un voile à 0,62 et un dégradé de disparition vers le bas : la pierre
+doit se deviner sous le texte, pas se lire, et le bandeau ne doit pas poser un
+bord franc en travers du jeu.
+
+Coût : deux images de 25 et 27 Ko fabriquées une fois au chargement (rien n'est
+téléchargé, rien n'est livré), et **2 à 3 images perdues sur 300** — le bruit
+habituel.
+
+**Toutes les torches du prologue sont éteintes à l'arrivée.** La rangée du haut
+était allumée, et elle donnait la salle d'un coup : on voyait où aller avant
+d'avoir rien fait, et rallumer ne servait plus à rien. Falot se réveille
+maintenant dans le noir complet, avec son halo d'une case et demie — c'est LUI
+la première lumière, et c'est la seule leçon que cette salle a à donner. Onze
+torches, zéro allumée, verrouillé par un test.
+
+À surveiller : une lueur pas encore vue n'a aucune lueur propre au-dessus du
+voile — elle n'apparaît que dans le halo. La salle est donc réellement noire
+tant qu'on n'a pas rallumé une torche. C'est l'intention, mais si la traversée
+se révèle pénible à jouer, le réglage à toucher est l'espacement des lueurs de
+la ligne 5 (deux cases, pour un halo d'une case et demie), pas le nombre.

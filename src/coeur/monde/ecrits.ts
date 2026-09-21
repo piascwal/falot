@@ -52,10 +52,16 @@ export const ETAGES_ECRITS: Readonly<Record<number, EtageEcrit>> = {
   1: {
     carte: [
       '#########################', //  0
-      // LA SALLE DU RÉVEIL. Une seule pièce, large, et six torches éteintes
-      // sur ses parois : on s'y perd, on en rallume une, puis une autre, et
-      // on comprend en trois secondes où l'on est — un bâtiment dans le noir,
-      // et rien d'autre que ce qu'on allume. Les deux blocs de pierre au
+      // LA SALLE DU RÉVEIL. Une seule pièce, large, et DIX TORCHES ÉTEINTES
+      // sur ses deux parois : on s'y perd, on en rallume une, puis une autre,
+      // et on comprend en trois secondes où l'on est — un bâtiment dans le
+      // noir, et rien d'autre que ce qu'on allume.
+      //
+      // Aucune n'est allumée à l'arrivée. La rangée du haut l'était, et elle
+      // donnait la salle d'un coup : on voyait où aller avant d'avoir rien
+      // fait, et rallumer ne servait plus à rien. Falot se réveille dans le
+      // noir complet, avec son halo minuscule — c'est LUI la première
+      // lumière, et c'est la seule leçon que cette salle a à donner. Les deux blocs de pierre au
       // milieu coupent la vue : sans eux la salle se lit d'un seul coup d'œil
       // et il n'y a plus rien à explorer.
       //
@@ -75,7 +81,7 @@ export const ETAGES_ECRITS: Readonly<Record<number, EtageEcrit>> = {
       // Pas davantage : le budget d'éclat de TOUT l'étage doit rester sous le
       // palier suivant (55), sinon on apprendrait deux verbes dans la même
       // salle. Treize lueurs sur l'étage entier, soit cinquante-deux.
-      '##.t...t...t...t...t...##', //  1
+      '##.T...T...T...T...T...##', //  1   toutes éteintes, comme celles du bas
       '##.....##.....##..o....##', //  2
       '##7@.o.##.....##.......##', //  3   le réveil, et la main qui le porte
       '##.....##.....##..o....##', //  4   la descente vers la porte, payée

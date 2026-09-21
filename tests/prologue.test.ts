@@ -182,6 +182,10 @@ describe('le prologue — la salle du réveil', () => {
     const z = zoneEcrite(1)!;
     const salle = z.torches.filter((t) => t.y < c(0, 7).y);
     expect(salle.length).toBeGreaterThanOrEqual(5);
+    // ET AUCUNE N'EST ALLUMÉE À L'ARRIVÉE. La rangée du haut l'était, et elle
+    // donnait la salle d'un coup : on voyait où aller avant d'avoir rien fait,
+    // et rallumer ne servait plus à rien. Falot est la première lumière.
+    for (const t of z.torches) expect(t.reste, 'aucune torche allumée').toBe(0);
     const hautes = salle.filter((t) => t.oy < 0).length;
     const basses = salle.filter((t) => t.oy > 0).length;
     expect(hautes).toBeGreaterThanOrEqual(2);

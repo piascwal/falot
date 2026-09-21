@@ -46,11 +46,23 @@ canvas {
 
 /* ---- interface ---- */
 
+/* LA PIERRE DU JEU, posée par `hud.ts` : une tuile de mur et une de sol,
+   découpées dans les planches du tileset et données ici en image de fond. Le
+   bandeau et les boutons étaient des aplats translucides — une interface
+   d'application posée sur un souterrain. */
 .hud {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
+  background-image: var(--pierre-mur);
+  background-size: 96px;
+  background-repeat: repeat;
+  /* Un voile par-dessus la pierre : elle doit se deviner sous le texte, pas
+     se lire. Et un dégradé vers le bas, pour que le bandeau n'ait pas de
+     bord franc en travers du jeu. */
+  box-shadow: inset 0 0 0 1000px rgba(8, 9, 16, 0.62);
+  mask-image: linear-gradient(to bottom, #000 62%, transparent);
   padding: calc(env(safe-area-inset-top, 0px) + 0.7rem) 0.8rem 0.7rem;
   display: flex;
   align-items: center;
@@ -66,7 +78,7 @@ canvas {
 .back {
   /* C'était un lien, c'est devenu un bouton : sans ces trois lignes il arrive
      avec la bordure et la police du navigateur. */
-  border: 0;
+  border: 1px solid rgba(150, 158, 190, 0.18);
   font-family: inherit;
   cursor: pointer;
   color: rgba(232, 232, 240, 0.55);
@@ -74,7 +86,10 @@ canvas {
   font-size: 0.95rem;
   padding: 0.35rem 0.55rem;
   border-radius: 9px;
-  background: rgba(255, 255, 255, 0.05);
+  background-color: rgba(18, 20, 30, 0.6);
+  background-image: var(--pierre-mur);
+  background-size: 84px;
+  background-blend-mode: overlay;
 }
 
 .zone {
@@ -175,7 +190,12 @@ canvas {
   width: 148px;
   height: 11px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.07);
+  /* Le DALLAGE du sol pour ce qui se remplit : c'est un creux qu'on remplit,
+     pas un cadre. Le mur sert à ce qui encadre, le sol à ce qui reçoit. */
+  background-color: rgba(255, 255, 255, 0.07);
+  background-image: var(--pierre-sol);
+  background-size: 56px;
+  background-blend-mode: overlay;
   border: 1px solid rgba(255, 255, 255, 0.13);
   overflow: hidden;
 }
@@ -297,7 +317,13 @@ canvas {
   height: 72px;
   border-radius: 50%;
   border: 2px solid;
-  background: rgba(255, 255, 255, 0.06);
+  /* LA PIERRE, sous la couleur du bouton : `overlay` garde le grain sans
+     manger la teinte que chaque bouton porte (le jaune du pierre, le bleu du
+     souffle, l'orange de la torche). */
+  background-color: rgba(255, 255, 255, 0.06);
+  background-image: var(--pierre-mur);
+  background-size: 72px;
+  background-blend-mode: overlay;
   font-size: 0.66rem;
   font-weight: 700;
   letter-spacing: 0.07em;
