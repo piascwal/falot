@@ -1256,3 +1256,51 @@ frontière de case, et la coupure se lit comme un trait droit en travers du mur.
 Un `filter = 'blur(4px)'` au moment de poser le calque d'obscurité l'adoucit
 bien — mais il coûte **50 à 80 images perdues sur 300**, contre 0 à 1 sans lui.
 Hors de prix pour un bord. Il faudra l'obtenir autrement, ou pas du tout.
+
+## La coupure droite sur les murs, et la pénombre
+
+Le trou percé dans l'obscurité est un polygone à bord dur. Sur du sol ça ne se
+voit pas : le dégradé y est déjà à zéro quand on arrive au bout de la portée.
+Sur un **mur**, si — la lumière s'arrête à la morsure, bien avant la portée,
+donc l'alpha tombe d'un coup d'une valeur encore forte à rien.
+
+Mesuré sur le calque d'obscurité (pas sur l'image composée : ni texture ni
+sprite, rien que l'éclairage), joueur sous une paroi droite, faisceau
+perpendiculaire :
+
+| | marche la plus forte entre deux pixels voisins |
+|---|---|
+| avant | **113,8** sur 255 — `255, 141, 43` en deux pixels |
+| après | **37** — une rampe sur une quinzaine de pixels de calque |
+
+La correction est un flou de 2 pixels de calque sur le perçage. Deux choses
+l'ont rendue possible :
+
+**Où l'appliquer.** Le même flou posé sur le calque entier une fois composé, à
+pleine résolution, coûtait **50 à 80 images perdues sur 300**. Appliqué à
+chaque perçage, il coûtait encore 13 à 34 — et, contre-intuitivement, le prix
+ne suivait pas le rayon (1,5 px : 34 ; 2,5 px : 13, du bruit autour de la même
+valeur). Ce qu'un filtre coûte, c'est **une surface temporaire par appel**.
+Donc : un seul appel. Les perçages s'accumulent sur un calque à part
+(`Ecran.trou`), et on ôte l'ensemble en un coup, flouté. Le résultat est
+identique à l'ancien, parce qu'empiler des alphas en `source-over` donne
+exactement le complément de les retrancher l'un après l'autre en
+`destination-out`. Coût final : **1 à 10 images perdues sur 300, contre 2 à 8
+sans le flou** — mesuré à la suite sur la même machine. Gratuit.
+
+**Quel rayon.** Le rayon ne coûte plus rien, donc il se choisit au regard — et
+à l'invariant. Un flou étale la lumière au-delà du mur, et la règle du moteur
+est que *la lumière ne ressort jamais de l'autre côté* : c'est elle, et elle
+seule, qui empêche de voir le plan à travers la pierre. Mesuré sur une cloison
+d'**une seule case**, faisceau perpendiculaire, joueur au niveau 4 :
+
+| rayon | face lointaine de la cloison | salle au-delà |
+|---|---|---|
+| 0 | 255 (noir total) | 255 |
+| **2** | **246** | **255 — rien** |
+| 3 | 227 | 247 |
+| 5 | — | — |
+
+À 2, l'invariant tient exactement. Au-delà, ça commence à passer. Et au-delà
+de 3, le cône du faisceau perd sa netteté, qui est une information de jeu : on
+doit lire d'un coup d'œil où regarde un Guet.

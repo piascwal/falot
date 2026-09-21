@@ -34,6 +34,18 @@ export interface Ecran {
   /** Le calque d'obscurité, à demi-résolution. */
   lum: HTMLCanvasElement;
   lctx: CanvasRenderingContext2D;
+  /**
+   * LE CALQUE DES TROUS, même taille que `lum`.
+   *
+   * Les perçages ne mordent plus l'obscurité un par un : ils s'accumulent ici,
+   * puis on ôte l'ensemble d'un seul coup, flouté. C'est ce qui rend la
+   * pénombre abordable — un filtre par image au lieu d'un par source — et le
+   * résultat est identique à l'ancien, parce qu'empiler des alphas en
+   * `source-over` donne exactement le complément de les retrancher l'un après
+   * l'autre en `destination-out`.
+   */
+  trou: HTMLCanvasElement;
+  tctx: CanvasRenderingContext2D;
   W: number;
   H: number;
   DPR: number;
@@ -50,13 +62,17 @@ export function creerEcran(canvas: HTMLCanvasElement): Ecran {
   const ctx = canvas.getContext('2d');
   const lum = document.createElement('canvas');
   const lctx = lum.getContext('2d');
-  if (!ctx || !lctx)
+  const trou = document.createElement('canvas');
+  const tctx = trou.getContext('2d');
+  if (!ctx || !lctx || !tctx)
     throw new Error('Pas de contexte 2D : ce navigateur ne peut pas jouer.');
   const ecran: Ecran = {
     canvas,
     ctx,
     lum,
     lctx,
+    trou,
+    tctx,
     W: 0,
     H: 0,
     DPR: 1,
@@ -82,6 +98,8 @@ export function redimensionner(ecran: Ecran): void {
   ecran.canvas.height = Math.round(ecran.H * ecran.DPR);
   ecran.lum.width = Math.ceil(ecran.canvas.width * QLUM);
   ecran.lum.height = Math.ceil(ecran.canvas.height * QLUM);
+  ecran.trou.width = ecran.lum.width;
+  ecran.trou.height = ecran.lum.height;
   ecran.ctx.setTransform(ecran.DPR, 0, 0, ecran.DPR, 0, 0);
 }
 

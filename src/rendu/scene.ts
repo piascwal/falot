@@ -34,6 +34,7 @@ import { type Ecran, QLUM } from './ecran.js';
 import { dessinerFin } from './fin.js';
 import { dessinerFantomeManche, dessinerManche, dessinerVisee } from './gestes.js';
 import {
+  PENOMBRE,
   percerCone,
   percerDisque,
   percerRond,
@@ -502,7 +503,18 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
   lctx.globalCompositeOperation = 'source-over';
   lctx.fillStyle = 'rgba(8,8,14,0.975)';
   lctx.fillRect(0, 0, W, H);
-  lctx.globalCompositeOperation = 'destination-out';
+
+  // LES TROUS S'ACCUMULENT À PART, et on les ôtera tous ensemble, floutés.
+  // Voir `PENOMBRE` : un filtre coûte une surface temporaire, et le prix
+  // dépend du NOMBRE de perçages filtrés, pas du rayon du flou — mesuré, un
+  // flou par source coûtait de treize à trente-quatre images perdues sur trois
+  // cents, que le rayon vaille 1,5 ou 2,5 pixels. Un seul filtre par image les
+  // rend toutes.
+  const tctx = ecran.tctx;
+  tctx.setTransform(1, 0, 0, 1, 0, 0);
+  tctx.clearRect(0, 0, ecran.trou.width, ecran.trou.height);
+  tctx.setTransform(ecran.DPR * QLUM, 0, 0, ecran.DPR * QLUM, 0, 0);
+  tctx.globalCompositeOperation = 'source-over';
 
   const jx = joueur.x - cam.x,
     jy = joueur.y - cam.y;
@@ -511,12 +523,12 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
   // puisqu'il se déplace.
   if (r > 1) {
     joueur.rayonsHalo = portéesRond(zone, joueur.x, joueur.y, r);
-    percerRond(lctx, jx, jy, r, 1, joueur.rayonsHalo, ecran, zone, joueur.x, joueur.y);
+    percerRond(tctx, jx, jy, r, 1, joueur.rayonsHalo, ecran, zone, joueur.x, joueur.y);
   }
   if (portee)
     percerCone(
       ecran,
-      lctx,
+      tctx,
       zone,
       joueur.x,
       joueur.y,
@@ -529,7 +541,7 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
   for (const p of eclaires)
     percerCone(
       ecran,
-      lctx,
+      tctx,
       zone,
       p.x,
       p.y,
@@ -541,7 +553,7 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
     );
   for (const b of zone.braises)
     percerRond(
-      lctx,
+      tctx,
       b.x - cam.x,
       b.y - cam.y,
       b.r,
@@ -556,12 +568,12 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
   // sait jamais où c'est retombé — or c'est précisément l'information dont on
   // a besoin pour décider par où passer.
   if (partie.chute && !partie.chute.pose)
-    percerDisque(lctx, partie.chute.x - cam.x, partie.chute.y - cam.y, CASE * 1.5, 0.92);
+    percerDisque(tctx, partie.chute.x - cam.x, partie.chute.y - cam.y, CASE * 1.5, 0.92);
   for (const c of partie.pierres)
-    percerDisque(lctx, c.x - cam.x, c.y - cam.y - c.hauteur, CASE * 0.5, 0.7);
+    percerDisque(tctx, c.x - cam.x, c.y - cam.y - c.hauteur, CASE * 0.5, 0.7);
   for (const t of partie.traces) {
     const k = 1 - t.t / t.duree;
-    percerDisque(lctx, t.x - cam.x, t.y - cam.y, CASE * (0.45 + k * 0.65), 0.45 + k * 0.45);
+    percerDisque(tctx, t.x - cam.x, t.y - cam.y, CASE * (0.45 + k * 0.65), 0.45 + k * 0.45);
   }
   // Un calmé n'est pas qu'un faisceau : son corps et un petit halo restent
   // éclairés, sinon on ne voit qu'un cône sortir du néant. Sauf s'il a soufflé
@@ -569,7 +581,7 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
   // la lumière du joueur — coloré, mais découvert par nous.
   for (const p of zone.persos) {
     if (p.calme && !p.eteint)
-      percerDisque(lctx, p.x - cam.x, p.y - cam.y, D.taille * 2.1, 0.95);
+      percerDisque(tctx, p.x - cam.x, p.y - cam.y, D.taille * 2.1, 0.95);
     // Une sentinelle qui t'a repéré se montre en entier : c'est le signal le
     // plus important du jeu, il ne doit pas rester caché dans le noir.
     // Un Guet qui a entendu quelque chose se montre aussi : c'est la réponse
@@ -578,7 +590,7 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
       p.emotion === EMOTIONS.COLERE &&
       (p.alerte > 0 || p.charge > 0.04 || p.curieuxT > 0)
     ) {
-      percerDisque(lctx, p.x - cam.x, p.y - cam.y, D.taille * 1.7, 0.95);
+      percerDisque(tctx, p.x - cam.x, p.y - cam.y, D.taille * 1.7, 0.95);
     }
   }
   // Une fissure ne s'éclaire PAS toute seule. Elle en avait le droit un temps,
@@ -589,7 +601,7 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
     if (t.reste <= 0) continue;
     const k = clamp(t.reste / (t.duree * 0.35), 0, 1); // elle faiblit en mourant
     percerRond(
-      lctx,
+      tctx,
       t.x - cam.x,
       t.y - cam.y,
       t.r * (0.55 + k * 0.45),
@@ -614,11 +626,11 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
     if (!p.rayonsVue) continue;
     const proximite = clamp(1 - (dj - CASE * 2.6) / (CASE * 1.6), 0, 1);
     const force = traque ? 0.72 : 0.14 + proximite * 0.2;
-    if (p.oeil) percerRond(lctx, p.x - cam.x, p.y - cam.y, PORTEE_OEIL, force, p.rayonsVue);
+    if (p.oeil) percerRond(tctx, p.x - cam.x, p.y - cam.y, PORTEE_OEIL, force, p.rayonsVue);
     else
       percerCone(
         ecran,
-        lctx,
+        tctx,
         zone,
         p.x,
         p.y,
@@ -629,6 +641,13 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
         p.rayonsVue,
       );
   }
+  // LE PERÇAGE, EN UN SEUL COUP ET ADOUCI. Le flou ne s'applique qu'ici, à
+  // demi-résolution, sur le calque des trous déjà complet.
+  lctx.setTransform(1, 0, 0, 1, 0, 0);
+  lctx.globalCompositeOperation = 'destination-out';
+  lctx.filter = `blur(${PENOMBRE}px)`;
+  lctx.drawImage(ecran.trou, 0, 0);
+  lctx.filter = 'none';
   lctx.globalCompositeOperation = 'source-over';
 
   ctx.save();

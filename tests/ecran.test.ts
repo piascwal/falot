@@ -24,6 +24,8 @@ function ecranFactice(W = 390, H = 700, DPR = 2): Ecran {
     ctx,
     lum: toile(),
     lctx: { setTransform: vi.fn() } as unknown as CanvasRenderingContext2D,
+    trou: toile(),
+    tctx: { setTransform: vi.fn() } as unknown as CanvasRenderingContext2D,
     W,
     H,
     DPR,
@@ -36,6 +38,8 @@ function ecranFactice(W = 390, H = 700, DPR = 2): Ecran {
   e.canvas.height = Math.round(H * DPR);
   e.lum.width = Math.ceil(e.canvas.width * QLUM);
   e.lum.height = Math.ceil(e.canvas.height * QLUM);
+  e.trou.width = e.lum.width;
+  e.trou.height = e.lum.height;
   return e;
 }
 

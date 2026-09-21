@@ -113,6 +113,28 @@ export function percerCone(
 // fait déjà autant.
 export const RAYONS_ROND = 64;
 
+/**
+ * LA PÉNOMBRE — combien de pixels de flou sur le bord des perçages.
+ *
+ * Un trou est un polygone à bord dur. Sur du sol ça ne se voit pas : le
+ * dégradé y est déjà à zéro quand on arrive au bout de la portée. Sur un MUR,
+ * si : la lumière s'arrête à la morsure, bien avant la portée, donc l'alpha
+ * tombe d'un coup d'une valeur encore forte à rien. Mesuré sur le calque, le
+ * joueur sous une paroi droite : 255, 141, 43 en deux pixels — une marche de
+ * 114 sur 255. C'est ça, le trait droit en travers de la pierre.
+ *
+ * Aucune source n'est un point, donc aucune ombre n'a de bord net. On floute
+ * donc le perçage — mais UNE SEULE FOIS PAR IMAGE, sur le calque des trous
+ * déjà complet (voir `Ecran.trou`). Un filtre coûte une surface temporaire, et
+ * la mesure est nette : le prix suit le NOMBRE de perçages filtrés, pas le
+ * rayon du flou (1,5 px : 34 images perdues sur 300 ; 2,5 px : 13 — du bruit
+ * autour de la même valeur). Et la même chose appliquée au calque entier une
+ * fois composé, à pleine résolution, coûtait 50 à 80.
+ *
+ * En pixels du calque, donc deux fois moins qu'à l'écran.
+ */
+export const PENOMBRE = 2;
+
 // Parcours de grille : on saute de frontière de case en frontière de case, si
 // bien qu'aucune case traversée n'est omise. Un pas fixe, lui, enjambe un coin
 // dès qu'il le rase en diagonale — mesuré au pas de 0,2 case, 7 rayons sur
