@@ -955,9 +955,47 @@ devenir invisible dans la lumière.
   du plateau : ils avaient l'air posés *dessus*. C'est l'ordre du tracé qui
   fait qu'on est attablé — le corps derrière, le plateau devant — et ils sont
   désormais de part et d'autre, chacun sur sa chaise.
-- **La scène de Falot est une cinquième case.** C'était un bonhomme devant une
-  fenêtre, et personne ne comprenait. Maintenant qu'on vient d'en voir quatre,
-  on sait ce qu'est une case allumée : il essaie **deux fois** d'entrer dans la
-  sienne, et **à chaque fois qu'il franchit le bord, elle s'éteint**. La phrase
-  ne tombe qu'après la deuxième tentative — dite plus tôt, elle expliquait une
-  image qu'on n'avait pas encore vue.
+- **La scène de Falot était un cadre où il n'entrait pas.** Elle a tenu une
+  version, le temps de comprendre qu'elle ne marcherait jamais : elle demandait
+  de saisir une règle au moment où il faudrait seulement être ému. Remplacée
+  par l'errance (voir plus bas).
+
+## L'errance — la fin qui n'explique rien
+
+La fin précédente lui faisait retrouver « la sienne » derrière un cadre, et
+demandait de comprendre *on n'entre pas dans ce qu'on éclaire* au moment exact
+où il faudrait seulement être ému. Ça ne se lisait pas, et une règle qu'il faut
+expliquer à la dernière image n'est pas une fin.
+
+À la place, une scène qui se regarde : **il erre dans un monde déjà allumé.**
+
+- Des fenêtres, un réverbère, une bougie, un phare au loin. Il va vers l'une,
+  puis une autre, puis une troisième. Chaque fois un fil se tend, chaque fois
+  des grains de **sa** lumière partent dans la lampe et n'en reviennent pas.
+  Elles ont déjà quelqu'un ; elles n'avaient pas besoin de lui.
+- Les fenêtres s'éteignent une à une pendant ce temps. **Pas à cause de lui** :
+  le monde va se coucher, c'est tout, et c'est bien pire.
+- Il descend à mesure qu'il se vide. Le trou par lequel il est sorti apparaît
+  aux deux tiers de la scène : on doit le voir l'attendre.
+
+### Le rouge, et la tête qu'il secoue
+
+Vidé, il commence à **virer au rouge**. C'est la règle du monde appliquée à
+lui : une lumière restée éteinte trop longtemps devient un Guet. Il monte à un
+cheveu, **il se secoue la tête**, il redevient bleu ; ça remonte plus haut, il
+se secoue encore. Il gagne. Et, épuisé d'avoir gagné, il tombe dans le trou.
+
+C'est la seule chose de toute la scène qu'il fasse et qui ne soit pas subie —
+donc c'est ce qui reste de lui à la fin : **pas de la lumière, une décision.**
+
+Un détail de fabrication : sa réserve ne descend pas à zéro pendant l'errance,
+elle s'arrête à 0,2. Vidé pour de bon, il n'est plus qu'un contour, et un
+contour n'a pas de couleur à virer au rouge — on ne verrait rien du moment qui
+compte. Le vrai vide a sa propre courbe, et n'arrive qu'après.
+
+### La chute montre ce qu'il a fait
+
+Tout le tunnel qu'il vient de monter défile à l'envers, avec **les petites
+lumières qu'il a laissées à chaque palier**. Il tombe en contour, vide — et à
+mi-chemin **sa propre lumière revient**. Ce n'est pas une consolation : c'est
+la raison pour laquelle il recommence.

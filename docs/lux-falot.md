@@ -261,7 +261,8 @@ peut pas ouvrir un mur avec de la lumière.
 | Falot ne change jamais de couleur | Il reste ce petit bleu inquiet du premier étage au dernier. Ce qui monte, c'est ce qu'il ÉMET : le halo chauffe, une aura s'ouvre autour de lui. Une autre couleur à chaque palier faisait croire à un autre personnage |
 | Le regard d'un Guet est une lumière | Il perce le noir comme une torche — donc s'y tenir, c'est être éclairé. Un Falot soufflé qui traverse un cône rouge s'y voit, vidé : se couvrir n'est pas devenir invisible |
 | Ce qu'on remonte, ce sont des lumières | Pas des âmes, pas des gens : ce qui est tombé quand quelqu'un a débranché une veilleuse ou soufflé une flamme. Une seule histoire, pas deux |
-| Il ne rejoint jamais ce qu'il éclaire | Une lumière se tient toujours à l'autre bout de son faisceau. S'approcher, c'est cesser d'éclairer ; il recule, et ça reste allumé |
+| Là-haut, aucune lumière n'est pour lui | Elles ont toutes déjà quelqu'un. Il donne ce qu'il avait gardé à des lampes qui n'en avaient pas besoin, et ça ne revient pas |
+| À la fin il vire au rouge, et il se secoue | Une lumière restée éteinte trop longtemps devient un Guet : la règle vaut aussi pour lui. Il refuse, deux fois. C'est la seule chose de la fin qui ne soit pas subie |
 | Un premier étage écrit à la main, les suivants tirés au sort | Le bas du puits a une forme ; au-dessus, plus personne ne sait |
 
 ## Ce qui est arrêté (les quatre questions)
@@ -275,18 +276,18 @@ détail — la campagne, les étages, la fin — est dans
    paragraphe de ce document, et rien d'autre : on a un temps raconté « le
    bonheur des gens », et ça faisait deux histoires au lieu d'une. Elles
    repartent allumer quelque chose là-haut, et on les voit le faire : une
-   veilleuse, une bougie, un lampadaire, un phare. Puis vient la sienne, et
-   **plus il s'approche, moins il l'éclaire** — une lumière se tient toujours
-   à l'autre bout de son faisceau. Alors il recule pour que ça reste allumé,
-   et il redescend parce qu'il en reste à remonter. C'est la règle du jeu
-   entier qui lui prend la seule chose qu'il voulait : ce qui est posé
-   t'efface, ce que tu portes te trahit.
+   veilleuse, une bougie, un lampadaire, un phare. Puis il cherche la sienne,
+   et **il n'y en a pas** : toutes ont déjà quelqu'un. Il se vide à essayer,
+   le monde s'éteint autour de lui — il va se coucher, c'est tout — et il
+   commence à **virer au rouge**, parce qu'une lumière restée éteinte trop
+   longtemps devient un Guet. Il se secoue la tête, deux fois, et il refuse.
+   Puis, épuisé, il retombe par où il était monté.
 2. **Falot sait-il ce qu'est un Guet ?** **Non.** S'il savait qu'une lumière
    abandonnée finit par devenir ça, remonter serait un calcul ; il faut que ce
    soit un geste.
 3. **Voit-on le monde d'en haut ?** **Oui, une fois** : quatre fenêtres sur
-   quatre vies, et la sienne. C'est la scène de fin, et elle ne sert qu'une
-   fois.
+   quatre vies, puis une ville entière qui va se coucher pendant qu'il y
+   cherche une place. C'est la scène de fin, et elle ne sert qu'une fois.
 4. **Le nom du monde.** **Les Dessous.**
 
 ## Point 2 — l'étage 1 (fait)

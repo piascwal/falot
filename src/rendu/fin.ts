@@ -25,7 +25,7 @@ import { FIN } from '../coeur/textes.js';
 import type { Partie } from '../coeur/types.js';
 import type { Ecran } from './ecran.js';
 import { texteCerne } from './texte.js';
-import { dessinerTete } from './visages.js';
+import { dessinerOmbre, dessinerTete } from './visages.js';
 
 /** Le bleu de Falot. Il ne change plus : il a tout donné, il reste Peureux.
  *  C'est aussi ce qui sépare ce qu'il EST de ce qu'il DONNE — l'or, jamais
@@ -495,121 +495,281 @@ function dessinerQuatre(ecran: Ecran, k: number, enRoute: boolean, temps: number
 }
 
 /**
- * LA SIENNE, et pourquoi il n'y entre pas.
+ * L'ERRANCE — il cherche la sienne, et il n'y en a pas.
  *
- * C'est UNE CINQUIÈME CASE, dessinée comme les quatre autres : un cadre, une
- * scène dedans, quelqu'un. La seule différence, c'est que la lumière ne vient
- * pas du dedans — elle vient de lui, resté dehors.
+ * Il sort sur un monde DÉJÀ ALLUMÉ : des fenêtres, un réverbère, une bougie,
+ * un phare au loin. Il va vers l'une, puis une autre, puis une troisième, et
+ * chaque fois il tend un fil — et chaque fois il donne un peu de ce qu'il
+ * avait gardé, qui entre dans la lampe et n'en ressort pas. Elles ont déjà
+ * quelqu'un ; elles n'ont pas besoin de lui.
  *
- * Il essaie deux fois. À chaque fois qu'il franchit le bord du cadre, la
- * scène s'éteint : il n'est plus la lumière de l'image, il est DANS l'image,
- * et une image n'éclaire personne. Il ressort, tout se rallume.
+ * Pendant ce temps les fenêtres s'éteignent une à une. Le monde ne s'éteint
+ * pas à cause de lui : il va se coucher, c'est tout, et c'est bien pire.
  *
- * Le cadre était une fenêtre, avant, et personne ne comprenait la scène : on
- * voyait un bonhomme devant une vitre, pas une lumière qui ne peut pas entrer
- * dans ce qu'elle éclaire. Le cadre le dit, parce qu'on vient d'en voir quatre.
+ * À la fin il vire au ROUGE. Une lumière restée éteinte trop longtemps finit
+ * par devenir un Guet — c'est écrit dans la bible, et c'est ce qui le guette
+ * là, à deux doigts. Il se secoue la tête, il redevient bleu, ça recommence,
+ * il se secoue encore. Il gagne. Et, épuisé d'avoir gagné, il tombe dans le
+ * trou par lequel il était monté.
+ *
+ * C'est la scène qui remplace le cadre où il n'entrait pas : elle n'a aucune
+ * règle à faire comprendre, elle se regarde.
  */
 
-/** Où il en est de son approche : 0 = à sa place, 1 = à l'intérieur du cadre.
- *  Deux tentatives — une seule se lit comme un accident. */
-function approche(k: number): number {
-  if (k < 0.1) return 0;
-  if (k < 0.3) return (k - 0.1) / 0.2; // il avance, doucement
-  if (k < 0.4) return 1; // il est dedans, et tout est noir
-  if (k < 0.52) return 1 - (k - 0.4) / 0.12; // il ressort
-  if (k < 0.62) return (k - 0.52) / 0.1; // il réessaie, plus vite
-  if (k < 0.7) return 1;
-  if (k < 0.82) return 1 - (k - 0.7) / 0.12;
-  return 0; // il reste à sa place
+/** Le rouge d'un Guet, en composantes : c'est vers LUI qu'il glisse, et c'est
+ *  exactement le même que celui du jeu — sinon la menace ne se reconnaît pas. */
+const ROUGE = [255, 122, 107] as const;
+
+/** Largeur du monde d'en haut, en écrans. */
+const MONDE = 3.4;
+
+/**
+ * UN FOYER : une lumière qui appartient déjà à quelqu'un.
+ * `wx` est sa place dans le monde (0 à 1), `y` sa hauteur à l'écran, et
+ * `mort` le moment où l'on s'y couche.
+ */
+const FOYERS = [
+  { wx: 0.06, y: 0.36, r: 26, genre: 'fenetre', mort: 0.52 },
+  { wx: 0.13, y: 0.52, r: 22, genre: 'fenetre', mort: 0.3 },
+  { wx: 0.22, y: 0.3, r: 30, genre: 'bougie', mort: 0.86 },
+  { wx: 0.3, y: 0.44, r: 34, genre: 'fenetre', mort: 0.74 }, // la première qu'il tente
+  { wx: 0.38, y: 0.6, r: 24, genre: 'fenetre', mort: 0.4 },
+  { wx: 0.46, y: 0.26, r: 26, genre: 'fenetre', mort: 0.62 },
+  { wx: 0.56, y: 0.5, r: 40, genre: 'lampadaire', mort: 0.9 }, // la deuxième
+  { wx: 0.64, y: 0.34, r: 24, genre: 'fenetre', mort: 0.47 },
+  { wx: 0.72, y: 0.56, r: 22, genre: 'fenetre', mort: 0.58 },
+  { wx: 0.82, y: 0.38, r: 32, genre: 'bougie', mort: 0.93 }, // la troisième
+  { wx: 0.9, y: 0.6, r: 24, genre: 'fenetre', mort: 0.66 },
+  { wx: 0.97, y: 0.28, r: 30, genre: 'phare', mort: 0.97 },
+] as const;
+
+/** Les trois qu'il tente, et quand. */
+const TENTATIVES = [
+  { foyer: 3, debut: 0.12, fin: 0.26 },
+  { foyer: 6, debut: 0.36, fin: 0.5 },
+  { foyer: 9, debut: 0.58, fin: 0.72 },
+] as const;
+
+/**
+ * Sa place dans le monde, de 0 à 1 : il avance, il s'arrête devant une
+ * lumière, il repart. Sans les plateaux, il glisse devant elles sans avoir
+ * l'air de rien tenter.
+ */
+function errer(k: number): number {
+  const etapes: [number, number, number, number][] = [
+    [0, 0.12, 0, 0.3],
+    [0.12, 0.26, 0.3, 0.3],
+    [0.26, 0.36, 0.3, 0.56],
+    [0.36, 0.5, 0.56, 0.56],
+    [0.5, 0.58, 0.56, 0.82],
+    [0.58, 0.72, 0.82, 0.82],
+    [0.72, 0.84, 0.82, 1],
+  ];
+  for (const [k0, k1, p0, p1] of etapes) {
+    if (k > k1) continue;
+    const u = clamp((k - k0) / (k1 - k0), 0, 1);
+    return p0 + (p1 - p0) * (u * u * (3 - 2 * u)); // adouci aux deux bouts
+  }
+  return 1;
 }
 
-function dessinerLaSienne(ecran: Ecran, k: number, temps: number): void {
-  const { ctx, W, H } = ecran;
-  const cw = Math.min(W * 0.62, 460);
-  const chh = cw * 0.72;
-  const cx = W * 0.56 - cw / 2; // décalé à droite : il lui faut la place à gauche
-  const cy = H * 0.44 - chh / 2;
+/**
+ * Ce qu'il lui reste, de 1 à 0,2 : il en laisse un tiers à chaque tentative.
+ *
+ * Il ne descend PAS à zéro ici. Vidé pour de bon, il n'est plus qu'un contour,
+ * et un contour n'a pas de couleur à virer au rouge — on ne verrait rien du
+ * moment qui compte. Le vrai vide vient après, et il a sa propre courbe.
+ */
+function reste(k: number): number {
+  let perdu = 0;
+  for (const t of TENTATIVES) perdu += clamp((k - t.debut) / (t.fin - t.debut), 0, 1);
+  return 0.2 + 0.8 * clamp(1 - perdu / 3, 0, 1);
+}
 
-  const monte = clamp(k / 0.08, 0, 1);
-  const a = approche(k) * monte;
-  // La scène meurt VITE quand il approche : au quart du chemin il n'éclaire
-  // déjà presque plus. C'est ce qui fait comprendre que c'est lui, la lumière.
-  const clarte = (1 - a) * (1 - a) * monte;
-  // dehors, à gauche du cadre ; dedans, au tiers de la case
-  const lx = cx - W * 0.17 + (W * 0.17 + cw * 0.3) * a;
-  const ly = cy + chh * 0.52 + H * 0.4 * (1 - monte);
+/** Le vide, pour de bon : il n'est plus qu'un contour, et il tombe. */
+const vide = (k: number) => clamp((k - 0.93) / 0.07, 0, 1);
+
+/**
+ * Le rouge qui monte, et les deux fois où il se secoue la tête.
+ *
+ * Il ne bascule jamais vraiment : il monte à un cheveu, se secoue, redescend,
+ * remonte plus haut, se secoue encore, et gagne. C'est ce qu'il reste de lui à
+ * la fin — pas de la lumière, une décision.
+ */
+function bascule(k: number): number {
+  if (k < 0.72 || k > 0.93) return 0;
+  // il monte lentement, il se secoue, ça retombe d'un coup
+  const a = clamp((k - 0.72) / 0.05, 0, 1) - clamp((k - 0.77) / 0.015, 0, 1);
+  const b = clamp((k - 0.82) / 0.06, 0, 1) - clamp((k - 0.88) / 0.015, 0, 1);
+  return clamp(Math.max(a * 0.72, b), 0, 1);
+}
+
+/** LA VILLE. Des blocs, et rien d'autre : ce sont les fenêtres allumées qui
+ *  la racontent, et il faut qu'elles tiennent DANS les immeubles — au-dessus,
+ *  elles flottaient dans le ciel et la ville n'était qu'une frise en bas. */
+function toits(ecran: Ecran, cam: number, nuit: number): void {
+  const { ctx, W, H } = ecran;
+  const sol = H * 0.82;
+  const large = W * MONDE;
+  const bw = large / 52;
+  for (let i = -2; i < 56; i++) {
+    const bx = i * bw - cam;
+    if (bx > W + bw || bx < -bw * 2) continue;
+    // deux rangs : un fond plus bas et plus sombre, une avant-scène plus haute
+    const h1 = H * (0.22 + ((((i * 37) % 13) + 13) % 13) / 42);
+    ctx.fillStyle = '#0a0a11';
+    ctx.fillRect(bx, sol - h1, bw + 1, h1 + H);
+    if (i % 2 === 0) {
+      const h2 = H * (0.14 + ((((i * 53) % 9) + 9) % 9) / 40);
+      ctx.fillStyle = '#0d0d15';
+      ctx.fillRect(bx - bw * 0.3, sol - h2, bw * 1.6, h2 + H);
+    }
+  }
+  ctx.strokeStyle = `rgba(255,255,255,${0.05 * (1 - nuit)})`;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, sol);
+  ctx.lineTo(W, sol);
+  ctx.stroke();
+}
+
+/** Une lumière qui a déjà quelqu'un. */
+function foyer(
+  ecran: Ecran,
+  x: number,
+  y: number,
+  r: number,
+  genre: string,
+  vif: number,
+): void {
+  const { ctx } = ecran;
+  if (vif <= 0.01) return;
+  halo(ecran, x, y, r * 3.4, OR, 0.34 * vif);
+  ctx.fillStyle = `rgba(${OR},${0.85 * vif})`;
+  if (genre === 'fenetre') {
+    ctx.fillRect(x - r * 0.34, y - r * 0.4, r * 0.68, r * 0.8);
+  } else if (genre === 'bougie') {
+    ctx.beginPath();
+    ctx.arc(x, y, r * 0.2, 0, TAU);
+    ctx.fill();
+  } else if (genre === 'lampadaire') {
+    ctx.fillRect(x - r * 0.24, y - r * 0.24, r * 0.48, r * 0.34);
+    ctx.fillStyle = `rgba(${OR},${0.22 * vif})`;
+    ctx.fillRect(x - r * 0.05, y, r * 0.1, r * 2.4);
+  } else {
+    ctx.beginPath();
+    ctx.arc(x, y, r * 0.26, 0, TAU);
+    ctx.fill();
+    ctx.fillStyle = `rgba(${OR},${0.16 * vif})`; // son balayage, au loin
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.arc(x, y, r * 8, Math.PI * 0.86, Math.PI * 0.98);
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+
+function dessinerErrance(ecran: Ecran, k: number, temps: number): void {
+  const { ctx, W, H } = ecran;
+  const cam = errer(k) * (MONDE - 1) * W;
+  const nuit = clamp(k / 0.95, 0, 1);
+  const force = reste(k);
+  const rouge = bascule(k);
 
   ctx.fillStyle = '#08080e';
   ctx.fillRect(0, 0, W, H);
+  toits(ecran, cam, nuit);
 
-  // LE CADRE. Il reste tracé même éteint : sans lui, quand la scène s'éteint,
-  // il ne reste rien à l'écran et on croit à une coupure.
-  ctx.strokeStyle = `rgba(${OR},${0.12 + 0.3 * clarte})`;
-  ctx.lineWidth = 2;
-  ctx.strokeRect(cx, cy, cw, chh);
+  // LUI. Il reste à sa place dans le cadre, c'est le monde qui défile — sinon
+  // on le perd de vue à chaque arrêt, et c'est lui qu'on regarde.
+  //
+  // IL DESCEND, tout du long : à mesure qu'il se vide il tient moins haut, et
+  // à la fin il est au ras du trou. La chute n'arrive donc pas d'un coup, on
+  // la voit venir pendant quatorze secondes.
+  const creux = vide(k);
+  const fx = W * 0.44;
+  const troux = W * 0.44;
+  const trouy = H * 0.79;
+  const fy =
+    H * (0.38 + (1 - force) * 0.22) +
+    Math.sin(temps * 0.9) * H * 0.02 * force +
+    (trouy - H * 0.58) * creux * creux;
 
-  // LE CÔNE qu'il envoie : il raccourcit exactement comme il s'approche. La
-  // lumière, c'est la distance — c'est toute la scène en une forme.
-  const vers = Math.atan2(cy + chh * 0.55 - ly, cx + cw * 0.5 - lx);
-  cone(
+  // LE TROU par lequel il est sorti, et par lequel il va repartir. Il apparaît
+  // bien avant la fin : on doit le voir l'attendre.
+  const ouvert = clamp((k - 0.62) / 0.16, 0, 1);
+  if (ouvert > 0.01) {
+    ctx.fillStyle = `rgba(0,0,0,${0.9 * ouvert})`;
+    ctx.beginPath();
+    ctx.ellipse(troux, trouy, D.taille * 2.4 * ouvert, D.taille * 0.8 * ouvert, 0, 0, TAU);
+    ctx.fill();
+    ctx.strokeStyle = `rgba(143,208,255,${0.14 * ouvert})`;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+
+  for (let i = 0; i < FOYERS.length; i++) {
+    const f = FOYERS[i];
+    const x = f.wx * MONDE * W - cam;
+    if (x < -160 || x > W + 160) continue;
+    foyer(ecran, x, f.y * H, f.r, f.genre, clamp((f.mort - k) / 0.05, 0, 1));
+  }
+
+  // LES TENTATIVES : un fil qui se tend, et ce qu'il y laisse. Ce sont des
+  // grains de SA lumière qui partent vers la lampe et n'en reviennent pas.
+  for (const t of TENTATIVES) {
+    const u = clamp((k - t.debut) / (t.fin - t.debut), 0, 1);
+    if (u <= 0 || u >= 1) continue;
+    const f = FOYERS[t.foyer];
+    const cx = f.wx * MONDE * W - cam;
+    const cy = f.y * H;
+    const vu = Math.sin(u * Math.PI); // il se tend, puis il lâche
+    ctx.strokeStyle = `rgba(${VERT},${0.34 * vu})`;
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(fx, fy);
+    ctx.lineTo(cx, cy);
+    ctx.stroke();
+    for (let g = 0; g < 7; g++) {
+      const p = (u * 1.6 + g / 7) % 1;
+      lumiere(ecran, fx + (cx - fx) * p, fy + (cy - fy) * p, 2.4, (1 - p) * vu);
+    }
+  }
+
+  // Sa couleur : bleue, sauf quand ça remonte. Il ne bascule jamais vraiment.
+  const bleu = [143, 208, 255] as const;
+  const melange = bleu.map((v, i) => Math.round(v + (ROUGE[i] - v) * rouge));
+  const teint = `rgb(${melange[0]},${melange[1]},${melange[2]})`;
+  // l'aura de ce qui lui reste, et le sursaut quand il se secoue
+  halo(
     ecran,
-    lx,
-    ly,
-    vers,
-    Math.hypot(cx + cw * 0.5 - lx, cy + chh * 0.55 - ly) * 1.1,
-    0.6,
-    OR,
-    0.95 * clarte,
+    fx,
+    fy,
+    D.taille * (2.2 + force * 2.6),
+    melange.join(','),
+    0.1 + 0.16 * force,
   );
-
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(cx, cy, cw, chh);
-  ctx.clip();
-  halo(ecran, cx + cw * 0.5, cy + chh * 0.45, cw * 0.62, OR, 0.42 * clarte);
-  // La scène : une pièce, une chaise, quelqu'un assis. RIEN QUI ÉCLAIRE —
-  // pas de lampe, pas de bougie. Toute la lumière de cette case vient de
-  // dehors, et c'est ça qu'il faut comprendre avant qu'il essaie d'entrer.
-  const sol = cy + chh * 0.8;
-  const sx = cx + cw * 0.46;
-  // Pas d'aplat au sol : un rectangle plus clair sous la ligne se lit comme
-  // une marche. Une ligne suffit à poser le plancher.
-  ctx.strokeStyle = teinte(clarte * 0.4);
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.moveTo(cx, sol);
-  ctx.lineTo(cx + cw, sol);
-  ctx.stroke();
-  // la chaise : un dossier derrière elle, une assise, deux pieds
-  ctx.fillStyle = teinte(clarte * 0.42);
-  ctx.beginPath();
-  ctx.roundRect(sx - cw * 0.085, sol - chh * 0.42, cw * 0.028, chh * 0.42, 3);
-  ctx.fill();
-  ctx.fillRect(sx - cw * 0.09, sol - chh * 0.17, cw * 0.17, chh * 0.025);
-  ctx.fillRect(sx + cw * 0.06, sol - chh * 0.16, cw * 0.02, chh * 0.16);
-  const tourne = clamp((k - 0.86) / 0.14, 0, 1);
-  silhouette(ecran, sx + cw * 0.02 * tourne, sol - chh * 0.14, chh * 0.34, clarte * 0.95);
-  ctx.restore();
-
-  // LUI. Bleu, toujours : ce qu'il donne est doré, ce qu'il est ne l'a jamais
-  // été. Dedans, il ne reste que lui de visible dans un cadre noir — c'est
-  // l'image qui dit tout, et elle n'a pas besoin de la phrase.
-  corps.x = lx;
-  corps.y = ly;
+  corps.x = fx;
+  corps.y = fy;
   corps.sx = 1;
   corps.sy = 1;
-  corps.regard = vers;
+  corps.regard = 0;
+  // IL SE SECOUE LA TÊTE. C'est ça qui le ramène au bleu, et c'est la seule
+  // chose qu'il fasse de toute la scène qui ne soit pas subie.
+  corps.tremble = rouge > 0.35 ? 1 : 0;
+  dessinerOmbre(ecran, corps, D.taille, 0.3 * force);
   dessinerTete(
     ecran,
     corps,
-    BLEU,
-    D.taille * 0.8,
-    true,
-    monte,
-    a > 0.75 ? 'inquiet' : a > 0.2 ? 'intrigue' : 'apaise',
+    teint,
+    D.taille,
+    creux < 0.5, // vidé pour de bon : plus que le contour
+    1 - creux * 0.35,
+    rouge > 0.35 ? 'acharne' : force < 0.4 ? 'peur' : 'inquiet',
     temps,
     1,
   );
+  corps.tremble = 0;
 }
 
 export function dessinerFin(ecran: Ecran, partie: Partie, temps: number): void {
@@ -687,20 +847,25 @@ export function dessinerFin(ecran: Ecran, partie: Partie, temps: number): void {
     return;
   }
 
-  // --- 4. LA SIENNE ---
-  if (etape === 'sienne') {
-    dessinerLaSienne(ecran, k, temps);
-    // La première phrase pose la scène, la seconde ne tombe qu'APRÈS la
-    // deuxième tentative : dite trop tôt, elle explique une image qu'on n'a pas
-    // encore vue, et c'est exactement ce qui ne marchait pas.
-    if (k < 0.42) phrase(ecran, FIN.sienne, haut, clamp(k / 0.42, 0, 1));
-    else if (k > 0.66) phrase(ecran, FIN.loin, haut, clamp((k - 0.68) / 0.32, 0, 1));
+  // --- 4. L'ERRANCE ---
+  if (etape === 'errance') {
+    dessinerErrance(ecran, k, temps);
+    // Une phrase par temps fort, jamais deux à la fois, et jamais avant
+    // l'image : chacune tombe sur ce qu'on vient de voir.
+    if (k < 0.22) phrase(ecran, FIN.cherche, haut, clamp(k / 0.22, 0, 1));
+    else if (k > 0.42 && k < 0.62) phrase(ecran, FIN.prises, haut, (k - 0.42) / 0.2);
+    else if (k > 0.72) phrase(ecran, FIN.vide, haut, clamp((k - 0.72) / 0.28, 0, 1));
     return;
   }
 
   // --- 5. LA CHUTE : il n'y a plus de dehors, il n'y a que le puits ---
   const chute = k * k; // elle accélère
   const fy = H * 0.3 + chute * H * 0.5;
+  // IL TOMBE VIDE, ET IL SE RALLUME EN TOMBANT. Il est arrivé au trou réduit à
+  // un contour ; à mi-chute la petite lumière revient. Ce n'est pas une
+  // consolation — c'est la raison pour laquelle il recommence : en bas, il en
+  // reste à remonter, et lui, il tient encore.
+  const reprend = clamp((chute - 0.45) / 0.3, 0, 1);
   ctx.strokeStyle = 'rgba(255,255,255,0.09)';
   ctx.lineWidth = 2;
   const large = Math.min(W * 0.34, CASE * 2.2);
@@ -719,21 +884,33 @@ export function dessinerFin(ecran: Ecran, partie: Partie, temps: number): void {
     ctx.lineTo(W / 2 + large, y);
   }
   ctx.stroke();
-  // SA FENÊTRE RESTE ALLUMÉE, tout en haut, et s'éloigne avec le reste. C'est
-  // la dernière chose qu'on voit de là-haut, et ce n'est pas un échec : elle
-  // est allumée PARCE QU'il est reparti.
-  const carre = Math.max(0, 26 * (1 - chute * 1.4));
+  // CE QU'IL A LAISSÉ EN MONTANT. À chaque palier, les petites lumières qu'il
+  // y a rallumées ; elles défilent à l'envers pendant qu'il retombe. C'est
+  // tout le tunnel qu'il vient de faire, repris en cinq secondes — et c'est la
+  // seule chose de cette fin qui lui reste vraiment.
+  for (let i = -1; i < H / ecart + 2; i++) {
+    const y = i * ecart - defile;
+    for (let g = 0; g < 3; g++) {
+      const lx = W / 2 - large + 14 + g * 13 + ((i * 7 + g) % 3) * 9;
+      lumiere(ecran, lx, y - 9, 2.2, 0.5 * (1 - chute * 0.7));
+      lumiere(ecran, W - lx, y - 9, 2.2, 0.5 * (1 - chute * 0.7));
+    }
+  }
+  // et tout en haut, le trou par lequel il était sorti, qui s'éloigne
+  const carre = Math.max(0, 30 * (1 - chute * 1.4));
   if (carre > 1) {
-    const wy = H * 0.14 - chute * H * 0.24;
-    halo(ecran, W / 2, wy, carre * 5, OR, 0.34 * (1 - chute));
-    ctx.fillStyle = `rgba(${OR},${0.5 * (1 - chute)})`;
-    ctx.fillRect(W / 2 - carre / 2, wy - carre / 2, carre, carre);
+    const wy = H * 0.12 - chute * H * 0.26;
+    halo(ecran, W / 2, wy, carre * 4, OR, 0.26 * (1 - chute));
+    ctx.fillStyle = `rgba(${OR},${0.34 * (1 - chute)})`;
+    ctx.beginPath();
+    ctx.ellipse(W / 2, wy, carre, carre * 0.42, 0, 0, TAU);
+    ctx.fill();
   }
   // Ce qui lui reste de lumière le suit avec du retard : des filets, pas des
   // boules — une traîne ronde se lit comme une chenille.
   for (let i = 1; i < 12; i++) {
     const ty = fy - i * 22 * (0.5 + chute);
-    ctx.fillStyle = `rgba(143,208,255,${0.2 * (1 - i / 12)})`;
+    ctx.fillStyle = `rgba(143,208,255,${0.2 * (1 - i / 12) * reprend})`;
     ctx.fillRect(W / 2 - 1.2, ty, 2.4, 10 + 14 * chute);
   }
   corps.x = W / 2;
@@ -741,7 +918,7 @@ export function dessinerFin(ecran: Ecran, partie: Partie, temps: number): void {
   corps.sx = 0.86;
   corps.sy = 1.16; // étiré par la chute
   corps.regard = -Math.PI / 2;
-  dessinerTete(ecran, corps, BLEU, D.taille, true, 1, 'inquiet', temps, 1);
+  dessinerTete(ecran, corps, BLEU, D.taille, reprend > 0.5, 1, 'inquiet', temps, 1);
   phrase(ecran, FIN.chute, haut, clamp((k - 0.25) / 0.7, 0, 1));
   // le noir se referme à la toute fin
   if (k > 0.82) {

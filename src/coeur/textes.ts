@@ -69,17 +69,16 @@ export const RECIT_PLUS_HAUT: readonly string[] = [
  * LUMIÈRES. Chacune retourne allumer quelque chose là-haut — une veilleuse,
  * une bougie, un lampadaire, un phare. On les voit le faire, en quatre.
  *
- * Puis vient la sienne, et la seule chose qu'il n'aura jamais : on ne peut
- * pas entrer dans ce qu'on éclaire. Une lumière est toujours à l'autre bout
- * du faisceau — c'est exactement la règle que le joueur apprend depuis douze
- * étages, prise par le bout qui fait mal.
+ * Puis il cherche la sienne, et il n'y en a pas : toutes ont déjà quelqu'un.
+ * Il se vide à essayer, le monde s'éteint autour de lui, et il retombe.
  *
- * Cinq phrases en tout. Le reste est dans l'image.
+ * Six phrases en tout, jamais deux à la fois. Le reste est dans l'image.
  */
 export const FIN = {
   escorte: 'Il les a toutes remontées.',
   quatre: 'Quelque part, quelqu’un a moins peur.',
-  sienne: 'La sienne l’attend.',
-  loin: 'On n’entre pas dans ce qu’on éclaire.',
+  cherche: 'Il en cherche une pour lui.',
+  prises: 'Toutes ont déjà quelqu’un.',
+  vide: 'Il donne ce qui lui restait, et personne ne le voit.',
   chute: 'Alors il redescend. Il en reste à remonter.',
 } as const;

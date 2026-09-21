@@ -74,38 +74,38 @@ Cinq temps, sans un bouton :
    tomber sur la lumière qu'ils vont allumer. Une case reste **noire** tant que
    la sienne n'est pas arrivée. Une seule phrase : « Quelque part, quelqu'un a
    moins peur. »
-4. **La sienne.** **Une cinquième case**, dessinée comme les quatre autres :
-   un cadre, une pièce, quelqu'un assis — et rien qui éclaire dedans. La
-   lumière vient de lui, resté dehors. Il essaie **deux fois** d'y entrer, et
-   **à chaque fois qu'il franchit le bord, la case s'éteint** : il n'est plus
-   la lumière de l'image, il est DANS l'image, et une image n'éclaire
-   personne. Il ressort, tout se rallume, et il tient la distance.
-5. **La chute.** Il redescend, et sa fenêtre reste allumée derrière lui.
+4. **L'errance.** Il sort sur un monde **déjà allumé** : des fenêtres, un
+   réverbère, une bougie, un phare au loin. Il va vers l'une, puis une autre,
+   puis une troisième, et chaque fois il tend un fil — et chaque fois il donne
+   un peu de ce qu'il avait gardé, qui entre dans la lampe et n'en ressort
+   pas. Elles ont déjà quelqu'un. Pendant ce temps les fenêtres s'éteignent
+   une à une : le monde ne s'éteint pas à cause de lui, **il va se coucher**,
+   et c'est bien pire. Il descend à mesure qu'il se vide, jusqu'au trou par
+   lequel il était sorti.
+5. **Le rouge, et la tête qu'il secoue.** Vidé, il commence à **virer au
+   rouge** — une lumière restée éteinte trop longtemps devient un Guet, c'est
+   la règle du monde, et elle vaut aussi pour lui. Il monte à un cheveu, **il
+   se secoue la tête**, il redevient bleu. Ça remonte plus haut, il se secoue
+   encore. **Il gagne.** Et, épuisé d'avoir gagné, il tombe dans le trou.
+6. **La chute.** Tout le tunnel qu'il vient de monter défile à l'envers, avec
+   les petites lumières qu'il a laissées à chaque palier. À mi-chemin, sa
+   propre lumière revient.
 
-### Pourquoi il ne peut pas la rejoindre
+### Pourquoi ça marche mieux que la version d'avant
 
-Parce qu'il **est** la lumière. Une lumière se tient toujours à l'autre bout
-de son faisceau : elle éclaire ce qu'elle n'atteint pas, et ce qu'elle atteint,
-elle ne l'éclaire plus.
+La fin précédente lui faisait retrouver « la sienne » derrière une vitre, et
+demandait de comprendre une règle — *on n'entre pas dans ce qu'on éclaire* —
+au moment exact où il faudrait seulement être ému. Personne ne la comprenait.
 
-Ce n'est pas un refus, pas un oubli, pas une punition — c'est ce qu'éclairer
-veut dire, et **c'est la règle que le joueur apprend depuis le premier
-étage** : ce qui est posé t'efface, ce que tu portes te trahit. Une torche au
-mur éclaire la salle ; celle qu'on tient ne protège personne. Douze étages
-durant, il apprend que la lumière qu'on garde ne sert à rien. Au bout, la même
-règle lui prend la seule chose qu'il voulait.
+Celle-ci n'a **rien à expliquer** : on voit un petit bonhomme chercher une
+place dans un monde qui n'en a pas pour lui, se vider à essayer, et refuser de
+devenir ce qui le poursuit. C'est la seule chose qu'il fasse de toute la scène
+qui ne soit pas subie, et c'est ce qui reste de lui à la fin : **pas de la
+lumière, une décision.**
 
-Et c'est pour ça que sa scène est **une case, pas une fenêtre** : on vient
-d'en voir quatre, on sait ce qu'est une case allumée, donc on comprend d'un
-seul coup ce que sa case perd quand il y entre.
-
-C'est aussi pour ça que la quatrième scène est **un phare** : c'est la seule
-des quatre où la lumière ne rencontre jamais celui qu'elle sauve. Le plan
-d'avant dit tout haut ce que le plan d'après lui fait.
-
-Et il redescend, parce qu'il en reste à remonter. Ce n'est ni un mode
-déverrouillé ni une récompense : c'est le sujet. **Il choisit la distance**, et
-la fenêtre est allumée *parce qu'il est reparti.*
+Et ça referme la boucle du bestiaire. Depuis le premier étage, ce qui le
+chasse, ce sont des lumières qui ont renoncé. Là, on le voit à deux doigts d'en
+être une — et choisir de redescendre plutôt que ça.
 
 ### Ce que les Guets deviennent dans cette version
 

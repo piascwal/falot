@@ -1,18 +1,18 @@
 /**
- * LA FIN — ce que deviennent les lumières, et pourquoi il retombe.
+ * LA FIN — ce que deviennent les lumières, et ce qu'il reste de lui.
  *
  * Le scénario ne parle plus d'âmes : ce sont des LUMIÈRES, et rien d'autre.
  * Falot les remonte, elles repartent allumer quelque chose là-haut, et on le
  * voit — un enfant, un couple, un trottoir sous la pluie, un bateau au large.
  *
- * Puis vient la sienne. Elle l'attend, elle est là, et il ne peut pas la
- * rejoindre : **une lumière est toujours à l'autre bout du faisceau.** Plus
- * il s'approche, moins il éclaire ; collé à la vitre, il n'éclaire plus rien
- * du tout. C'est la règle que le jeu enseigne depuis le premier étage — ce
- * qui est posé t'efface, ce que tu portes te trahit — retournée contre lui.
+ * Puis il cherche la sienne. Il erre dans un monde déjà allumé, et il essaie
+ * d'aller en prendre une : chacune a déjà quelqu'un. À chaque tentative il
+ * donne un peu de ce qu'il avait gardé, et ça ne revient pas. Autour de lui
+ * les fenêtres s'éteignent une à une — le monde va se coucher, sans lui.
  *
- * Il n'y a donc personne à blâmer, et rien à réparer : il recule pour que ça
- * reste allumé, et il redescend parce qu'il en reste à remonter.
+ * Quand il est vide, il retombe : tout le tunnel qu'il vient de monter défile
+ * à l'envers. Il n'a pas échoué contre quelqu'un, et il n'y a rien à réparer.
+ * Il redescend parce qu'il en reste à remonter.
  *
  * Cinq temps, rien à cliquer. Une commande tenue accélère : on peut avoir
  * déjà vu la fin sans vouloir l'attendre une deuxième fois.
@@ -30,19 +30,22 @@ import { lancerLaChute } from './seuil.js';
  *   — LE FIL : elles le quittent et prennent un fil, comme celui qu'il laisse
  *     derrière lui, qui se sépare en quatre ;
  *   — LES QUATRE : chacune allume sa scène, et on les voit toutes les quatre ;
- *   — LA SIENNE : une cinquième case, la sienne, et ce qui arrive quand il
- *     essaie d'y entrer ;
- *   — LA CHUTE : il redescend.
+ *   — L'ERRANCE : il cherche la sienne dans un monde déjà allumé, il se vide à
+ *     essayer, et le monde s'éteint autour de lui ;
+ *   — LA CHUTE : il retombe, tout le long de ce qu'il vient de monter.
+ *
+ * L'errance est la plus longue de loin : c'est la seule qui ait besoin de
+ * durer. Les quatre scènes se comprennent en un coup d'œil ; se vider, non.
  */
 export const TEMPS_FIN = {
-  escorte: 5,
-  fil: 5.5,
-  quatre: 5,
-  sienne: 12,
-  chute: 4.5,
+  escorte: 4.5,
+  fil: 5,
+  quatre: 4.5,
+  errance: 14,
+  chute: 5.5,
 } as const;
 export type EtapeFin = keyof typeof TEMPS_FIN;
-const ORDRE = ['escorte', 'fil', 'quatre', 'sienne', 'chute'] as const;
+const ORDRE = ['escorte', 'fil', 'quatre', 'errance', 'chute'] as const;
 export const DUREE_FIN = ORDRE.reduce((a, e) => a + TEMPS_FIN[e], 0);
 
 export function lancerLaFin(partie: Partie): void {

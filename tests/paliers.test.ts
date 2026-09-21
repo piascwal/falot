@@ -332,15 +332,15 @@ describe('la fin (étage 12)', () => {
   });
 
   it('passe par ses cinq temps, dans l’ordre, sans en sauter un', () => {
-    // L'escorte, le fil, les quatre scènes, la sienne, la chute. C'est le
+    // L'escorte, le fil, les quatre scènes, l'errance, la chute. C'est le
     // seul endroit du jeu où l'ordre EST le propos : les lumières allument
-    // quelque chose avant qu'on comprenne qu'il n'aura jamais la sienne.
+    // quelque chose avant qu'on comprenne qu'il n'en aura jamais une.
     const vus: string[] = [];
     for (let t = 0; t < DUREE_FIN; t += 0.25) {
       const e = tempsFin(t).etape;
       if (vus[vus.length - 1] !== e) vus.push(e);
     }
-    expect(vus).toEqual(['escorte', 'fil', 'quatre', 'sienne', 'chute']);
+    expect(vus).toEqual(['escorte', 'fil', 'quatre', 'errance', 'chute']);
   });
 
   it('le fait retomber tout en bas, et ça recommence', () => {
