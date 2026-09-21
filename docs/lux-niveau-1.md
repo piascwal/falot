@@ -1021,3 +1021,39 @@ c'est arrivé une fois de trop. L'écran-titre affiche désormais, tout en bas e
 en tout petit, la **date de construction** (`version 2026-09-21 06:54`),
 injectée par Vite à la compilation. En développement elle n'existe pas : on ne
 se demande jamais si on a la dernière version d'un serveur qui recharge seul.
+
+## De la pierre, enfin
+
+Le sol était un aplat `#1a1a26` et les murs n'étaient **pas dessinés du tout** :
+on voyait le fond noir au travers. C'est lisible, et c'est vide.
+
+`src/rendu/tuiles.ts` fabrique maintenant la matière, au chargement et en
+quarante millisecondes : des dalles inégales et de travers, des fêlures, du
+grain par blocs de deux pixels, et des nappes très larges qui empêchent la
+tuile d'être plate. Six variantes, choisies par la position de la case — **la
+case est sa propre graine**, sinon la pierre bougerait sous les pieds du
+joueur.
+
+Trois choix qui font tout le résultat :
+
+- **Les tuiles sont raccordables.** Chaque caillou est dessiné neuf fois : à sa
+  place, et décalé d'une tuile dans les huit directions. Ce qui déborde d'un
+  côté rentre de l'autre, et la grille disparaît.
+- **Le grain va par blocs de deux pixels.** Pixel par pixel, ça faisait de la
+  neige de téléviseur : le détail était plus fin que ce que l'écran montre une
+  fois la tuile réduite.
+- **Le mur est nettement plus sombre que le sol.** C'est ce qui fait lire
+  l'architecture, maintenant que les deux sont dessinés.
+
+Et une ombre de **contact** : là où un sol touche une pierre, le sol
+s'assombrit. Ce n'est pas de l'éclairage — elle ne vient d'aucune direction,
+elle est la même sur les quatre côtés — c'est de l'occlusion, et sans elle les
+cases flottent les unes sur les autres. Elle est cuite une fois par côté :
+fabriquer un dégradé par case coûtait une image de temps en temps.
+
+Une pierre enfouie au milieu d'un massif n'est pas dessinée : aucune lumière ne
+l'atteint et rien ne la borde.
+
+**Mesuré** : 38 ms de fabrication, une fois, pendant l'écran-titre. Puis 0 à 4
+images perdues sur 300 selon les passes — c'est le bruit de mesure d'un
+navigateur sans écran, pas une chute.

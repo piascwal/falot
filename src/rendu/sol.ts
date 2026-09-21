@@ -10,7 +10,41 @@ import { CASE } from '../coeur/dimensions.js';
 import { TAU } from '../coeur/geometrie.js';
 import type { Partie } from '../coeur/types.js';
 import type { Ecran } from './ecran.js';
+import { tuiles, variante } from './tuiles.js';
 import { carreArrondi } from './visages.js';
+
+/**
+ * L'OMBRE DE CONTACT. Le sol s'assombrit contre chaque pierre.
+ *
+ * Ce n'est PAS de l'éclairage : elle ne vient d'aucune direction, elle est la
+ * même sur les quatre côtés. C'est de l'occlusion — le peu de lumière qui
+ * arrive dans un angle en ressort moins. Sans elle, un sol et un mur se lisent
+ * sur le même plan et la salle est plate.
+ */
+function ombreDeContact(
+  ecran: Ecran,
+  partie: Partie,
+  c0x: number,
+  c1x: number,
+  c0y: number,
+  c1y: number,
+): void {
+  const { ctx, cam } = ecran;
+  const zone = partie.zone;
+  const plein = (cx: number, cy: number) =>
+    cx < 0 || cy < 0 || cx >= zone.cols || cy >= zone.lignes || zone.mur[cy][cx] === 1;
+  for (let cy = c0y; cy <= c1y; cy++)
+    for (let cx = c0x; cx <= c1x; cx++) {
+      if (zone.mur[cy][cx]) continue;
+      const x = cx * CASE - cam.x;
+      const y = cy * CASE - cam.y;
+      const t = tuiles();
+      if (plein(cx, cy - 1)) ctx.drawImage(t.contacts[0], x, y, CASE + 1, CASE + 1);
+      if (plein(cx, cy + 1)) ctx.drawImage(t.contacts[1], x, y, CASE + 1, CASE + 1);
+      if (plein(cx - 1, cy)) ctx.drawImage(t.contacts[2], x, y, CASE + 1, CASE + 1);
+      if (plein(cx + 1, cy)) ctx.drawImage(t.contacts[3], x, y, CASE + 1, CASE + 1);
+    }
+}
 
 // Le sol de TOUTES les cases à l'écran : le voile se charge de ne montrer que
 // ce qui est éclairé. Pas de brouillard de guerre — seule la lumière révèle.
@@ -24,11 +58,49 @@ export function dessinerSol(
 ): void {
   const { ctx, cam } = ecran;
   const zone = partie.zone;
-  ctx.fillStyle = '#1a1a26';
+  const t = tuiles();
+
+  // LA PIERRE. Le sol était un aplat et les murs n'étaient pas dessinés du
+  // tout : on voyait le fond noir au travers. Chaque case prend maintenant sa
+  // tuile, choisie par sa position — la case est sa propre graine, sinon la
+  // pierre bougerait sous les pieds du joueur.
+  //
+  // Les murs sont dessinés EUX AUSSI. Le voile d'obscurité se charge de ne
+  // montrer que ce qui est éclairé : on ne triche pas en cachant ce qui est
+  // loin, on le laisse dans le noir.
+  const libre = (cx: number, cy: number) =>
+    cx >= 0 && cy >= 0 && cx < zone.cols && cy < zone.lignes && zone.mur[cy][cx] !== 1;
   for (let cy = c0y; cy <= c1y; cy++)
-    for (let cx = c0x; cx <= c1x; cx++)
-      if (!zone.mur[cy][cx])
-        ctx.fillRect(cx * CASE - cam.x, cy * CASE - cam.y, CASE + 1, CASE + 1);
+    for (let cx = c0x; cx <= c1x; cx++) {
+      const mur = zone.mur[cy][cx] === 1;
+      // Une pierre enfouie au milieu d'un massif n'est jamais visible : aucune
+      // lumière ne l'atteint, et rien ne la borde. On ne la dessine pas.
+      if (
+        mur &&
+        !libre(cx - 1, cy) &&
+        !libre(cx + 1, cy) &&
+        !libre(cx, cy - 1) &&
+        !libre(cx, cy + 1)
+      )
+        continue;
+      const v = variante(cx, cy);
+      ctx.drawImage(
+        mur ? t.mur : t.sol,
+        v * t.taille,
+        0,
+        t.taille,
+        t.taille,
+        cx * CASE - cam.x,
+        cy * CASE - cam.y,
+        CASE + 1,
+        CASE + 1,
+      );
+    }
+
+  // LE CONTACT. Là où un sol touche une pierre, le sol s'assombrit. Ça ne
+  // vient d'aucune direction — c'est de l'occlusion, pas de l'éclairage — et
+  // sans elle les cases flottent les unes sur les autres au lieu de se poser.
+  ombreDeContact(ecran, partie, c0x, c1x, c0y, c1y);
 
   // LA CENDRE. Le sol brûlé est un peu plus clair, et grumeleux : quatre
   // grains par case, toujours aux mêmes endroits — la case est sa propre
@@ -38,19 +110,18 @@ export function dessinerSol(
     for (let cy = c0y; cy <= c1y; cy++)
       for (let cx = c0x; cx <= c1x; cx++) {
         if (!zone.cendre[cy][cx]) continue;
-        const x = cx * CASE - cam.x,
-          y = cy * CASE - cam.y;
-        ctx.fillStyle = '#242430';
-        ctx.fillRect(x, y, CASE + 1, CASE + 1);
-        ctx.fillStyle = 'rgba(178,186,204,0.16)';
-        for (let i = 0; i < 4; i++) {
-          const u = ((cx * 7919 + cy * 104729 + i * 6151) % 97) / 97;
-          const v = ((cx * 104729 + cy * 7919 + i * 3571) % 89) / 89;
-          const r = 1.2 + ((cx + cy + i) % 3) * 0.7;
-          ctx.beginPath();
-          ctx.arc(x + u * CASE, y + v * CASE, r, 0, TAU);
-          ctx.fill();
-        }
+        const v = variante(cx, cy);
+        ctx.drawImage(
+          t.cendre,
+          v * t.taille,
+          0,
+          t.taille,
+          t.taille,
+          cx * CASE - cam.x,
+          cy * CASE - cam.y,
+          CASE + 1,
+          CASE + 1,
+        );
       }
   }
 
@@ -59,8 +130,11 @@ export function dessinerSol(
   // retrouvait cernée d'un rectangle qui clignotait à chaque ouverture.
   const pierre = (cx: number, cy: number) =>
     cx < 0 || cy < 0 || cx >= zone.cols || cy >= zone.lignes || zone.mur[cy][cx] === 1;
-  ctx.strokeStyle = 'rgba(255,255,255,0.13)';
-  ctx.lineWidth = 1.5;
+  // Le trait d'architecture reste, mais plus discret : il soulignait une
+  // pierre qui n'existait pas. Maintenant elle existe, il n'a plus qu'à dire
+  // où elle s'arrête.
+  ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+  ctx.lineWidth = 1;
   ctx.beginPath();
   for (let cy = c0y; cy <= c1y; cy++) {
     for (let cx = c0x; cx <= c1x; cx++) {

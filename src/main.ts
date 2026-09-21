@@ -22,6 +22,7 @@ import {
   veillerSurLEcran,
 } from './rendu/ecran.js';
 import { dessiner } from './rendu/scene.js';
+import { tuiles } from './rendu/tuiles.js';
 
 const canvas = document.getElementById('jeu') as HTMLCanvasElement | null;
 if (!canvas) throw new Error('Pas de canvas « jeu » dans la page');
@@ -151,6 +152,11 @@ function corpsBoucle(maintenant: number): void {
   hud.maj(partie);
   dessiner(ecran, partie, maintenant / 1000);
 }
+
+// LA PIERRE, fabriquée avant la première image. Quarante millisecondes une
+// fois pour toutes : on les passe pendant l'écran-titre, pas au milieu d'un
+// pas de course.
+tuiles();
 
 requestAnimationFrame(boucle);
 

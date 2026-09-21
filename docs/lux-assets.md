@@ -12,22 +12,36 @@ rien à réécrire le jour où les fichiers arrivent.
 
 ## Les trois règles qui décident de tout
 
-### 1. Aucune lumière n'est peinte
+### 1. Aucune lumière n'est peinte DANS la tuile
 
-**C'est la règle la plus importante de ce document.** Ce jeu est un moteur de
-lumière : tout ce qu'on voit est percé dans une couche d'obscurité par des
-polygones de raycast, recalculés à chaque image. Un sprite qui arrive avec son
-ombre portée, son reflet et son soleil en haut à gauche se bat contre le
-moteur, et le résultat est **pire** que le tracé actuel.
+**C'est la règle la plus importante de ce document**, et elle se comprend mal
+dite trop vite. Elle ne dit pas que le jeu n'a pas de lumière : il n'a que ça.
+Les faisceaux, les torches, le halo du joueur sont recalculés à chaque image,
+et c'est **eux** qui révèlent la matière.
 
-Donc, dans chaque image :
+Elle dit que la lumière ne doit pas être **cuite dans l'image**. Une tuile de
+pierre ne contient pas de soleil imaginaire : pas de face claire en haut et
+sombre en bas, pas d'ombre portée d'un caillou, pas de reflet spéculaire.
+Parce qu'une torche peut arriver par la droite, et la tuile dirait le
+contraire.
 
-- pas d'ombre portée, pas d'ombre propre, pas de reflet spéculaire ;
-- pas de dégradé qui suppose une source de lumière ;
-- des aplats, des contours, des textures — de la matière, jamais de l'éclairage.
+> Une tuile, c'est de la **matière en nuances sombres**. C'est le moteur qui
+> l'éclaire, à chaque image, depuis la bonne direction.
 
 C'est la différence entre « une pierre » et « une pierre éclairée par la
 gauche ». On veut la première.
+
+**Deux exceptions, qui n'en sont pas :**
+
+- **Ce qui émet.** La flamme d'une torche, une braise, les yeux, le cœur d'une
+  lueur : c'est un deuxième canal, toujours visible, que le moteur ne touche
+  pas. Une torche a donc deux parties : son manche (matière) et sa flamme
+  (émission).
+- **L'occlusion de contact.** Là où un sol touche une pierre, le sol
+  s'assombrit. Ça ne vient d'aucune direction — c'est la même chose sur les
+  quatre côtés — donc ça ne ment jamais, et sans elle les cases flottent les
+  unes sur les autres. Elle est déjà dans le moteur (`rendu/tuiles.ts`), il ne
+  faut pas la redessiner dans les tuiles.
 
 ### 2. Les corps sont en niveaux de gris
 
@@ -146,17 +160,27 @@ Six humeurs, deux images chacune (`0` = œil ouvert, `1` = cligné) :
 
 Soit **20 images** pour tout le lot 1.
 
-### Lot 2 — les textures du décor
+### Lot 2 — les textures du décor *(déjà là, mais fabriquées)*
 
-Pas des tuiles : des **textures qui se répètent**, 128 × 128, sans couture, à
-plat. Le moteur les multiplie sous sa passe de lumière.
+Le sol et les murs ne sont plus des aplats : `src/rendu/tuiles.ts` fabrique de
+la pierre au chargement — dalles inégales, fêlures, grain, six variantes
+choisies par la position de la case. C'est de l'algorithme, pas du dessin,
+donc c'est fait. Une planche dessinée à la main peut les remplacer, et devra
+alors respecter ceci :
 
-| Nom | Ce que c'est |
-|---|---|
-| `texture/sol` | Le sol des Dessous. De la pierre entassée, pas taillée |
-| `texture/mur` | Les murs. Personne n'a bâti les Dessous : ça tient mal |
-| `texture/fissure` | Le réseau de fractures d'un mur fêlé, en surcouche |
-| `texture/cendre` | Le sol brûlé de l'étage 4, qui craque sous qui se presse |
+| Nom | Taille | Ce que c'est |
+|---|---|---|
+| `texture/sol/0..5` | 128 × 128 | Le sol des Dessous. De la pierre entassée, pas taillée |
+| `texture/mur/0..5` | 128 × 128 | Les murs, **nettement plus sombres que le sol** : c'est ce qui fait lire l'architecture |
+| `texture/cendre/0..5` | 128 × 128 | Le sol brûlé de l'étage 4, plus clair et grumeleux |
+| `texture/fissure` | 128 × 128 | Le réseau de fractures d'un mur fêlé, en surcouche |
+
+- **Raccordables** : une tuile posée à côté d'elle-même ne doit montrer aucune
+  couture. Le générateur actuel dessine chaque caillou neuf fois — à sa place
+  et décalé d'une tuile dans les huit directions — pour que ce qui déborde
+  d'un côté rentre de l'autre. Une planche dessinée doit faire pareil.
+- **Six variantes**, sinon on voit le damier dès la première salle.
+- **Aucune ombre de contact** dans la tuile : le moteur la pose.
 
 ### Lot 3 — les objets
 
