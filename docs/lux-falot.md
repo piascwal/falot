@@ -251,7 +251,7 @@ peut pas ouvrir un mur avec de la lumière.
 | Trois secondes de souffle, pas plus | Se couvrir est un geste, pas un état. La réserve se refait deux fois plus lentement qu'elle ne se dépense |
 | Soufflé, il ne touche plus aux torches | Couvert, il ne donne pas de lumière — il n'en prend pas non plus |
 | Une ombre sous chaque corps | Personne ne marche ici : ce sont des lumières, et elles flottent |
-| Une torche PORTÉE ne met pas à l'abri | Ce qui est posé efface, ce qu'on porte trahit. Le fanal éloigne les Guets sans cacher personne |
+| Une torche PORTÉE ne met pas à l'abri | Ce qui est posé efface, ce qu'on porte trahit. La torche portée éloigne les Guets sans cacher personne |
 | Les Guets se passent ce qu'ils voient | Ils n'ont qu'un seul regard, et il se transmet |
 | Du sol qui craque sous qui se presse | Les Dessous ont brûlé par endroits. Un bruit ne demande pas de ligne de vue |
 | Un Guet qui refait ton chemin | Une lumière laisse une trace, et il a compris qu'il suffisait de la remonter |

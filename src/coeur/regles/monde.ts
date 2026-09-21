@@ -33,11 +33,11 @@ import { emettre, onde } from '../particules.js';
 import { ETEINTS, REPLIQUES } from '../textes.js';
 import type { Partie, Perso, Point, Zone } from '../types.js';
 import { montrerToast, murmurer } from '../voix.js';
-import { majFanal } from './fanal.js';
 import { lancerLaFin } from './fin.js';
 import { aLAbri, estEclaire, prochedUneBraise } from './lumiere.js';
 import { eteindre, gagnerEclat, paniquer, ramasser } from './progression.js';
 import { ouvrirLeSeuil } from './seuil.js';
+import { majTorche } from './torche.js';
 
 /** Le temps qu'une lumière doit rester sur un Guet pour qu'il se doute. */
 const BAIN_ALERTE = 0.35;
@@ -97,9 +97,10 @@ function craquer(partie: Partie): void {
 function toucheParLaLumiere(partie: Partie, p: Perso): boolean {
   const { joueur, zone } = partie;
   const d = Math.hypot(p.x - joueur.x, p.y - joueur.y);
-  // Le fanal est de la lumière PORTÉE, et la plus grande de toutes : il
+  // La torche portée est de la lumière qui SE DÉPLACE, et la plus grande de
+  // toutes : elle
   // baigne tout ce qui passe à sa portée. C'est le prix du passage en force.
-  if (joueur.fanal && joueur.fanal.reste > 0 && d < joueur.fanal.r) return true;
+  if (joueur.torche && joueur.torche.reste > 0 && d < joueur.torche.r) return true;
   if (d < rayonHalo(partie) && vueLibre(zone, joueur.x, joueur.y, p.x, p.y)) return true;
   const portee = porteeFaisceau(joueur);
   return (
@@ -156,7 +157,7 @@ export function majRegles(partie: Partie, dt: number): void {
     // passait à côté d'un abri sans le reprendre, sans jamais savoir pourquoi.
     // celle qu'on tient ne se reprend pas et ne se souffle pas : elle brûle
     // dans la main jusqu'au bout, et c'est tout le marché
-    if (t === joueur.fanal) continue;
+    if (t === joueur.torche) continue;
     // SOUFFLÉ, IL NE TOUCHE À RIEN. Il a essayé d'éteindre les torches en
     // passant : une salle qu'on pouvait vider de sa lumière par mégarde, et
     // des abris qui disparaissaient sans qu'on l'ait demandé. Couvert, il ne
@@ -268,8 +269,8 @@ export function majRegles(partie: Partie, dt: number): void {
   // fait donc le délai toute seule, sans aucune formule.
   if (joueur.repit > 0) joueur.repit -= dt;
   // Celle qu'il porte ne le couvre pas : ce qui est posé efface, ce qu'on
-  // porte trahit. Le fanal éloigne les Guets, il ne le cache d'aucun.
-  const abri = aLAbri(zone, joueur.x, joueur.y, joueur.fanal);
+  // porte trahit. La torche éloigne les Guets, elle ne le cache d'aucun.
+  const abri = aLAbri(zone, joueur.x, joueur.y, joueur.torche);
   joueur.abri = abri; // lu par le visage : voir `humeurDuJoueur`
   // Calculé UNE fois par image et non par sentinelle : la question ne dépend
   // que de la position de la lumière, pas de qui la regarde.
@@ -489,7 +490,7 @@ export function majRegles(partie: Partie, dt: number): void {
     if (joueur.bonusT <= 0) joueur.bonus = null; // sa jauge se vide, c'est assez
   }
 
-  majFanal(partie, dt);
+  majTorche(partie, dt);
 
   // Les pierres reviennent un par un, au rythme du palier atteint.
   const rang = rangPierre(joueur);

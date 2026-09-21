@@ -77,7 +77,8 @@ export const prochedUneBraise = (z: Zone, x: number, y: number, marge = 1): bool
 
 /**
  * Une torche POSÉE met à l'abri ; celle qu'on porte, non. C'est toute la
- * règle des deux lumières, et c'est ce qui empêche le fanal d'être gratuit :
+ * règle des deux lumières, et c'est ce qui empêche la torche portée d'être
+ * gratuite :
  * il éloigne les Guets, il ne te cache pas d'eux.
  */
 export const procheDuneTorche = (
@@ -105,7 +106,7 @@ export const aLAbri = (z: Zone, x: number, y: number, portee?: Torche | null): b
  */
 export function eclaireParAutrui(partie: Partie, x: number, y: number): boolean {
   const { zone } = partie;
-  if (aLAbri(zone, x, y, partie.joueur.fanal)) return true;
+  if (aLAbri(zone, x, y, partie.joueur.torche)) return true;
   return zone.persos.some((q) => {
     if (q.livre || q.aveugle > 0 || q.cligne > 0) return false;
     // LE REGARD D'UN GUET EST UNE LUMIÈRE. Il perce le noir comme une torche —

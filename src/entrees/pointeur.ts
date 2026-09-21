@@ -10,8 +10,8 @@
  */
 
 import { clamp } from '../coeur/geometrie.js';
-import { prendreOuLacherLeFanal } from '../coeur/regles/fanal.js';
 import { lancerPierre } from '../coeur/regles/pierre.js';
+import { prendreOuLacherLaTorche } from '../coeur/regles/torche.js';
 import type { Partie, Point } from '../coeur/types.js';
 import { RAYON_MANCHE } from '../rendu/gestes.js';
 
@@ -110,12 +110,12 @@ export function brancherPointeur(
   bouton.addEventListener('click', (e) => e.preventDefault());
 }
 
-/** Le bouton fanal : un geste, pas un maintien — on prend, ou on repose. */
-export function brancherFanal(bouton: HTMLButtonElement, partie: Partie): void {
+/** Le bouton torche : un geste, pas un maintien — on prend, ou on repose. */
+export function brancherTorche(bouton: HTMLButtonElement, partie: Partie): void {
   bouton.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    prendreOuLacherLeFanal(partie);
+    prendreOuLacherLaTorche(partie);
   });
   bouton.addEventListener('click', (e) => e.preventDefault());
 }

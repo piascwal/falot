@@ -1,8 +1,9 @@
 /**
- * LE FANAL — décrocher une torche, et la porter.
+ * PORTER LA TORCHE — la décrocher du mur, et l'emmener.
  *
  * « Un Guet n'approche jamais d'une flamme plus grande que lui. » La règle
- * était déjà celle des abris ; le fanal la met en mouvement. On traverse une
+ * était déjà celle des abris ; la torche portée la met en mouvement. On
+ * traverse une
  * salle impossible en tenant la lumière à bout de bras — et on est vu de
  * partout pendant qu'on le fait.
  *
@@ -21,11 +22,11 @@ export const PORTEE_PRISE = CASE * 1.3;
 /** La torche allumée à portée de main, s'il y en a une. */
 export function torcheSousLaMain(partie: Partie): Torche | null {
   const { joueur, zone } = partie;
-  if (!partie.pouvoirs.fanal) return null;
+  if (!partie.pouvoirs.torche) return null;
   let proche: Torche | null = null;
   let mini = PORTEE_PRISE;
   for (const t of zone.torches) {
-    if (t.reste <= 0 || t === joueur.fanal) continue;
+    if (t.reste <= 0 || t === joueur.torche) continue;
     const d = Math.hypot(t.x - joueur.x, t.y - joueur.y);
     if (d < mini) {
       mini = d;
@@ -36,36 +37,36 @@ export function torcheSousLaMain(partie: Partie): Torche | null {
 }
 
 /** Le geste : prendre celle qui est là, ou reposer celle qu'on tient. */
-export function prendreOuLacherLeFanal(partie: Partie): void {
+export function prendreOuLacherLaTorche(partie: Partie): void {
   const { joueur } = partie;
-  if (!partie.pouvoirs.fanal) return;
-  if (joueur.fanal) {
+  if (!partie.pouvoirs.torche) return;
+  if (joueur.torche) {
     // on la repose là où l'on est : elle finit de brûler sur place
-    joueur.fanal.ox = 0;
-    joueur.fanal.oy = 0;
-    emettre(partie, joueur.fanal.x, joueur.fanal.y, '#ffb45c', 6, 40);
-    joueur.fanal = null;
+    joueur.torche.ox = 0;
+    joueur.torche.oy = 0;
+    emettre(partie, joueur.torche.x, joueur.torche.y, '#ffb45c', 6, 40);
+    joueur.torche = null;
     return;
   }
   const t = torcheSousLaMain(partie);
   if (!t) return;
-  joueur.fanal = t;
+  joueur.torche = t;
   onde(partie, t.x, t.y, CASE * 1.4, '#ffb45c');
   montrerToast(partie, 'Tu la portes — aucun d’eux n’approchera, et tous te verront');
 }
 
 /** La torche portée suit la main : un peu devant, un peu au-dessus. */
-export function majFanal(partie: Partie, dt: number): void {
+export function majTorche(partie: Partie, dt: number): void {
   const { joueur } = partie;
-  const t = joueur.fanal;
+  const t = joueur.torche;
   if (!t) return;
   // CELLE QU'ON PORTE BRÛLE, elle. Une torche accrochée au mur ne s'éteint
   // plus une fois reprise ; celle qu'on décroche se consume dans la main, et
-  // c'est tout ce qui empêche le fanal d'être gratuit.
+  // c'est tout ce qui empêche la torche portée d'être gratuite.
   t.reste -= dt;
   if (t.reste <= 0) {
-    joueur.fanal = null;
-    montrerToast(partie, 'Le fanal s’est éteint');
+    joueur.torche = null;
+    montrerToast(partie, 'Ta torche s’est éteinte');
     return;
   }
   t.x = joueur.x + Math.cos(joueur.regard) * D.taille * 0.7;

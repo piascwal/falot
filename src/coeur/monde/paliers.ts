@@ -31,7 +31,7 @@ export type Trait =
   | 'meute';
 
 /** Ce qui appartient à Falot, une fois qu'il s'en est souvenu. */
-export type Pouvoir = 'souffle' | 'fanal';
+export type Pouvoir = 'souffle' | 'torche';
 
 export const TRAITS: readonly Trait[] = [
   'appel',
@@ -78,8 +78,8 @@ export const PALIERS: readonly Palier[] = [
   },
   {
     numero: 5,
-    nom: 'Le fanal',
-    neuf: 'fanal',
+    nom: 'La torche',
+    neuf: 'torche',
     murmure: 'Une torche se décroche. Aucun d’eux n’approche d’une flamme plus grande.',
   },
   {
@@ -141,8 +141,8 @@ export function pouvoirs(numero: number): Record<Pouvoir, boolean> {
     return q ? numero >= q.numero : false;
   };
   // Dans le Puits sans fin, on a déjà tout traversé une fois.
-  if (numero > DERNIER_ETAGE) return { souffle: true, fanal: true };
-  return { souffle: depuis('souffle'), fanal: depuis('fanal') };
+  if (numero > DERNIER_ETAGE) return { souffle: true, torche: true };
+  return { souffle: depuis('souffle'), torche: depuis('torche') };
 }
 
 /**

@@ -125,7 +125,7 @@ la règle d'or du projet : la situation enseigne, le texte confirme au mieux.
 | 2 | **L'appel** | Les Guets se préviennent : un qui te repère le dit à ses voisins | Deux Guets dos à dos dans une petite salle ; passer devant l'un réveille l'autre, et on le voit |
 | 3 | **Le souffle** | Falot se souvient qu'il peut **éteindre sa propre lumière** : invisible, mais aveugle | Un couloir droit, un Guet au bout qui ne bouge pas. Aucune pierre. La seule issue est de s'éteindre et d'avancer de mémoire |
 | 4 | **La cendre** | Un sol qui craque : traverser vite fait du bruit, marcher lentement non | Une salle entièrement cendrée, un Guet au centre, et la sortie à l'opposé |
-| 5 | **Le fanal** | On peut **décrocher une torche et la porter** : aucun Guet n'approche d'une flamme plus grande que lui, mais on est vu de partout | Une salle trop vaste pour son halo, trois Guets, une torche au mur |
+| 5 | **La torche portée** | On peut **décrocher une torche et la porter** : aucun Guet n'approche d'une flamme plus grande que lui, mais on est vu de partout | Une salle trop vaste pour son halo, trois Guets, une torche au mur |
 | 6 | **Le traqueur** | Un Guet qui ne patrouille pas : il **suit ton fil** | On le voit reprendre exactement le chemin qu'on vient de faire. Il faut apprendre à couper son propre fil |
 | 7 | **Les farouches** | Des lumières qui **fuient une lumière trop vive** : il faut s'approcher éteint | Une salle où chaque lumière recule d'autant qu'on avance. Le souffle de l'étage 3 est la réponse |
 | 8 | **Le voile** | La portée est **divisée par deux** sur tout l'étage | Les torches cessent d'être un confort et deviennent la carte |
@@ -162,7 +162,7 @@ sont celles du code, pas des intentions.
 | 2 | L'appel | Un Guet qui repère prévient ses voisins à **5 cases**, à travers la pierre. Ils n'ont rien vu : ils se doutent, et ils viennent |
 | 3 | Le souffle | Geste **tenu** (Maj, ou un bouton maintenu). Halo réduit à une mèche (0,22), plus de faisceau, plus de fil, invisible pour un Guet. Le contact tue toujours |
 | 4 | La cendre | Au-dessus de **165 px/s** (environ la moitié de la vitesse de pointe), le sol craque toutes les 0,4 s et s'entend à **6 cases**. Ça attire, ça n'efface rien — l'inverse d'une pierre |
-| 5 | Le fanal | Torche décrochée à **1,3 case**, portée jusqu'à ce qu'elle meure. Elle éloigne les Guets et **n'est pas un abri** : elle baigne de lumière tout ce qui passe à sa portée |
+| 5 | La torche portée | Torche décrochée à **1,3 case**, portée jusqu'à ce qu'elle meure. Elle éloigne les Guets et **n'est pas un abri** : elle baigne de lumière tout ce qui passe à sa portée |
 | 6 | Le traqueur | Il remonte le fil du plus ancien au plus récent, à **330** (contre 430 en ronde), et il accroche la trace la plus récente à **2,5 cases**. Un fil coupé l'arrête là |
 | 7 | Les farouches | Toutes les lumières de l'étage. Elles reculent tant qu'on brille à moins de **3,4 cases** ; elles se rallument si l'on vient à **1,15 case**, éteint |
 | 8 | Le voile | Halo et faisceau à **0,55**. Ce que voient les Guets ne change pas |

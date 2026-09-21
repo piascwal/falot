@@ -63,7 +63,7 @@ const nouveauJoueur = (): Joueur => ({
   souffleReste: SOUFFLE_MAX,
   souffleBloque: false,
   air: 1,
-  fanal: null,
+  torche: null,
   vu: 0,
   // Sans lui, `sin(temps + undefined)` valait NaN et la bouche du joueur ne se
   // dessinait pas du tout.
@@ -128,7 +128,7 @@ export function creerPartie(reglages: Reglages = {}): Partie {
     bilan: null,
     morts: 0,
     prologueFait: false,
-    pouvoirs: { souffle: false, fanal: false },
+    pouvoirs: { souffle: false, torche: false },
     recadrer: false,
     eclaires: new Set<Perso>(),
     bandeau: nouveauBandeau(),

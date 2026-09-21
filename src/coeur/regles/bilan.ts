@@ -53,7 +53,7 @@ function marquerAutour(zone: Zone, x: number, y: number, r: number): void {
 export function marquerVues(partie: Partie): void {
   const { zone, joueur } = partie;
   for (const t of zone.torches)
-    if (t.reste > 0 && t !== joueur.fanal) marquerAutour(zone, t.x, t.y, t.r * 0.8);
+    if (t.reste > 0 && t !== joueur.torche) marquerAutour(zone, t.x, t.y, t.r * 0.8);
   for (const b of zone.braises) marquerAutour(zone, b.x, b.y, b.r * 0.8);
 }
 

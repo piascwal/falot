@@ -894,7 +894,7 @@ brûlaient 26 secondes puis mouraient, si bien que revenir sur ses pas rendait
 le chemin au noir.
 
 Une torche **posée** brûle maintenant pour toujours. Seule celle qu'on
-**porte** se consume, parce qu'on la vide en la promenant (`regles/fanal.ts`).
+**porte** se consume, parce qu'on la vide en la promenant (`regles/torche portée.ts`).
 Ce n'est pas qu'un confort :
 
 - un abri allumé **reste** un abri, donc un étage se construit ;

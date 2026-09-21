@@ -342,18 +342,18 @@ canvas {
   transform: scale(0.94);
 }
 
-/* Le fanal : la couleur d'une flamme, et enfoncé tant qu'on la tient. */
-#fanal {
+/* La torche portée : la couleur d'une flamme, et enfoncé tant qu'on la tient. */
+#torche {
   border-color: rgba(255, 180, 92, 0.5);
   color: #ffb45c;
   width: 60px;
   height: 60px;
   touch-action: none;
 }
-#fanal:not([hidden]) {
+#torche:not([hidden]) {
   display: block;
 }
-#fanal.tenu {
+#torche.tenu {
   background: rgba(255, 180, 92, 0.12);
   border-color: rgba(255, 180, 92, 0.85);
 }

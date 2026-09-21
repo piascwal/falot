@@ -23,11 +23,11 @@ import {
 } from '../src/coeur/monde/paliers.js';
 import { avancer, creerPartie, PAS } from '../src/coeur/partie.js';
 import { lancerLeBilan, partEclairee, sansFaute } from '../src/coeur/regles/bilan.js';
-import { prendreOuLacherLeFanal } from '../src/coeur/regles/fanal.js';
 import { DUREE_FIN, tempsFin } from '../src/coeur/regles/fin.js';
 import { SOUFFLE_MAX } from '../src/coeur/regles/joueur.js';
 import { eclaireParAutrui } from '../src/coeur/regles/lumiere.js';
 import { eteindre } from '../src/coeur/regles/progression.js';
+import { prendreOuLacherLaTorche } from '../src/coeur/regles/torche.js';
 import type { Partie, Perso, PointRonde } from '../src/coeur/types.js';
 
 const guets = (p: Partie) => p.zone.persos.filter((q) => q.emotion === EMOTIONS.COLERE);
@@ -120,10 +120,10 @@ describe('le deck', () => {
     expect(pouvoirs(2).souffle).toBe(false);
     expect(pouvoirs(3).souffle).toBe(true);
     expect(pouvoirs(11).souffle).toBe(true);
-    expect(pouvoirs(4).fanal).toBe(false);
-    expect(pouvoirs(5).fanal).toBe(true);
+    expect(pouvoirs(4).torche).toBe(false);
+    expect(pouvoirs(5).torche).toBe(true);
     // dans le Puits sans fin, on a déjà tout traversé une fois
-    expect(pouvoirs(DERNIER_ETAGE + 3)).toEqual({ souffle: true, fanal: true });
+    expect(pouvoirs(DERNIER_ETAGE + 3)).toEqual({ souffle: true, torche: true });
   });
 });
 
@@ -503,10 +503,10 @@ describe('les farouches (étage 7)', () => {
   });
 });
 
-describe('le fanal (étage 5)', () => {
+describe('porter la torche (étage 5)', () => {
   /** Une torche allumée posée à portée de main, et rien d'autre dans la salle. */
   function scene(etage: number) {
-    const p = creerPartie({ grain: 'FANAL', etage });
+    const p = creerPartie({ grain: 'TORCHE', etage });
     p.zone.torches.length = 0;
     p.zone.braises.length = 0;
     const t = {
@@ -525,22 +525,22 @@ describe('le fanal (étage 5)', () => {
 
   it('ne se décroche qu’une fois que Falot s’en est souvenu', () => {
     const avant = scene(4);
-    prendreOuLacherLeFanal(avant.p);
-    expect(avant.p.joueur.fanal).toBe(null);
+    prendreOuLacherLaTorche(avant.p);
+    expect(avant.p.joueur.torche).toBe(null);
 
     const apres = scene(5);
-    prendreOuLacherLeFanal(apres.p);
-    expect(apres.p.joueur.fanal).toBe(apres.t);
+    prendreOuLacherLaTorche(apres.p);
+    expect(apres.p.joueur.torche).toBe(apres.t);
   });
 
   it('suit la main, et se repose où l’on est', () => {
     const { p, t } = scene(5);
-    prendreOuLacherLeFanal(p);
+    prendreOuLacherLaTorche(p);
     p.joueur.x += CASE * 4;
     avancer(p, PAS);
     expect(Math.hypot(t.x - p.joueur.x, t.y - p.joueur.y)).toBeLessThan(CASE);
-    prendreOuLacherLeFanal(p);
-    expect(p.joueur.fanal).toBe(null);
+    prendreOuLacherLaTorche(p);
+    expect(p.joueur.torche).toBe(null);
     const ou = { x: t.x, y: t.y };
     p.joueur.x += CASE * 4;
     avancer(p, PAS);
@@ -553,7 +553,7 @@ describe('le fanal (étage 5)', () => {
     avancer(p, PAS);
     expect(p.joueur.abri).toBe(true);
     // portée : elle ne couvre plus
-    prendreOuLacherLeFanal(p);
+    prendreOuLacherLaTorche(p);
     avancer(p, PAS);
     expect(p.joueur.abri).toBe(false);
     expect(t.reste).toBeGreaterThan(0);
@@ -563,7 +563,7 @@ describe('le fanal (étage 5)', () => {
     const { p } = scene(5);
     const g = guets(p)[0];
     poser(g, p.joueur.x + CASE * 1.8, p.joueur.y, 0); // dos tourné
-    prendreOuLacherLeFanal(p);
+    prendreOuLacherLaTorche(p);
     for (let i = 0; i < 40; i++) avancer(p, PAS);
     expect(g.bain).toBeGreaterThan(0);
   });
@@ -816,7 +816,7 @@ describe('les torches reprises', () => {
     expect(t.reste).toBeGreaterThan(0);
   });
 
-  it('sauf celle qu’on porte : le fanal se consume dans la main', () => {
+  it('sauf celle qu’on porte : la torche se consume dans la main', () => {
     const p = creerPartie({ grain: 'TORCHE', etage: 5 });
     p.chute = null;
     p.eclosion = 1;
@@ -832,8 +832,8 @@ describe('les torches reprises', () => {
       oy: 0,
     };
     p.zone.torches.push(t);
-    prendreOuLacherLeFanal(p);
-    expect(p.joueur.fanal).toBe(t);
+    prendreOuLacherLaTorche(p);
+    expect(p.joueur.torche).toBe(t);
     for (let i = 0; i < Math.round(3 / PAS); i++) avancer(p, PAS);
     expect(t.reste).toBeLessThan(24);
   });
@@ -853,11 +853,11 @@ describe('les torches reprises', () => {
       ox: 0,
       oy: 0,
     });
-    prendreOuLacherLeFanal(p);
+    prendreOuLacherLaTorche(p);
     for (let i = 0; i < 30; i++) avancer(p, PAS);
     expect(partEclairee(p.zone)).toBe(0);
     // reposée, elle éclaire pour de bon
-    prendreOuLacherLeFanal(p);
+    prendreOuLacherLaTorche(p);
     avancer(p, PAS);
     expect(partEclairee(p.zone)).toBeGreaterThan(0);
   });

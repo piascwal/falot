@@ -9,7 +9,7 @@
 import { avancer, creerPartie, PAS, PAS_MAX_PAR_IMAGE } from './coeur/partie.js';
 import { montrerToast } from './coeur/voix.js';
 import { brancherClavier } from './entrees/clavier.js';
-import { brancherFanal, brancherPointeur, brancherSouffle } from './entrees/pointeur.js';
+import { brancherPointeur, brancherSouffle, brancherTorche } from './entrees/pointeur.js';
 import { creerHud } from './interface/hud.js';
 import { descendre, poserLEcranTitre, retenirPrologue } from './interface/ouverture.js';
 import { retenirBilan, retenirLaFin } from './interface/sauvegarde.js';
@@ -43,7 +43,7 @@ const hud = creerHud();
 
 brancherPointeur(canvas, hud.pierre, partie);
 brancherSouffle(hud.souffle, partie);
-brancherFanal(hud.fanal, partie);
+brancherTorche(hud.torche, partie);
 brancherClavier(partie);
 
 // L'horloge de la boucle. Déclarée ici parce que `replanter` la remet à zéro :
