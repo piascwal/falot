@@ -1134,28 +1134,66 @@ Et une bêtise trouvée en mesurant : l'arête ouvrait un chemin et le traçait
 pour **chaque** case du sol, même celles qui ne touchent aucune pierre — deux
 cents appels par image pour rien.
 
-## Le coin noir dans les angles
+## Les angles, et deux corrections ratées avant la bonne
 
 Signalé en jouant : *« il y a un bug d'éclairage quand on est dans un coin de
-mur, la diagonale n'est pas éclairée »*, avec l'hypothèse qu'un bloc manquait à
-la construction. Reproduit sur un plan en croix fabriqué exprès, et agrandi
-trois fois : le bloc était bien là, et bien dessiné. C'est la **lumière** qui y
-creusait un coin noir en V.
+mur, la diagonale n'est pas éclairée »*. J'ai commencé par reproduire sur un
+plan en **croix**, c'est-à-dire sur des angles **saillants** — alors qu'il
+s'agissait des angles **rentrants**, les coins d'une salle. Deux essais pour
+rien, et le second a même empiré les choses. Pour mémoire :
 
-La cause : on mordait d'une **profondeur fixe depuis le point d'entrée**. Un
-rayon à 45° entre dans la case d'angle par sa pointe, donc sa morsure de 0,85
-case s'arrête bien avant d'avoir traversé la diagonale (qui en fait 1,41),
-pendant que ses deux voisins filent dans le couloir. Résultat : la case d'angle
-éclairée sur ses deux bords et noire en travers, et de loin on croit à un trou.
+1. **Une morsure d'une profondeur fixe** (les rayons entrent de 0,85 case dans
+   la pierre). Ça creuse un coin noir en V dans les angles saillants : un rayon
+   à 45° entre dans la case par sa pointe, il n'a pas de quoi traverser la
+   diagonale (1,41 case), et ses deux voisins filent tout droit dans le couloir.
+2. **« Toute la case »** (le rayon va jusqu'à la face opposée). Plus de V, mais
+   chaque pierre s'allume d'un bloc : la salle devient un damier de tuiles
+   allumées ou éteintes, sans le moindre dégradé. C'est ce qu'on m'a renvoyé —
+   *« tu as rajouté des bugs d'éclairage tuile par tuile qui rendent la scène
+   incohérente »*, et c'était exact.
 
-La règle est maintenant : **une pierre touchée par la lumière est éclairée en
-entier.** Le rayon va jusqu'à la face opposée de la case, et s'y arrête. C'est
-la même règle quel que soit l'angle d'entrée, donc plus de V — et ça ne fuit
-toujours pas, puisqu'il s'arrête *sur* la face, jamais au-delà. Au passage,
-`morsure` disparaît : il n'y a plus rien à régler.
+Et aucune des deux ne règle le cas d'origine. Le coin d'une salle n'est atteint
+par **aucun** rayon : les deux murs qui le bordent bloquent la diagonale. Il
+reste noir entre deux murs éclairés, et c'est ce qui se voit le plus.
 
-Une porte garde son cas à part : c'est un panneau au **milieu** de sa case, et
-la lumière doit aller jusqu'à lui.
+### La règle est ailleurs
+
+Le polygone de lumière est une affaire de **sol** : il dit jusqu'où le sol est
+éclairé, il s'arrête sur la face du mur, et il n'entre pas dans la pierre.
+
+La pierre, elle, a sa propre passe (`percerPierres`), avec **une** règle :
+
+> **Une pierre est éclairée si elle touche, par un côté OU PAR UN COIN, une
+> case de sol que la source voit.**
+
+Le coin est ce qui sauve les angles rentrants — et cette règle règle les trois
+cas d'un coup, le saillant, le rentrant et le dégradé, puisqu'on peint la
+pierre avec **la lumière de la source** et pas avec un niveau par tuile.
+
+Elle est sortie à part du dessin (`pierreVue`) et testée : sur une salle carrée,
+les quatre coins sont éclairés, les murs aussi, et **le deuxième rang ne l'est
+pas** — c'est ce qui empêche la salle d'à côté d'exister.
+
+### Trois détails qui font la différence
+
+- **La pierre boit la lumière** plus vite que le sol : le dégradé s'éteint aux
+  trois quarts de la portée. Sans ça, la face opposée d'une case est presque
+  aussi claire que la face touchée, et la paroi se termine par un bord franc à
+  une case de profondeur — on lisait l'épaisseur du mur, qu'on n'est pas censé
+  voir d'en haut.
+- **Pour un cône, la pierre doit être DANS le cône.** Sans cette condition elle
+  s'allumait partout où une case de sol voisine était vue, donc le mur
+  s'éclairait une case plus large que le faisceau, des deux côtés.
+- **Un seul chemin, et un flou.** Une case remplie toute seule montre ses
+  quatre bords dès que sa voisine n'est pas allumée : la paroi se lisait comme
+  une file de rectangles.
+
+Le flou, justement, a d'abord été appliqué **par source** — dix appels par
+image avec huit torches à l'écran, et un filtre de canvas n'est pas gratuit :
+mesuré, on passait de une à deux images perdues sur trois cents à six ou dix.
+Toutes les sources déposent donc leur lumière de pierre dans un **tampon**
+commun, qu'on floute une seule fois avant de le reporter sur l'obscurité. On
+retombe à trois ou quatre.
 
 ## Le delta mur/sol, deuxième passe
 

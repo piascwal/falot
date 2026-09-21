@@ -17,7 +17,13 @@ import { TAU } from '../src/coeur/geometrie.js';
 import { genererZone } from '../src/coeur/monde/generation.js';
 import { solide } from '../src/coeur/monde/grille.js';
 import type { Zone } from '../src/coeur/types.js';
-import { portéesCone, portéesRond, RAYONS, RAYONS_ROND } from '../src/rendu/lumiere.js';
+import {
+  pierreVue,
+  portéesCone,
+  portéesRond,
+  RAYONS,
+  RAYONS_ROND,
+} from '../src/rendu/lumiere.js';
 
 /** Un étage, ou une erreur franche : un test sur `null` ne prouve rien. */
 function etage(grain: string, numero: number): Zone {
@@ -106,27 +112,46 @@ describe('la lumière et la pierre', () => {
     expect(rayons).toBeGreaterThan(2000);
   });
 
-  it('mord assez pour qu’on VOIE la pierre, pas seulement un liseré', () => {
-    // L'autre moitié du marché : sans morsure franche, tout le travail sur
-    // les tuiles ne se voyait que par terre. Un mur collé à la source doit
-    // être éclairé sur l'essentiel de sa profondeur.
-    const zone = etage('MORSURE', 4);
-    let vus = 0;
-    let profonds = 0;
-    for (let cy = 1; cy < zone.lignes - 1; cy++)
-      for (let cx = 1; cx < zone.cols - 1; cx++) {
-        if (solide(zone, cx, cy) || !solide(zone, cx + 1, cy)) continue;
-        // une source au centre d'une case libre, la pierre juste à droite
-        const x = (cx + 0.5) * CASE;
-        const y = (cy + 0.5) * CASE;
-        const p = portéesRond(zone, x, y, CASE * 2.5);
-        // le rayon horizontal vers la droite, c'est l'indice 0
-        vus++;
-        if (p[0] >= CASE * 1.3) profonds++;
-      }
-    expect(vus, 'des murs à droite, il y en a').toBeGreaterThan(10);
-    // la source est à une demi-case du mur : atteindre 1,3 case, c'est avoir
-    // mordu au moins 0,8 case dans la pierre
-    expect(profonds / vus, 'la morsure est franche presque partout').toBeGreaterThan(0.9);
+  it('éclaire la pierre par les côtés ET par les coins', () => {
+    // LA RÈGLE, et elle vaut pour les trois cas qu'on a ratés tour à tour :
+    // l'angle saillant, l'angle rentrant, et la pierre cachée derrière.
+    const N = 15;
+    const mur: number[][] = [];
+    for (let y = 0; y < N; y++) {
+      const l: number[] = [];
+      // une salle carrée de 5 à 10 : ses quatre coins sont des angles RENTRANTS
+      for (let x = 0; x < N; x++) l.push(x >= 5 && x <= 10 && y >= 5 && y <= 10 ? 0 : 1);
+      mur.push(l);
+    }
+    const zone = {
+      mur,
+      cols: N,
+      lignes: N,
+      porteDe: mur.map(() => []),
+      fissureDe: null,
+      versionPortes: 0,
+    } as unknown as Zone;
+    const x = 7.5 * CASE;
+    const y = 7.5 * CASE;
+    const portee = CASE * 6;
+    const p = portéesRond(zone, x, y, portee);
+    const vue = (cx: number, cy: number) => pierreVue(zone, x, y, cx, cy, portee, p);
+
+    // LE COIN DE LA SALLE. Aucun rayon ne l'atteint — les deux murs qui le
+    // bordent bloquent la diagonale — et pourtant il touche le sol par un
+    // coin. C'est celui qui restait noir entre deux murs éclairés.
+    expect(vue(4, 4), 'angle rentrant haut-gauche').toBe(true);
+    expect(vue(11, 4), 'angle rentrant haut-droit').toBe(true);
+    expect(vue(4, 11), 'angle rentrant bas-gauche').toBe(true);
+    expect(vue(11, 11), 'angle rentrant bas-droit').toBe(true);
+
+    // les murs eux-mêmes, évidemment
+    expect(vue(7, 4), 'le mur du haut').toBe(true);
+    expect(vue(4, 7), 'le mur de gauche').toBe(true);
+
+    // ET PAS PLUS LOIN : la pierre du deuxième rang ne touche aucun sol vu,
+    // donc elle reste noire. C'est ce qui empêche la salle d'à côté d'exister.
+    expect(vue(7, 3), 'deuxième rang, au-dessus du mur').toBe(false);
+    expect(vue(3, 3), 'deuxième rang, en diagonale').toBe(false);
   });
 });
