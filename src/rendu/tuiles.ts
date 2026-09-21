@@ -342,14 +342,18 @@ export function tuiles(): Tuiles {
   // d'une salle : un trait de séparation ne suffit pas à dire « ça monte ».
   // Ce qui le dit, c'est la STRUCTURE — le sol est lisse et fait de grandes
   // dalles, le mur est un tas de blocs avec du noir entre eux.
-  const mur = planche('#030307', 17, (c, d) => {
+  const mur = planche('#050509', 26, (c, d) => {
     for (let i = 0; i < 9; i++) {
-      // des blocs francs, plus gros que les dalles du sol ; le fond presque
-      // noir qui reste entre eux fait le mortier. Mais pas au point d'occuper
-      // la case : un bloc aussi large que la tuile redessine la grille.
-      const w = T * (0.26 + d() * 0.3);
-      const h = T * (0.24 + d() * 0.26);
-      const g = 9 + Math.round(d() * 16); // beaucoup de contraste : c'est un tas
+      // Des blocs francs, plus gros que les dalles du sol, avec du noir entre
+      // eux pour le mortier — mais jamais aussi larges que la case, sinon leur
+      // bord tombe sur le bord de la tuile et la grille revient.
+      //
+      // Et BEAUCOUP de contraste : la moyenne est recalée après coup, donc on
+      // peut pousser l'écart sans éclaircir le mur. Sans ça la paroi n'est que
+      // du bruit sombre, et même éclairée on n'y voit aucune pierre.
+      const w = T * (0.28 + d() * 0.34);
+      const h = T * (0.26 + d() * 0.3);
+      const g = 10 + Math.round(d() * 46);
       caillou(
         c,
         d() * T - w * 0.3,
@@ -361,10 +365,12 @@ export function tuiles(): Tuiles {
         `rgb(${g},${g},${g + 8})`,
       );
     }
-    // des éclats : la pierre a été cassée pour être entassée, pas taillée
-    for (let i = 0; i < 14; i++) {
-      const r = T * (0.02 + d() * 0.06);
-      const g = 6 + Math.round(d() * 18);
+    // Quelques éclats : la pierre a été cassée pour être entassée, pas
+    // taillée. Peu nombreux — quatorze petits faisaient des confettis, et
+    // c'étaient eux qu'on voyait au lieu des blocs.
+    for (let i = 0; i < 6; i++) {
+      const r = T * (0.025 + d() * 0.05);
+      const g = 6 + Math.round(d() * 30);
       caillou(
         c,
         d() * T,
@@ -376,9 +382,9 @@ export function tuiles(): Tuiles {
         `rgb(${g},${g},${g + 6})`,
       );
     }
-    nappes(c, d, 30);
+    nappes(c, d, 22);
     grain(c, d, 16);
-    for (let i = 0; i < 4; i++) felure(c, d, 'rgba(0,0,0,0.75)');
+    for (let i = 0; i < 5; i++) felure(c, d, 'rgba(0,0,0,0.9)');
   });
 
   const cendre = planche('#2a2a38', 48, (c, d) => {

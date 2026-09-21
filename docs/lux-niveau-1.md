@@ -1197,3 +1197,23 @@ Elle n'était que sur l'écran-titre, donc jamais visible au moment où on se
 demande si le cache a lâché : on joue, on constate un défaut déjà corrigé, et
 on ne sait pas si on regarde la dernière version ou celle d'il y a une heure.
 Elle est maintenant dans un coin de l'écran de jeu, en tout petit.
+
+## Le mur était bien éclairé, mais on ne voyait rien dessus
+
+Retour de test : *« tu n'éclaires plus du tout le mur, on ne voit plus sa
+texture quand on se rapproche. »* Mesuré au pixel, à côté du joueur collé à une
+paroi : la pierre est bien allumée sur presque une case, et à une luminosité
+comparable au sol. **La lumière était là ; c'est la texture qui ne montrait
+rien.**
+
+Deux raisons, toutes les deux introduites en réglant le damier :
+
+- la moyenne du mur avait été recalée à 17 sur 255, ce qui est presque noir ;
+- ses blocs avaient été rapetissés ET leur écart de valeur réduit, donc il ne
+  restait qu'un bruit sombre uniforme.
+
+Corrigé : la moyenne passe à **26** (le sol est à 38, l'écart reste franc), les
+blocs retrouvent leur taille et surtout **beaucoup plus de contraste** — c'est
+gratuit, puisque la moyenne est recalée après coup : on peut pousser l'écart
+sans éclaircir le mur d'un cran. Et six éclats au lieu de quatorze : les petits
+faisaient des confettis, et c'étaient eux qu'on voyait au lieu des blocs.
