@@ -1666,3 +1666,35 @@ Le `repere` reste pour les Guets, qui se remplissent de leur colère quand ils
 ont repéré quelque chose ; ça n'a rien à voir avec un rallumage et ça ne bouge
 pas. Mesuré sur cinq captures à 0, 30, 60, 90 et 100 % : le vert monte du bas,
 et il n'y a plus de saut.
+
+## « Choisir un étage » ne répondait plus, et le verrou de progression saute
+
+**Le bouton s'annulait lui-même après quelques allers-retours.** La flèche du
+HUD ramène au menu via `retourAuTitre`, qui rappelait `poserLaGrille` — et
+cette fonction **rebranchait un écouteur de clic de plus** sur le bouton
+« Choisir un étage » à chaque appel, sans jamais vider `#etages` avant d'y
+reconstruire les douze cases. Au bout de quatre retours au menu, cinq
+écouteurs coexistaient sur le même bouton et se neutralisaient deux par deux :
+un clic sur un nombre pair d'écouteurs ne change rien à l'état visible,
+exactement le symptôme rapporté (« ne semble plus fonctionner »). La grille
+elle-même grossissait en secret — 60 boutons au lieu de 12 après quatre
+retours, mesuré.
+
+Le branchement du bouton de bascule est maintenant fait **une seule fois**,
+dans `poserLEcranTitre`, protégé par le même drapeau `branche` qui empêchait
+déjà `titre-descendre` et les autres d'être rebranchés deux fois.
+`poserLaGrille`, elle, ne fait plus que reconstruire le contenu de `#etages`
+(`grille.innerHTML = ''` avant de repeupler) — c'est la seule chose qui doit se
+refaire à chaque retour, puisque la progression a pu changer entre-temps.
+
+**Le verrou de progression est retiré.** On pouvait déjà tout ouvrir avec
+`?debug` dans l'adresse ; la demande était de le pouvoir sans ce paramètre,
+tout le temps. `b.disabled = …` a donc disparu de `poserLaGrille`, avec le
+paramètre `tout` qui ne servait plus qu'à ça — retiré de `poserLaGrille`,
+`poserLEcranTitre`, `retourAuTitre`, et de leurs deux appels dans `main.ts`
+(qui passaient `reglages.has('debug')`). La règle « fait » / « parfait » sur
+les cases reste : c'est un tableau de progression, pas un pense-bête vide.
+
+Vérifié en reproduisant le scénario signalé (quatre allers-retours au menu par
+la flèche du HUD, avec Playwright) : 12 boutons avant et après, le bouton
+bascule normalement, et l'étage 10 se choisit sans jamais l'avoir atteint.

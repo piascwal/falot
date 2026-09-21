@@ -84,11 +84,9 @@ if (demande) {
   cadrer(ecran, partie, true);
 } else {
   // `?debug` ouvre tous les étages dans la grille de l'écran-titre
-  poserLEcranTitre(partie, reglages.has('debug'));
+  poserLEcranTitre(partie);
   // La flèche du HUD : elle ramène au choix des étages, dans le jeu.
-  document
-    .getElementById('retour')
-    ?.addEventListener('click', () => retourAuTitre(partie, reglages.has('debug')));
+  document.getElementById('retour')?.addEventListener('click', () => retourAuTitre(partie));
 }
 
 // Le prologue franchi est la seule chose que le jeu retient d'une session à

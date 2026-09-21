@@ -582,10 +582,6 @@ canvas {
   cursor: pointer;
   padding: 0;
 }
-.etages button:disabled {
-  opacity: 0.35;
-  cursor: default;
-}
 .etages button.fait {
   border-color: rgba(255, 233, 168, 0.4);
   color: #ffe9a8;

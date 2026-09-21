@@ -111,20 +111,18 @@ export function voirLaFin(partie: Partie): void {
 /**
  * LA GRILLE DES ÉTAGES. Douze carrés : ce qu'on a éclairé de chacun, et un
  * cadre vert pour ceux qu'on a faits sans faute. On peut y repartir d'où l'on
- * veut — c'est le tableau de progression et le raccourci de mise au point, et
- * les deux méritaient le même écran.
+ * veut, N'IMPORTE LEQUEL, N'IMPORTE QUAND — c'est le tableau de progression
+ * et le raccourci pour rejouer un étage précis, et les deux méritaient le
+ * même écran plutôt qu'un verrou qui empêchait d'y retourner.
  *
- * Un étage qu'on n'a jamais atteint reste fermé : sauter à l'étage 9 sans
- * l'avoir mérité, c'est se gâcher le jeu sans le savoir. `?debug` dans
- * l'adresse les ouvre tous — c'est l'outil de mise au point.
+ * ELLE SE RECONSTRUIT ENTIÈREMENT À CHAQUE APPEL. `retourAuTitre` la rappelle
+ * chaque fois qu'on revient au menu en cours de partie — sans vider `grille`
+ * d'abord, les boutons d'un précédent passage restaient là, et un deuxième
+ * retour en ajoutait douze de plus : la grille grossissait sans fin.
  */
-function poserLaGrille(partie: Partie, tout: boolean): void {
+function poserLaGrille(partie: Partie): void {
   const grille = el('etages');
-  const bouton = el('titre-etages') as HTMLButtonElement;
-  bouton.addEventListener('click', () => {
-    grille.hidden = !grille.hidden;
-    bouton.textContent = grille.hidden ? 'Choisir un étage' : 'Masquer les étages';
-  });
+  grille.innerHTML = '';
   const progres = lireProgression();
   for (let n = 1; n <= DERNIER_ETAGE; n++) {
     const b = document.createElement('button');
@@ -139,9 +137,6 @@ function poserLaGrille(partie: Partie, tout: boolean): void {
       b.appendChild(barre);
       b.title = `${Math.round(trace.lumiere * 100)} % éclairé, ${trace.lumieres}/${trace.lumieresTotal} lumières, pris ${trace.morts} fois`;
     }
-    // `?debug` ouvre tout : pendant qu'on construit, on veut aller voir
-    // l'étage 10 sans avoir fait les neuf autres.
-    b.disabled = !tout && n > Math.max(1, progres.atteint);
     b.addEventListener('click', () => descendre(partie, n));
     grille.appendChild(b);
   }
@@ -161,19 +156,19 @@ let branche = false;
  * On repose la grille au passage : on vient peut-être de finir un étage, et
  * elle doit le montrer.
  */
-export function retourAuTitre(partie: Partie, tout = false): void {
+export function retourAuTitre(partie: Partie): void {
   partie.gele = true;
   partie.fin = null;
   el('titre').classList.add('on');
-  poserLaGrille(partie, tout);
+  poserLaGrille(partie);
 }
 
 /** L'écran-titre, et ses boutons. */
-export function poserLEcranTitre(partie: Partie, tout = false): void {
+export function poserLEcranTitre(partie: Partie): void {
   partie.gele = true;
   el('titre').classList.add('on');
   if (branche) {
-    poserLaGrille(partie, tout);
+    poserLaGrille(partie);
     return;
   }
   branche = true;
@@ -185,11 +180,22 @@ export function poserLEcranTitre(partie: Partie, tout = false): void {
   el('titre-descendre').addEventListener('click', () => descendre(partie, 1));
   el('titre-plus-haut').addEventListener('click', () => descendre(partie, 2));
   el('titre-fin').addEventListener('click', () => voirLaFin(partie));
+  // LE BOUTON QUI OUVRE LA GRILLE, branché UNE SEULE FOIS : c'était lui qui
+  // partait en vrille. `poserLaGrille` était rappelée à chaque retour au menu
+  // et rebranchait un écouteur de plus dessus à chaque fois ; après deux ou
+  // trois allers-retours, les clics s'annulaient entre eux et le bouton avait
+  // l'air mort.
+  const grille = el('etages');
+  const bouton = el('titre-etages') as HTMLButtonElement;
+  bouton.addEventListener('click', () => {
+    grille.hidden = !grille.hidden;
+    bouton.textContent = grille.hidden ? 'Choisir un étage' : 'Masquer les étages';
+  });
   // Le timbre de construction, injecté par Vite. En développement il n'existe
   // pas : on ne se demande jamais si on a la dernière version d'un serveur qui
   // recharge tout seul.
   const bati = typeof __BATI__ === 'string' ? `version ${__BATI__}` : '';
   el('bati').textContent = bati;
   el('bati-jeu').textContent = bati;
-  poserLaGrille(partie, tout);
+  poserLaGrille(partie);
 }
