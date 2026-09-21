@@ -13,27 +13,33 @@ import { aBonus } from '../lectures.js';
 import { degager } from '../monde/grille.js';
 import type { Corps, Partie } from '../types.js';
 
-/**
- * LA GELÉE. Le corps s'étire dans le sens de sa course et se pince sur l'autre
- * axe : c'est ce qui donne de la matière à un carré arrondi.
- *
- * ON PREND L'INTENSITÉ DE LA VITESSE, PAS SON SIGNE. C'était le défaut, et il
- * se voyait : écrit avec `vx` et `vy` signés, aller à gauche l'élargissait —
- * étiré dans le sens de la marche, ce qui est juste — et aller à droite faisait
- * exactement l'inverse, il s'étirait EN HAUTEUR, perpendiculairement à sa
- * course. Même chose entre le haut et le bas. La déformation ne dépend pas du
- * côté où l'on va, seulement de l'axe et de la vitesse : les quatre directions
- * donnent donc la même image, chacune tournée comme il faut.
- */
 /** Trois secondes de souffle, et il les refait deux fois plus lentement. */
 export const SOUFFLE_MAX = 3;
 const REPRISE_SOUFFLE = 0.5;
 
+/**
+ * LA GELÉE. Le corps s'aplatit quand il file : il s'élargit et se tasse.
+ *
+ * ELLE NE DÉPEND QUE DE LA VITESSE, PAS DE LA DIRECTION. Deux corrections
+ * successives, et la seconde est un choix de goût plutôt qu'une règle de
+ * physique :
+ *
+ *   — d'abord, la déformation était écrite avec `vx` et `vy` SIGNÉS. Aller à
+ *     gauche l'élargissait, aller à droite faisait exactement l'inverse : il
+ *     s'étirait en hauteur. Deux animations différentes pour le même pas ;
+ *   — ensuite, écrite par axe, elle l'étirait dans le sens de sa course — ce
+ *     qui est la règle classique, et ce qui donnait un Falot qui S'ALLONGE en
+ *     montant et en descendant. Vu en jeu, ça ne va pas : on le reconnaît à
+ *     sa silhouette écrasée, et la perdre une direction sur deux le rend
+ *     méconnaissable.
+ *
+ * Il se tasse donc toujours de la même façon, dans les quatre directions, et
+ * seule l'intensité change. C'est une lampe qui court, pas une goutte d'eau.
+ */
 export function majJelly(p: Corps, dt: number): void {
-  const vx = Math.abs(p.vx);
-  const vy = Math.abs(p.vy);
-  const cibleX = clamp(1 + (vx - vy) * 0.00055, 0.84, 1.19);
-  const cibleY = clamp(1 + (vy - vx) * 0.00055, 0.84, 1.19);
+  const v = Math.hypot(p.vx, p.vy);
+  const cibleX = clamp(1 + v * 0.00055, 0.84, 1.19);
+  const cibleY = clamp(1 - v * 0.00055, 0.84, 1.19);
   p.vsx += (cibleX - p.sx) * 190 * dt;
   p.vsy += (cibleY - p.sy) * 190 * dt;
   p.vsx -= p.vsx * 13 * dt;

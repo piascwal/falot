@@ -1543,10 +1543,9 @@ cibleY = 1 + vx·k − vy·k
 
 Aller à gauche l'élargissait — étiré dans le sens de la marche, ce qui est
 juste. Aller à droite faisait exactement l'inverse : il s'étirait **en
-hauteur**, perpendiculairement à sa course. Idem entre le haut et le bas. On
-prend l'INTENSITÉ, pas le signe : les quatre directions donnent la même image,
-chacune tournée comme il faut. Trois tests le verrouillent, et les trois
-échouent sur l'ancienne formule — vérifié avant de les garder.
+hauteur**, perpendiculairement à sa course. Idem entre le haut et le bas. On a
+donc pris l'INTENSITÉ au lieu du signe, par axe. *(Cette première correction
+s'est révélée incomplète en jeu : voir « Il ne s'allonge plus » plus bas.)*
 
 **On sortait du prologue sans le faisceau.** Le compte disait pourtant
 l'inverse : 36 d'éclat dans la salle du réveil pour un seuil à 26. Mais le
@@ -1567,3 +1566,26 @@ faisceau.
 page pour revenir choisir un étage. Elle ramène maintenant à l'écran-titre, qui
 est le hub du jeu, et repose la grille au passage — on vient peut-être de finir
 un étage.
+
+## Il ne s'allonge plus : il se tasse dans les quatre directions
+
+Suite du retour précédent, et cette fois c'est un choix de goût plutôt qu'une
+règle de physique. La gelée corrigée prenait l'intensité de la vitesse **par
+axe**, ce qui l'étirait dans le sens de sa course : la règle classique du
+*squash and stretch*. En jeu, ça donne un Falot qui **s'allonge** en montant et
+en descendant, et c'est raté — on le reconnaît à sa silhouette écrasée, et la
+perdre une direction sur deux le rend méconnaissable. C'est une lampe qui
+court, pas une goutte d'eau.
+
+La déformation ne dépend donc plus que de la VITESSE, jamais de la direction :
+
+```ts
+const v = Math.hypot(p.vx, p.vy);
+cibleX = clamp(1 + v * 0.00055, 0.84, 1.19); // il s'élargit
+cibleY = clamp(1 - v * 0.00055, 0.84, 1.19); // et il se tasse
+```
+
+Mesuré en jeu, manche à fond dans les quatre directions, à 222 de vitesse :
+`sx 1,12 / sy 0,88` — les quatre fois, au centième près. Deux tests le
+verrouillent : « tasse toujours, et jamais n'allonge », et « donne la même
+forme dans les quatre directions ».

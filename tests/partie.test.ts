@@ -579,15 +579,28 @@ describe('la gelée', () => {
     expect(secouer(0, -400)).toEqual(secouer(0, 400));
   });
 
-  it('étire toujours dans le sens de la course, jamais en travers', () => {
-    for (const v of [-400, 400] as const) {
-      const h = secouer(v, 0);
-      expect(h.sx, `horizontale à ${v}`).toBeGreaterThan(1);
-      expect(h.sy, `horizontale à ${v}`).toBeLessThan(1);
-      const w = secouer(0, v);
-      expect(w.sy, `verticale à ${v}`).toBeGreaterThan(1);
-      expect(w.sx, `verticale à ${v}`).toBeLessThan(1);
+  it('tasse toujours, et jamais n’allonge', () => {
+    // Écrite par axe, elle l'étirait dans le sens de sa course : Falot
+    // S'ALLONGEAIT en montant et en descendant. On le reconnaît à sa
+    // silhouette écrasée, et la perdre une direction sur deux le rend
+    // méconnaissable — il se tasse donc pareil dans les quatre.
+    for (const [vx, vy, ou] of [
+      [-400, 0, 'gauche'],
+      [400, 0, 'droite'],
+      [0, -400, 'haut'],
+      [0, 400, 'bas'],
+    ] as const) {
+      const f = secouer(vx, vy);
+      expect(f.sx, `vers la ${ou}`).toBeGreaterThan(1);
+      expect(f.sy, `vers la ${ou}`).toBeLessThan(1);
     }
+  });
+
+  it('donne la même forme dans les quatre directions', () => {
+    const g = secouer(-400, 0);
+    expect(secouer(400, 0)).toEqual(g);
+    expect(secouer(0, -400)).toEqual(g);
+    expect(secouer(0, 400)).toEqual(g);
   });
 });
 
