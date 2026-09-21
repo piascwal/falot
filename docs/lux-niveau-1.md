@@ -1304,3 +1304,54 @@ d'**une seule case**, faisceau perpendiculaire, joueur au niveau 4 :
 À 2, l'invariant tient exactement. Au-delà, ça commence à passer. Et au-delà
 de 3, le cône du faisceau perd sa netteté, qui est une information de jeu : on
 doit lire d'un coup d'œil où regarde un Guet.
+
+## Le convoi était intouchable, et personne ne l'avait vu
+
+Retour de test : *« j'ai l'impression que les Guets ne peuvent plus récupérer
+les lumières une fois que Falot les a récupérées. »* Vérifié, et c'était pire
+que ça : **aucun Guet, d'aucun type, ne pouvait reprendre une âme du convoi.**
+
+Mesuré avec Falot mis hors d'atteinte et une âme épinglée à deux cases d'un
+Guet, en plein dans son cône :
+
+```
+t=0,0  charge=0,01  alerte=2,8  corps vus=1  éteinte=false
+t=0,3  charge=0,00  alerte=2,5  corps vus=0  éteinte=true
+…
+t=5,7  charge=0,00  alerte=-0,0 corps vus=0  éteinte=false   ← elle se rallume
+```
+
+Et ça bouclait indéfiniment. `souffler()` éteignait **tout le convoi** dès
+qu'un Guet se doutait de quelque chose — seuil `alerte > 0`, donc dès la
+première image où il l'apercevait — et un corps éteint n'apparaissait à
+personne : ni au Guet ordinaire (`!éteint && !abri`), ni à l'Œil
+(`!éteint || abri`). Je croyais l'Œil capable de les voir ; c'est faux, je l'ai
+mesuré.
+
+Conséquence invisible : `paniquer()` n'avait qu'un seul appelant, la ligne où
+le front rouge rattrape un membre du convoi, et **cette ligne ne s'exécutait
+jamais**. Le commentaire juste au-dessus promettait « on perd la cargaison, pas
+la partie » — ça n'arrivait pas. Deux règles du jeu se contredisaient, et c'est
+la plus silencieuse qui gagnait.
+
+**La règle tranchée par le test :** le souffle couvre Falot, pas ce qu'il
+emmène. Le convoi souffle toujours — ça l'empêche d'être repéré de loin et ça
+lui évite d'éclairer la salle — mais **ça ne le sauve plus d'un faisceau**. Une
+âme qui entre dans le cône d'un Guet **déjà en alerte** est vue quand même, et
+son front rouge la **vide et la reprend** : elle perd sa lumière, elle quitte
+le convoi, elle s'enfuit. Elle reste récupérable — il faut retourner la
+calmer — parce qu'un échec qui coûte du temps vaut mieux qu'une perte sèche.
+
+Le « déjà en alerte » se lit sur `p.alerte`, qui vaut encore ce qu'il valait à
+l'image précédente : c'est bien un Guet que quelque chose avait déjà mis en
+éveil, pas celui que cette âme-ci vient d'alerter. D'où deux régimes, mesurés :
+
+| distance de l'âme | Guet calme | Guet déjà en alerte |
+|---|---|---|
+| 1,2 case | 0,93 s | **0,00 s** |
+| 2 cases | 1,60 s | **0,13 s** |
+| 3 cases | 2,42 s | 0,93 s |
+
+Un Guet calme doit d'abord remarquer puis charger : on a une à deux secondes
+pour tirer le convoi hors du cône. Un Guet déjà en alerte a son front sorti, et
+l'âme part tout de suite. C'est exactement l'arbitrage demandé.

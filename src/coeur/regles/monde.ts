@@ -366,12 +366,34 @@ export function majRegles(partie: Partie, dt: number): void {
     // n'est pas traverser.
     const joueurVu =
       !voile && apparait(joueur.eteint, abri) && joueur.repit <= 0 && exposable(joueur);
-    // Une lumière qui s'est soufflée n'est plus un corps à voir : seul ce que
-    // Falot porte le désigne encore (voir `souffler`).
+    /**
+     * LE SOUFFLE DU CONVOI NE LE SAUVE PLUS D'UN FAISCEAU.
+     *
+     * Il l'empêche d'être repéré de LOIN — une sentinelle qui n'a rien
+     * remarqué ne voit pas des lampes éteintes. Il n'efface pas une âme qui
+     * entre dans le cône d'un Guet qui se doute DÉJÀ de quelque chose : celui-
+     * là sait qu'il y a de la lumière par ici, et il regarde les corps.
+     *
+     * Sans cette exception, le convoi était intouchable et on pouvait le
+     * mesurer : dès la première image où un Guet l'apercevait, tout le convoi
+     * s'éteignait, la jauge du Guet retombait, il se rallumait, et ça bouclait
+     * indéfiniment. `paniquer` ci-dessous n'était jamais atteint — le code
+     * promettait « on perd la cargaison, pas la partie » et ça n'arrivait pas.
+     *
+     * `p.alerte` vaut encore ce qu'il valait à l'image précédente : c'est bien
+     * « un Guet déjà en alerte », pas celui que cette âme-ci vient d'alerter.
+     * Falot, lui, garde son souffle entier — c'est sa règle à lui, et elle ne
+     * bouge pas.
+     */
+    const dejaEnAlerte = p.alerte > 0;
     const convoi = voile
       ? []
       : zone.persos.filter(
-          (q) => q.suit && !q.livre && apparait(q.eteint, q.abri) && exposable(q),
+          (q) =>
+            q.suit &&
+            !q.livre &&
+            apparait(dejaEnAlerte ? false : q.eteint, q.abri) &&
+            exposable(q),
         );
     const corps = (joueurVu ? 1 : 0) + convoi.length;
     p.corpsVus = corps; // exposé pour les mesures
@@ -390,9 +412,11 @@ export function majRegles(partie: Partie, dt: number): void {
       }
       p.charge = Math.min(1, p.charge + 0.34 * corps * dt);
 
-      // Le front rouge rattrape quelqu'un : le joueur est éliminé, mais un
-      // membre du convoi PANIQUE seulement. On perd la cargaison, pas la
-      // partie — un échec qui coûte du temps plutôt qu'une punition sèche.
+      // Le front rouge rattrape quelqu'un : le joueur est éliminé, mais une
+      // âme du convoi est VIDÉE ET REPRISE — elle perd sa lumière, elle sort
+      // du convoi et elle s'enfuit. On perd la cargaison, pas la partie : il
+      // faut retourner la calmer, ce qui coûte du temps plutôt que de punir
+      // sèchement.
       const front = p.charge * PORTEE_VUE;
       if (joueurVu && front >= d) {
         eteindre(partie);

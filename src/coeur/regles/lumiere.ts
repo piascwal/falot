@@ -14,9 +14,14 @@ import type { Partie, Perso, Torche, Zone } from '../types.js';
 
 /**
  * LE CONVOI SOUFFLE SA LUMIÈRE. Dès qu'un Guet se doute de quelque chose, les
- * lumières rallumées s'éteignent : elles n'éclairent plus, et on ne les voit plus.
- * Il ne reste que ce que Falot porte — c'est lui qui se fait prendre, pas ceux
- * qu'il emmène.
+ * lumières rallumées s'éteignent : elles n'éclairent plus, et elles cessent de
+ * trahir Falot à distance.
+ *
+ * ÇA NE LES REND PAS INTOUCHABLES. Une âme qui entre dans le cône d'un Guet
+ * déjà en alerte est vue quand même, et son front rouge la vide et la reprend
+ * (voir `majRegles` et `paniquer`). Le souffle du convoi sert à ne PAS être
+ * remarqué ; il ne sauve pas après coup. Seul Falot garde un souffle qui le
+ * cache pour de bon.
  *
  * Ça se décide AVANT la propagation de la lumière, sinon le convoi éclaire
  * encore pendant l'image où il vient de s'éteindre.

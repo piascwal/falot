@@ -439,13 +439,46 @@ describe('le convoi', () => {
     expect(p.eclaires.has(q)).toBe(false);
   });
 
-  it('n’est plus un corps à voir une fois éteint : seul Falot se fait prendre', () => {
+  it('soufflé, il est invisible pour un Guet qui n’a rien remarqué', () => {
+    // Le convoi ne souffle que si un Guet se doute de quelque chose QUELQUE
+    // PART : on en alerte donc un au loin, et on regarde ce que voit l'autre,
+    // celui qui a le convoi dans son cône et qui, lui, n'a rien remarqué.
+    // Falot est derrière lui : on veut mesurer ce que les âmes lui montrent,
+    // pas ce que Falot lui montre.
+    const p = creerPartie({ grain: 'CONVOI' });
+    const [g, loin] = guets(p);
+    expect(loin).toBeTruthy();
+    g.regard = g.regardRepos = g.capAlerte = 0;
+    g.ronde = [];
+    g.amplitude = 0;
+    g.balayage = 0;
+    g.aveugle = 0;
+    g.cligne = 0;
+    g.alerte = 0; // il ne se doute de rien
+    loin.alerte = 3; // celui-là, si — le convoi souffle
+    loin.aveugle = 0;
+    p.joueur.x = g.x - CASE * 9;
+    p.joueur.y = g.y;
+    p.joueur.repit = 9;
+    for (const q of lumieres(p).slice(0, 3)) {
+      q.calme = true;
+      q.suit = true;
+      q.prime = true;
+      q.x = q.baseX = g.x + CASE * 2;
+      q.y = q.baseY = g.y;
+    }
+    avancer(p, PAS);
+    // trois lumières en plein dans son cône, et il ne voit rien du tout
+    expect(g.corpsVus).toBe(0);
+  });
+
+  it('mais un Guet DÉJÀ EN ALERTE les voit quand même, soufflées ou non', () => {
     const p = creerPartie({ grain: 'CONVOI' });
     const g = guets(p)[0];
     g.regard = 0;
     g.aveugle = 0;
     g.cligne = 0;
-    g.alerte = 3; // il se doute déjà : le convoi est donc éteint
+    g.alerte = 3; // il se doute déjà de quelque chose
     p.joueur.x = g.x + CASE * 2.5;
     p.joueur.y = g.y;
     p.joueur.repit = 0;
@@ -457,8 +490,42 @@ describe('le convoi', () => {
       q.y = p.joueur.y;
     }
     avancer(p, PAS);
-    // trois lumières collées au joueur, et il ne compte QUE le joueur
-    expect(g.corpsVus).toBe(1);
+    // le joueur ET les trois lumières : le souffle du convoi ne l'efface plus
+    expect(g.corpsVus).toBe(4);
+  });
+
+  it('une âme entrée dans le faisceau d’un Guet en alerte est vidée et reprise', () => {
+    const p = creerPartie({ grain: 'CONVOI' });
+    const g = guets(p)[0];
+    g.regard = 0;
+    g.aveugle = 0;
+    g.cligne = 0;
+    g.ronde = [];
+    g.amplitude = 0;
+    g.balayage = 0;
+    g.alerte = 3;
+    g.charge = 0.5; // son front est déjà sorti : c'est ça, « en alerte »
+    const q = lumieres(p)[0];
+    q.calme = true;
+    q.suit = true;
+    q.prime = true;
+    // FALOT EST HORS D'ATTEINTE : on veut voir l'âme reprise, pas Falot éteint
+    p.joueur.x = g.x - CASE * 9;
+    p.joueur.y = g.y;
+    p.joueur.repit = 9;
+    q.x = q.baseX = g.x + CASE * 1.2;
+    q.y = q.baseY = g.y;
+    for (let i = 0; i < 90; i++) {
+      p.joueur.repit = 9;
+      q.x = g.x + CASE * 1.2;
+      q.y = g.y;
+      avancer(p, PAS);
+      if (!q.suit) break;
+    }
+    // vidée : elle a perdu sa lumière — et reprise : elle n'est plus au convoi
+    expect(q.suit).toBe(false);
+    expect(q.calme).toBe(false);
+    expect(q.livre).toBe(false); // récupérable : elle est là, elle fuit
   });
 });
 

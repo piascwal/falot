@@ -52,8 +52,13 @@ export function gagnerEclat(partie: Partie, n: number): void {
   evoluer(partie);
 }
 
-// Un membre du convoi repéré s'enfuit et redevient farouche. Il reste
-// récupérable : il faut retourner le calmer, ce qui coûte du temps.
+/**
+ * VIDÉE ET REPRISE. Une âme que le front rouge d'un Guet rattrape perd sa
+ * lumière — `calme` retombe, son corps se vide, et le travail de rallumage est
+ * à refaire — et elle quitte le convoi. Elle reste RÉCUPÉRABLE : elle s'enfuit
+ * et redevient farouche, il faut retourner la calmer. C'est un échec qui coûte
+ * du temps, pas une perte sèche.
+ */
 export function paniquer(partie: Partie, q: Perso): void {
   const { joueur, zone } = partie;
   q.suit = false;
@@ -66,7 +71,7 @@ export function paniquer(partie: Partie, q: Perso): void {
   q.baseX = q.x;
   q.baseY = q.y;
   emettre(partie, q.x, q.y - D.taille * 0.8, '#8fd0ff', 8, 70);
-  montrerToast(partie, "Une lumière t'échappe !");
+  montrerToast(partie, 'Un Guet t’a repris une lumière — elle est à rallumer');
   for (const r of zone.persos) if (r.suit && r.rang > q.rang) r.rang--;
 }
 
