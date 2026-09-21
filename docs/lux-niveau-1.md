@@ -1413,3 +1413,62 @@ Erreurs faites et corrigées en regardant les captures, dans l'ordre :
 
 Coût mesuré : **0 image perdue sur 300** pendant toute la montée de lumière et
 les quatre scènes.
+
+## Le mur ne parlait pas la même langue que le sol
+
+Retour de test : *« les motifs des murs sont trop ressemblants au motif du sol.
+J'adore ceux du sol alors ne les touche surtout pas. »*
+
+La cause n'était pas une valeur, c'était un **vocabulaire** : le sol et le mur
+appelaient tous les deux `caillou()`, c'est-à-dire des galets épars posés au
+hasard. Deux tailles, deux contrastes, le même motif. C'est pour ça qu'un trait
+de séparation ne suffisait pas — on ne sépare pas deux choses qui disent la
+même chose.
+
+Le sol n'a pas bougé d'un pixel. Ce qui change, c'est la **grammaire** du mur :
+un sol est *posé*, un mur est *bâti*. Trois propositions ont été dessinées et
+comparées sur planche puis en jeu sous la lampe :
+
+- **A — l'appareil.** De vraies assises : des blocs rectangulaires en rangées
+  décalées d'un demi-bloc, du mortier noir entre eux. Les mesures tombent juste
+  sur la tuile (quatre assises de T/4, des blocs de T/2), donc les rangées se
+  prolongent d'une case à l'autre au lieu de se casser, et l'appareil traverse
+  toute une paroi. **Retenu.**
+- **B — le cyclopéen.** De grosses pierres polygonales ajustées, chacune d'un
+  ton, séparées par un joint épais — un Voronoï à distance bouclée, ce qui le
+  rend raccordable sans une ligne de plus. Plus de caractère, un peu moins
+  immédiat à lire.
+- **C — la paroi taillée.** De la roche creusée, ses strates et ses coups de
+  pic. Jolie sur planche, elle **redevenait du bruit** dès qu'on la voyait sous
+  la lampe. Écartée sur la capture en jeu, pas sur l'échantillon.
+
+## Les garnitures : ce qui a poussé là-dessus
+
+Une pierre régulière tient debout, mais ne raconte rien. Quatre garnitures se
+posent par-dessus les tuiles, sur fond transparent, **selon ce que la case
+est** — une plante pousse là où elle peut :
+
+| | où | taux |
+|---|---|---|
+| lierre | mur vu de face (du sol en dessous) | 13 % |
+| suintement | idem | 11 % |
+| racines | toute pierre exposée | 6 % |
+| mousse | sol contre une pierre, du côté de la pierre | 22 % |
+
+La case est sa propre graine — le lierre ne bouge pas quand on repasse devant —
+avec des nombres premiers **différents** de ceux de `variante`, sinon la même
+case tirerait ensemble sa pierre et sa garniture et le motif se verrait. Elles
+sont posées avant l'ombre de contact : la mousse est dans l'angle, donc l'angle
+doit s'assombrir par-dessus elle, sinon elle flotte devant la pierre.
+
+Premier essai invisible, et la raison mérite d'être notée : les feuilles
+étaient peintes à la **même valeur que la pierre** (34 sur un mur à 26). Une
+teinte seule ne se voit pas à trente sur deux cent cinquante-cinq ; ce qui fait
+lire une plante sur un mur, c'est l'**écart de valeur**. Elles sont donc deux à
+trois fois plus claires que la pierre — ce n'est pas de la lumière, c'est de
+l'albédo : une feuille renvoie plus qu'un caillou. Avec un liseré sombre sous
+chaque feuille, sinon elle se fond dans le joint clair d'une assise.
+
+Coût : 4 ms de fabrication au chargement, et **rien de mesurable par image** —
+sans garnitures 3/13/16 images perdues sur 300, avec 8/9/14, c'est-à-dire le
+même bruit.

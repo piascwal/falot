@@ -10,7 +10,7 @@ import { CASE } from '../coeur/dimensions.js';
 import { TAU } from '../coeur/geometrie.js';
 import type { Partie } from '../coeur/types.js';
 import type { Ecran } from './ecran.js';
-import { tuiles, variante } from './tuiles.js';
+import { ornements, tuiles, VARIANTES_GARNITURE, variante } from './tuiles.js';
 import { carreArrondi } from './visages.js';
 
 /**
@@ -78,6 +78,102 @@ function ombreDeContact(
     }
 }
 
+/**
+ * LES GARNITURES — ce qui a poussé sur la pierre.
+ *
+ * Une case sur huit environ en porte une, et LA CASE EST SA PROPRE GRAINE :
+ * le lierre ne doit pas bouger quand on repasse devant. Des nombres premiers
+ * différents de ceux de `variante`, sinon la même case tirerait ensemble sa
+ * pierre et sa garniture, et le motif se verrait.
+ *
+ * Elles sont posées SELON CE QUE LA CASE EST, pas au hasard complet — une
+ * plante pousse là où elle peut :
+ *   — le LIERRE et le SUINTEMENT descendent d'un mur qu'on voit de face,
+ *     c'est-à-dire un mur qui a du sol en dessous de lui ;
+ *   — les RACINES traversent n'importe quelle pierre exposée ;
+ *   — la MOUSSE se tient sur le sol, contre une pierre, du côté de la pierre.
+ */
+const HASARD = (cx: number, cy: number, sel: number): number =>
+  ((((cx + 1) * 374761393) ^ ((cy + 1) * 668265263) ^ (sel * 2246822519)) >>> 0) /
+  4294967296;
+
+const variantePosee = (cx: number, cy: number, sel: number): number =>
+  Math.floor(HASARD(cx, cy, sel + 17) * VARIANTES_GARNITURE) % VARIANTES_GARNITURE;
+
+function poserGarnitures(
+  ecran: Ecran,
+  partie: Partie,
+  c0x: number,
+  c1x: number,
+  c0y: number,
+  c1y: number,
+): void {
+  const { ctx, cam } = ecran;
+  const zone = partie.zone;
+  const g = ornements();
+  const t = tuiles();
+  const pierre = (cx: number, cy: number) =>
+    cx < 0 || cy < 0 || cx >= zone.cols || cy >= zone.lignes || zone.mur[cy][cx] === 1;
+  const poser = (
+    planche: HTMLCanvasElement,
+    v: number,
+    cx: number,
+    cy: number,
+    quart = 0,
+  ): void => {
+    const x = cx * CASE - cam.x;
+    const y = cy * CASE - cam.y;
+    if (!quart) {
+      ctx.drawImage(planche, v * t.taille, 0, t.taille, t.taille, x, y, CASE + 1, CASE + 1);
+      return;
+    }
+    // La mousse est dessinée « en bas de case » : on tourne le repère pour la
+    // coller du côté où la pierre se trouve vraiment.
+    ctx.save();
+    ctx.translate(x + CASE / 2, y + CASE / 2);
+    ctx.rotate((quart * Math.PI) / 2);
+    ctx.drawImage(
+      planche,
+      v * t.taille,
+      0,
+      t.taille,
+      t.taille,
+      -CASE / 2,
+      -CASE / 2,
+      CASE + 1,
+      CASE + 1,
+    );
+    ctx.restore();
+  };
+
+  for (let cy = c0y; cy <= c1y; cy++)
+    for (let cx = c0x; cx <= c1x; cx++) {
+      const mur = zone.mur[cy][cx] === 1;
+      if (mur) {
+        // UNE PAROI QU'ON VOIT DE FACE : celle qui a du sol sous elle. Sur une
+        // pierre enfouie, une liane serait dessinée dans le noir pour rien.
+        const deFace = !pierre(cx, cy + 1);
+        const h = HASARD(cx, cy, 1);
+        if (deFace && h < 0.13) poser(g.lierre, variantePosee(cx, cy, 1), cx, cy);
+        else if (deFace && h < 0.24) poser(g.suintement, variantePosee(cx, cy, 2), cx, cy);
+        else if (h < 0.3 && (deFace || !pierre(cx, cy - 1)))
+          poser(g.racines, variantePosee(cx, cy, 3), cx, cy);
+        continue;
+      }
+      // SUR LE SOL : de la mousse au pied d'une pierre, et du côté de la
+      // pierre. Au milieu d'une salle il n'y a rien à faire pousser.
+      const cotes: number[] = [];
+      if (pierre(cx, cy + 1)) cotes.push(0); // la pierre est en bas
+      if (pierre(cx - 1, cy)) cotes.push(1); // à gauche
+      if (pierre(cx, cy - 1)) cotes.push(2); // en haut
+      if (pierre(cx + 1, cy)) cotes.push(3); // à droite
+      if (!cotes.length) continue;
+      if (HASARD(cx, cy, 4) > 0.22) continue;
+      const quart = cotes[Math.floor(HASARD(cx, cy, 5) * cotes.length) % cotes.length];
+      poser(g.mousse, variantePosee(cx, cy, 6), cx, cy, quart);
+    }
+}
+
 // Le sol de TOUTES les cases à l'écran : le voile se charge de ne montrer que
 // ce qui est éclairé. Pas de brouillard de guerre — seule la lumière révèle.
 export function dessinerSol(
@@ -135,6 +231,11 @@ export function dessinerSol(
         CASE + 1,
       );
     }
+
+  // CE QUI A POUSSÉ DESSUS. Avant l'ombre de contact : la mousse est dans
+  // l'angle, donc l'angle doit s'assombrir PAR-DESSUS elle, sinon elle flotte
+  // devant la pierre au lieu d'être coincée dedans.
+  poserGarnitures(ecran, partie, c0x, c1x, c0y, c1y);
 
   // LE CONTACT. Là où un sol touche une pierre, le sol s'assombrit. Ça ne
   // vient d'aucune direction — c'est de l'occlusion, pas de l'éclairage — et

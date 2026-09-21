@@ -305,7 +305,7 @@ function contact(dir: number): HTMLCanvasElement {
 
 /**
  * ---------------------------------------------------------------------------
- * TROIS MURS À CHOISIR
+ * LE MUR
  * ---------------------------------------------------------------------------
  *
  * Le sol et le mur parlaient le MÊME vocabulaire : `caillou()`, c'est-à-dire
@@ -314,19 +314,14 @@ function contact(dir: number): HTMLCanvasElement {
  * séparation ne suffit pas à dire « ça monte ».
  *
  * Le sol est parfait et on n'y touche pas. Ce qui change, c'est la GRAMMAIRE
- * du mur : un sol est posé, un mur est BÂTI ou TAILLÉ. Trois propositions.
+ * du mur : un sol est posé, un mur est BÂTI. Deux autres avaient été essayés
+ * et écartés — de grosses pierres polygonales ajustées, et une roche taillée à
+ * coups de pic. La première se lisait bien mais moins vite ; la seconde,
+ * jolie sur planche, redevenait du bruit dès qu'on la voyait sous la lampe.
  */
 
-/** Une tuile est un carré de T sur T : toute distance s'y mesure en faisant
- *  le tour, sinon le motif ne se raccorde pas d'une case à l'autre. */
-function distanceBouclee(dx: number, dy: number): number {
-  const x = Math.min(Math.abs(dx), T - Math.abs(dx));
-  const y = Math.min(Math.abs(dy), T - Math.abs(dy));
-  return Math.hypot(x, y);
-}
-
 /**
- * A — L'APPAREIL. De vraies assises : des blocs rectangulaires posés en
+ * L'APPAREIL. De vraies assises : des blocs rectangulaires posés en
  * rangées, décalés d'un demi-bloc d'une rangée à l'autre, et du mortier noir
  * entre eux. C'est la grammaire d'un MUR, celle qu'on lit sans y penser —
  * horizontale, régulière, empilée.
@@ -375,139 +370,198 @@ const MUR_APPAREIL = (c: CanvasRenderingContext2D, d: () => number): void => {
 };
 
 /**
- * B — LE CYCLOPÉEN. Pas d'assises : de grosses pierres polygonales ajustées
- * les unes aux autres, chacune d'un ton différent, séparées par un joint noir
- * épais. C'est du mur monté sans équerre — et c'est le plus loin possible du
- * dallage régulier du sol.
+ * ---------------------------------------------------------------------------
+ * LES GARNITURES — ce qui a poussé là-dessus
+ * ---------------------------------------------------------------------------
  *
- * Le découpage est un Voronoï à distance bouclée : chaque pixel appartient à
- * la pierre dont le germe est le plus proche, en faisant le tour de la tuile.
- * C'est ce qui le rend raccordable sans une seule ligne de plus.
+ * Une pierre régulière, c'est un décor qui tient ; c'est aussi un décor qui ne
+ * raconte rien. Il y a de l'eau qui suinte, des racines qui descendent, de la
+ * mousse dans les angles : les Dessous sont vieux, et ça doit se voir.
+ *
+ * Elles se posent PAR-DESSUS la tuile, sur une case sur huit environ, et la
+ * case est sa propre graine : le lierre ne bouge pas quand on repasse devant.
+ * Elles suivent la même règle que tout le fichier — AUCUNE LUMIÈRE dedans.
+ * Une plante peinte en vert clair se lirait comme une chose allumée ; c'est de
+ * la matière sombre, et c'est le moteur qui la révèle.
+ *
+ * Elles ne débordent pas non plus de leur case : une liane qui traverserait
+ * deux cases se ferait couper par le voile d'obscurité au milieu d'elle-même.
  */
-const MUR_CYCLOPEEN = (c: CanvasRenderingContext2D, d: () => number): void => {
-  const n = 7;
-  const gx: number[] = [];
-  const gy: number[] = [];
-  const ton: number[] = [];
-  for (let i = 0; i < n; i++) {
-    gx.push(d() * T);
-    gy.push(d() * T);
-    ton.push(14 + Math.round(d() * 44));
-  }
-  const img = c.getImageData(0, 0, T, T);
-  const p = img.data;
-  const joint = T * 0.03;
-  for (let y = 0; y < T; y++)
-    for (let x = 0; x < T; x++) {
-      let d1 = 1e9;
-      let d2 = 1e9;
-      let quel = 0;
-      for (let i = 0; i < n; i++) {
-        const dd = distanceBouclee(x - gx[i], y - gy[i]);
-        if (dd < d1) {
-          d2 = d1;
-          d1 = dd;
-          quel = i;
-        } else if (dd < d2) d2 = dd;
-      }
-      // Près d'une frontière, c'est du mortier. Plus loin, c'est la pierre —
-      // et elle s'assombrit vers son bord, ce qui lui donne du galbe.
-      const bord = d2 - d1;
-      const g =
-        bord < joint
-          ? 2 + Math.round((bord / joint) * 6)
-          : ton[quel] - Math.round(Math.max(0, 1 - (bord - joint) / (T * 0.16)) * 12);
-      const k = (y * T + x) * 4;
-      p[k] = g;
-      p[k + 1] = g;
-      p[k + 2] = g + 8;
-      p[k + 3] = 255;
-    }
-  c.putImageData(img, 0, 0);
-  nappes(c, d, 18);
-  grain(c, d, 16);
-  for (let i = 0; i < 2; i++) felure(c, d, 'rgba(0,0,0,0.85)');
-};
+const GARNITURES = 4;
 
 /**
- * C — LA PAROI TAILLÉE. Pas de blocs du tout : de la roche creusée, avec ses
- * strates horizontales et les coups de pic verticaux qui l'ont ouverte. C'est
- * un couloir percé, pas un mur monté — et dans les Dessous, c'est peut-être
- * plus juste que de la maçonnerie.
+ * LE VERT DES DESSOUS : gris, éteint, mais PLUS CLAIR QUE LA PIERRE.
+ *
+ * Premier essai à la même valeur que le mur — une feuille à 34 sur une pierre
+ * à 26 : sous la lampe on ne distinguait rien du tout, parce qu'une teinte
+ * seule ne se voit pas à trente sur deux cent cinquante-cinq. Ce qui fait lire
+ * une plante sur un mur, c'est l'ÉCART DE VALEUR, pas la couleur. Elle est
+ * donc deux à trois fois plus claire que la pierre — ce n'est pas de la
+ * lumière, c'est son albédo : une feuille renvoie plus qu'un caillou.
  */
-const MUR_TAILLE = (c: CanvasRenderingContext2D, d: () => number): void => {
-  // LES COUPS DE PIC : des colonnes verticales de tons voisins. C'est la
-  // verticale qui dit « ça monte » — le sol n'a aucune direction, lui.
-  const img = c.getImageData(0, 0, T, T);
-  const p = img.data;
-  const pas = Math.round(T * 0.045);
-  const colonnes: number[] = [];
-  for (let x = 0; x < T; x += pas) colonnes.push(10 + Math.round(d() * 34));
-  // LES STRATES : quatre bandes horizontales, chacune d'un ton propre. Elles
-  // se prolongent d'une case à l'autre parce qu'elles tombent sur la tuile.
-  const strates = [0, 1, 2, 3].map(() => Math.round((d() - 0.5) * 18));
-  for (let y = 0; y < T; y++) {
-    const st = strates[Math.floor((y / T) * 4)];
-    // le creux d'une strate : plus sombre juste sous sa limite
-    const dans = ((y / T) * 4) % 1;
-    const creux = dans < 0.1 ? -10 : dans > 0.9 ? 6 : 0;
-    for (let x = 0; x < T; x++) {
-      const col = colonnes[Math.floor(x / pas) % colonnes.length];
-      // le coup de pic ondule : une colonne droite ferait un peigne
-      const onde = Math.round(Math.sin(y * 0.08 + x * 0.3) * 4);
-      const g = Math.max(0, Math.min(255, col + st + creux + onde));
-      const k = (y * T + x) * 4;
-      p[k] = g;
-      p[k + 1] = g;
-      p[k + 2] = g + 9;
-      p[k + 3] = 255;
+const VERT = (g: number) => `rgb(${Math.round(g * 0.66)},${g},${Math.round(g * 0.74)})`;
+
+/** Une planche de garnitures : `GARNITURES` variantes côte à côte, sur fond
+ *  TRANSPARENT — c'est ce qui les distingue d'une tuile. */
+function garniture(
+  dessiner: (c: CanvasRenderingContext2D, d: () => number) => void,
+  graine: number,
+): HTMLCanvasElement {
+  const t = document.createElement('canvas');
+  t.width = T * GARNITURES;
+  t.height = T;
+  const c = t.getContext('2d');
+  if (!c) return t;
+  for (let v = 0; v < GARNITURES; v++) {
+    c.save();
+    c.translate(v * T, 0);
+    c.beginPath();
+    c.rect(0, 0, T, T);
+    c.clip();
+    dessiner(c, des(graine + v * 7919));
+    c.restore();
+  }
+  return t;
+}
+
+/** UNE TIGE QUI DESCEND, avec ses feuilles. Elle part du haut de la case et
+ *  s'arrête avant le bas : une liane qui touche les deux bords se raccorde à
+ *  la case d'à côté et fait un rideau. */
+function tige(
+  c: CanvasRenderingContext2D,
+  d: () => number,
+  x0: number,
+  long: number,
+): void {
+  let x = x0;
+  let y = 0;
+  const pas = T * 0.06;
+  const derive = (d() - 0.5) * 0.5;
+  c.strokeStyle = VERT(52);
+  c.lineWidth = Math.max(1, T * 0.016);
+  c.beginPath();
+  c.moveTo(x, y);
+  while (y < long) {
+    y += pas;
+    x += Math.sin(y * 0.09 + x0) * T * 0.02 + derive;
+    c.lineTo(x, y);
+    // une feuille une fois sur deux, alternée de part et d'autre
+    if (d() < 0.55) {
+      const cote = d() < 0.5 ? -1 : 1;
+      const r = T * (0.034 + d() * 0.04);
+      c.save();
+      c.translate(x, y);
+      c.rotate(cote * (0.6 + d() * 0.5));
+      // Un liseré sombre sous la feuille : sans lui elle se fond dans le
+      // joint clair d'une assise et on ne voit plus qu'une tache.
+      c.fillStyle = 'rgba(4,8,5,0.8)';
+      c.beginPath();
+      c.ellipse(cote * r, r * 0.22, r * 1.1, r * 0.6, 0, 0, TAU);
+      c.fill();
+      c.fillStyle = VERT(44 + Math.round(d() * 44));
+      c.beginPath();
+      c.ellipse(cote * r, 0, r, r * 0.52, 0, 0, TAU);
+      c.fill();
+      c.restore();
     }
   }
-  c.putImageData(img, 0, 0);
-  // quelques saillies : la roche n'est pas plane
-  for (let i = 0; i < 5; i++) {
-    const w = T * (0.06 + d() * 0.1);
-    const h = T * (0.2 + d() * 0.5);
-    const g = 6 + Math.round(d() * 34);
-    caillou(
-      c,
-      d() * T,
-      d() * T,
-      w,
-      h,
-      T * 0.02,
-      (d() - 0.5) * 0.1,
-      `rgb(${g},${g},${g + 8})`,
-    );
-  }
-  nappes(c, d, 20);
-  grain(c, d, 15);
-  for (let i = 0; i < 4; i++) felure(c, d, 'rgba(0,0,0,0.8)');
-};
-
-/** Les trois propositions, pour pouvoir les comparer côte à côte. */
-export const MURS = {
-  appareil: MUR_APPAREIL,
-  cyclopeen: MUR_CYCLOPEEN,
-  taille: MUR_TAILLE,
-} as const;
-export type NomMur = keyof typeof MURS;
-
-/** Celui qui est en jeu. Provisoire : il n'en restera qu'un. */
-let murChoisi: NomMur = 'appareil';
-export function choisirMur(n: NomMur): void {
-  murChoisi = n;
-  planches = null;
+  c.stroke();
 }
 
-/** Les trois murs dessinés, pour la planche de comparaison. Provisoire. */
-export function apercuMurs(): Record<NomMur, HTMLCanvasElement> {
+/** Des filaments qui traversent, plus secs que du lierre : ce qui a trouvé
+ *  une fente et s'y est glissé. */
+function racine(
+  c: CanvasRenderingContext2D,
+  d: () => number,
+  x0: number,
+  y0: number,
+): void {
+  let x = x0;
+  let y = y0;
+  let a = Math.PI * 0.5 + (d() - 0.5) * 1.2;
+  c.strokeStyle = 'rgba(96,78,54,0.92)';
+  c.lineWidth = Math.max(1, T * 0.02);
+  c.beginPath();
+  c.moveTo(x, y);
+  for (let i = 0; i < 14; i++) {
+    a += (d() - 0.5) * 0.5;
+    x += Math.cos(a) * T * 0.055;
+    y += Math.sin(a) * T * 0.055;
+    c.lineTo(x, y);
+    if (d() < 0.25) {
+      // une bifurcation : sans elles ce sont des cheveux, pas des racines
+      const b = a + (d() - 0.5) * 1.6;
+      c.moveTo(x, y);
+      c.lineTo(x + Math.cos(b) * T * 0.09, y + Math.sin(b) * T * 0.09);
+      c.moveTo(x, y);
+    }
+  }
+  c.stroke();
+}
+
+/** Les quatre garnitures, fabriquées une fois. */
+interface Garnitures {
+  lierre: HTMLCanvasElement;
+  racines: HTMLCanvasElement;
+  mousse: HTMLCanvasElement;
+  suintement: HTMLCanvasElement;
+}
+
+function fabriquerGarnitures(): Garnitures {
   return {
-    appareil: planche('#050509', 26, MUR_APPAREIL),
-    cyclopeen: planche('#050509', 26, MUR_CYCLOPEEN),
-    taille: planche('#050509', 26, MUR_TAILLE),
+    // LE LIERRE pend du haut de la case : c'est un mur, ça pousse vers le bas.
+    lierre: garniture((c, d) => {
+      const n = 2 + Math.floor(d() * 3);
+      for (let i = 0; i < n; i++)
+        tige(c, d, T * (0.12 + d() * 0.76), T * (0.45 + d() * 0.4));
+    }, 0x5eed),
+    // LES RACINES traversent : elles viennent d'ailleurs et repartent ailleurs.
+    racines: garniture((c, d) => {
+      for (let i = 0; i < 2; i++) racine(c, d, d() * T, -T * 0.05);
+    }, 0x7a11),
+    // LA MOUSSE se tient EN BAS de la case, là où l'humidité s'arrête. Elle est
+    // tournée par `sol.ts` selon le côté où la pierre se trouve.
+    mousse: garniture((c, d) => {
+      for (let i = 0; i < 120; i++) {
+        const x = d() * T;
+        // beaucoup près du bord, presque rien au-delà d'un tiers de case
+        const y = T - Math.abs(d() * d() * T * 0.42);
+        const r = T * (0.009 + d() * 0.024);
+        c.fillStyle = VERT(40 + Math.round(d() * 46));
+        c.beginPath();
+        c.ellipse(x, y, r, r * 0.75, 0, 0, TAU);
+        c.fill();
+      }
+    }, 0x33c1),
+    // LE SUINTEMENT : une coulée sombre et humide, du haut vers le bas.
+    suintement: garniture((c, d) => {
+      for (let i = 0; i < 3; i++) {
+        const x = T * (0.15 + d() * 0.7);
+        const w = T * (0.05 + d() * 0.09);
+        const h = T * (0.4 + d() * 0.55);
+        const g = c.createLinearGradient(x, 0, x, h);
+        g.addColorStop(0, 'rgba(0,0,0,0.55)');
+        g.addColorStop(0.7, 'rgba(0,0,0,0.3)');
+        g.addColorStop(1, 'rgba(0,0,0,0)');
+        c.fillStyle = g;
+        c.beginPath();
+        c.ellipse(x, h * 0.5, w, h * 0.5, 0, 0, TAU);
+        c.fill();
+      }
+    }, 0x91b7),
   };
 }
+
+let garnitures: Garnitures | null = null;
+
+/** Les garnitures, fabriquées une fois et gardées. */
+export function ornements(): Garnitures {
+  if (!garnitures) garnitures = fabriquerGarnitures();
+  return garnitures;
+}
+
+/** Combien de variantes par garniture. */
+export const VARIANTES_GARNITURE = GARNITURES;
 
 let planches: Tuiles | null = null;
 
@@ -545,7 +599,7 @@ export function tuiles(): Tuiles {
   // le même vocabulaire — des galets épars — et on confondait une paroi avec
   // un dallage. Ce qui les sépare maintenant, c'est la GRAMMAIRE : un sol est
   // posé, un mur est bâti ou taillé.
-  const mur = planche('#050509', 26, MURS[murChoisi]);
+  const mur = planche('#050509', 26, MUR_APPAREIL);
 
   const cendre = planche('#2a2a38', 48, (c, d) => {
     // LE SOL BRÛLÉ : plus clair, grumeleux, et il craque sous qui se presse.
