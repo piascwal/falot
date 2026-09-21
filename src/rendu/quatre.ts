@@ -21,12 +21,27 @@
 export const LARGE = 80;
 export const HAUT = 96;
 
+/**
+ * LA GRILLE DE CHAQUE SCÈNE, en pixels. Elles ne l'ont pas toutes : une scène
+ * qui porte un personnage a besoin de place — un visage de neuf pixels de côté
+ * n'est pas un visage, c'est une tache — pendant qu'un phare et sa mer se
+ * disent très bien en quatre-vingts. On les fait donc grandir UNE PAR UNE, en
+ * regardant, plutôt que toutes d'un coup : la fois où j'ai doublé les quatre
+ * ensemble, trois compositions sur quatre se sont cassées.
+ */
+export const GRILLE: readonly (readonly [number, number])[] = [
+  [160, 192], // la chambre : un enfant, donc de la place
+  [LARGE, HAUT],
+  [LARGE, HAUT],
+  [LARGE, HAUT],
+];
+
 /** Où brûle la lumière de chaque scène, en pixels de la grille. Une seule
  *  source de vérité : la scène la dessine là, et le fil de la lumière s'y
  *  rend. Les deux se déduisaient de nombres écrits deux fois, et ça dérivait
  *  dès qu'on déplaçait un lit. */
 export const FOYER: readonly (readonly [number, number])[] = [
-  [64, 51], // l'ampoule de la veilleuse
+  [128, 102], // l'ampoule de la veilleuse
   [40, 42], // la flamme de la bougie
   [39, 23], // le verre du lampadaire
   [31, 15], // la lanterne du phare
@@ -113,7 +128,7 @@ export function masque(
   k: number,
   temps: number,
 ): void {
-  if (i === 0) bulle(c, 64, 51, 66 * k, 1, 0.88);
+  if (i === 0) bulle(c, 128, 102, 132 * k, 1, 0.88);
   else if (i === 1) {
     // une flamme n'est jamais stable : elle respire, à peine
     const vacille = 1 + Math.sin(temps * 6.1) * 0.03 + Math.sin(temps * 2.3) * 0.02;
@@ -175,14 +190,19 @@ const PAL = {
   oreiller: '#efe6cd',
   chair: '#e5b98e',
   chairO: '#bf8f5d',
+  chairH: '#f4cda4',
   cheveux: '#4b3324',
+  cheveuxH: '#6d4c34',
+  cheveuxO: '#31200f',
   chemise: '#d6ccb6',
+  chemiseO: '#a89e87',
   gilet: '#5b4633',
   robe: '#cfc2a6',
   pantalon: '#2f2b34',
   flamme: '#ffe9ae',
   verre: '#f6e0a6',
   blanc: '#f1e8d1',
+  blancO: '#c2b89e',
   pierre: '#8c7c64',
   pierreO: '#69593f',
   roche: '#4a4239',
@@ -266,6 +286,31 @@ function dome(
   }
 }
 
+/**
+ * UN DESSIN POSÉ PIXEL PAR PIXEL.
+ *
+ * Le seul endroit de ce fichier qui ne soit pas calculé, et c'est volontaire :
+ * un visage ne se calcule pas. Une tête tracée par formules donne une tête
+ * moyenne, et une tête moyenne n'est personne. Les lettres disent le
+ * nuancier, le point ne peint rien, et les lignes n'ont pas besoin d'être
+ * égales — ce qui manque à droite est transparent.
+ */
+function sprite(
+  t: Toile,
+  x: number,
+  y: number,
+  art: readonly string[],
+  cle: Readonly<Record<string, Couleur>>,
+): void {
+  for (let j = 0; j < art.length; j++) {
+    const ligne = art[j];
+    for (let i = 0; i < ligne.length; i++) {
+      const col = cle[ligne[i]];
+      if (col) r(t, x + i, y + j, 1, 1, col);
+    }
+  }
+}
+
 /** Une tête de trois quarts, vue d'assez loin : des cheveux, un visage, et
  *  rien d'autre. Un œil dessiné à cette taille fait un masque. */
 function tete(t: Toile, x: number, y: number, vers: number): void {
@@ -284,87 +329,179 @@ function tete(t: Toile, x: number, y: number, vers: number): void {
 // La plus petite lumière du jeu, et celle qui compte le plus : c'est
 // littéralement ce que Falot était.
 // ---------------------------------------------------------------------------
+/**
+ * L'ENFANT, POSÉ PIXEL PAR PIXEL.
+ *
+ * Tout le reste de ce fichier est calculé ; lui est écrit. C'est le seul
+ * moyen d'avoir un visage : une tête tracée par formules donne une tête
+ * moyenne, et une tête moyenne n'est personne. Ici chaque pixel est décidé —
+ * les deux mèches sur le front, les yeux un peu écartés, la bouche minuscule
+ * de quelqu'un qui vient d'avoir peur du noir et qui n'ose pas encore
+ * souffler.
+ *
+ * Une lettre par nuance, le point ne peint rien. Les lignes n'ont pas besoin
+ * d'être égales : ce qui manque à droite est transparent.
+ */
+const ENFANT = [
+  '..........oooooooo',
+  '........oodddddddoo',
+  '.......ohhhhhhhhhhho',
+  '......ohhhhHHHhhhhhho',
+  '.....ohhhHHHHHhhhhhhho',
+  '.....ohhhHHHhhhhhhhhhho',
+  '....ohhhhhhhhhhhhhhhhho',
+  '....ohdssssssssssssssdo',
+  '....ohsssssssssssssssSo',
+  '....ohssssssssssssssSSo',
+  '....ohsseeossseeosssSSo',
+  '....ohsseeossseeosssSSo',
+  '....ohssssssssssssssSSo',
+  '....ohssLsssssssLsssSSo',
+  '....ohsssssssssssssSSSo',
+  '....ohsssssmmmmsssssSSo',
+  '.....ohssssmmmmssssSSo',
+  '.....oSssssssssssssSo',
+  '......oSSsssssssSSSo',
+  '.......ooSSSSSSSoo',
+  '.........oooooo',
+  '........occccccco',
+  '.......opppppppppo',
+  '......oppppppppppppo',
+  '.....opppppppppppppppo',
+  '.....oPPPPPPPPPPPPPPPo',
+  '.....opppppppppppppppo',
+  '.....opppppppppppppppo',
+  '.....oPPPPPPPPPPPPPPPo',
+  '.....opppppppppppppppo',
+  '.....opppppppppppppppo',
+  '.....oPPPPPPPPPPPPPPPo',
+  '.....opppppppppppppppo',
+  '.....opppppppppppqqqqo',
+  '.....oPPPPPPPPPPPqqqqo',
+  '.....opppppppppppqqqqo',
+  '.....opppppppppppqqqqo',
+  '.....oPPPPPPPPPPPqqqqo',
+  '.....ooooooooooooooooo',
+] as const;
+
+const CLE_ENFANT = {
+  o: 'trait',
+  s: 'chair',
+  S: 'chairO',
+  L: 'chairH',
+  h: 'cheveux',
+  H: 'cheveuxH',
+  d: 'cheveuxO',
+  e: 'trait',
+  m: 'chairO',
+  c: 'blanc',
+  p: 'chemise',
+  P: 'drapO',
+  q: 'chemiseO',
+} as const satisfies Record<string, Couleur>;
+
+/**
+ * LE BRAS ET LA MAIN, tendus vers la lampe. Séparés du sprite parce qu'ils
+ * doivent atteindre la table de chevet, et que la distance dépend du meuble,
+ * pas de l'enfant.
+ */
+const BRAS = [
+  'oooooooooooooooooooooooooooooooooooooooooooooo',
+  'oppppppppppppppppppppppppppppppppppposssssssso',
+  'oppppppppppppppppppppppppppppppppppposssssssso',
+  'opppppppppppppppppppppppppppppppppppoLssssssso',
+  'oqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqoSSSSSSSSo',
+  'oooooooooooooooooooooooooooooooooooooooooooooo',
+] as const;
+
 function chambre(t: Toile): void {
-  const sol = 78;
-  r(t, 0, 0, LARGE, HAUT, 'ciel');
-  r(t, 0, 0, LARGE, sol, 'murO'); // le mur
-  r(t, 0, sol, LARGE, HAUT - sol, 'sol'); // le plancher
-  r(t, 0, sol, LARGE, 1, 'trait');
-  for (let x = 6; x < LARGE; x += 13) r(t, x, sol + 1, 1, HAUT - sol - 1, 'boisF');
+  const [L, H] = GRILLE[0];
+  const sol = 156;
+  r(t, 0, 0, L, H, 'ciel');
+  r(t, 0, 0, L, sol, 'murO'); // le mur
+  r(t, 0, sol, L, H - sol, 'sol'); // le plancher
+  r(t, 0, sol, L, 1, 'trait');
+  for (let x = 12; x < L; x += 26) r(t, x, sol + 1, 2, H - sol - 1, 'boisF');
 
   // LA TABLE DE CHEVET, à droite, à portée de main depuis le lit.
-  r(t, 52, 60, 24, 16, 'boisM');
-  cadre(t, 52, 60, 24, 16, 'trait');
-  r(t, 50, 57, 28, 4, 'boisC'); // le plateau, qui déborde
-  cadre(t, 50, 57, 28, 4, 'trait');
-  r(t, 55, 64, 18, 6, 'boisF'); // le tiroir
-  cadre(t, 55, 64, 18, 6, 'trait');
-  r(t, 62, 66, 5, 2, 'boisC'); // sa poignée
-  r(t, 54, 76, 3, 6, 'boisF'); // les pieds
-  r(t, 71, 76, 3, 6, 'boisF');
+  r(t, 104, 120, 48, 32, 'boisM');
+  cadre(t, 104, 120, 48, 32, 'trait');
+  r(t, 100, 114, 56, 8, 'boisC'); // le plateau, qui déborde
+  cadre(t, 100, 114, 56, 8, 'trait');
+  r(t, 110, 128, 36, 12, 'boisF'); // le tiroir
+  cadre(t, 110, 128, 36, 12, 'trait');
+  r(t, 124, 132, 10, 4, 'boisC'); // sa poignée
+  r(t, 108, 152, 6, 12, 'boisF'); // les pieds
+  r(t, 142, 152, 6, 12, 'boisF');
 
   // LA VEILLEUSE CHAMPIGNON. Un pied blanc, un chapeau, une étoile. C'est
   // l'objet du plan, donc c'est le seul qui a droit à un détail.
-  r(t, 61, 49, 7, 8, 'blanc'); // le pied
-  cadre(t, 60, 49, 9, 8, 'trait');
-  dome(t, 64, 50, 11, 9, 'verre'); // le chapeau
-  r(t, 53, 50, 23, 1, 'trait'); // son bord
-  for (let i = 0; i <= 9; i++) {
-    const dx = Math.round(11 * Math.sqrt(Math.max(0, 1 - (i / 9) ** 2)));
-    r(t, 64 - dx, 50 - i, 1, 1, 'trait');
-    r(t, 64 + dx, 50 - i, 1, 1, 'trait');
+  r(t, 122, 98, 14, 16, 'blanc'); // le pied
+  r(t, 124, 100, 3, 13, 'blancO'); // sa nervure
+  cadre(t, 120, 98, 18, 16, 'trait');
+  dome(t, 128, 100, 22, 18, 'verre'); // le chapeau
+  r(t, 106, 100, 46, 2, 'trait'); // son bord
+  for (let i = 0; i <= 18; i++) {
+    const dx = Math.round(22 * Math.sqrt(Math.max(0, 1 - (i / 18) ** 2)));
+    r(t, 128 - dx, 100 - i, 1, 1, 'trait');
+    r(t, 128 + dx, 100 - i, 1, 1, 'trait');
   }
-  r(t, 63, 43, 3, 1, 'blanc'); // l'étoile sur le chapeau
-  r(t, 62, 44, 5, 1, 'blanc');
-  r(t, 63, 45, 3, 1, 'blanc');
-  r(t, 62, 46, 2, 1, 'blanc');
-  r(t, 66, 46, 2, 1, 'blanc');
+  // L'ÉTOILE, à cinq branches et posée à la main : un tas de rectangles
+  // empilés faisait une tache, et une tache sur un abat-jour ne dit rien.
+  const ETOILE = [
+    '......XX......',
+    '......XX......',
+    '.....XXXX.....',
+    'XXXXXXXXXXXXXX',
+    '.XXXXXXXXXXXX.',
+    '..XXXXXXXXXX..',
+    '...XXXXXXXX...',
+    '...XXX..XXX...',
+    '..XXX....XXX..',
+    '.XX........XX.',
+  ] as const;
+  sprite(t, 121, 82, ETOILE, { X: 'blanc' });
 
   // LE LIT. Deux montants à pommeau, une tête à barreaux : sans les pommeaux
   // ça se lit comme une caisse.
-  r(t, 3, 34, 5, 44, 'boisM');
-  cadre(t, 3, 34, 5, 44, 'trait');
-  rond(t, 5, 32, 3, 'boisC');
-  cadre(t, 2, 29, 7, 6, 'trait');
-  r(t, 38, 46, 5, 32, 'boisM'); // le montant du pied
-  cadre(t, 38, 46, 5, 32, 'trait');
-  rond(t, 40, 44, 3, 'boisC');
+  r(t, 6, 68, 10, 88, 'boisM');
+  cadre(t, 6, 68, 10, 88, 'trait');
+  rond(t, 11, 62, 8, 'trait'); // le pommeau, cerné
+  rond(t, 11, 62, 7, 'boisM');
+  rond(t, 10, 61, 4, 'boisC');
+  r(t, 76, 92, 10, 64, 'boisM'); // le montant du pied
+  cadre(t, 76, 92, 10, 64, 'trait');
+  rond(t, 81, 87, 7, 'trait');
+  rond(t, 81, 87, 6, 'boisM');
+  rond(t, 80, 86, 3, 'boisC');
   // LA TÊTE DE LIT EST À LA TÊTE. Une traverse d'un montant à l'autre avec des
   // barreaux sur toute la longueur, ça ne fait pas un lit : ça fait une
   // barrière, et l'enfant a l'air enfermé dedans.
-  r(t, 3, 37, 16, 3, 'boisC'); // la traverse de la tête
-  cadre(t, 3, 37, 16, 3, 'trait');
-  for (let x = 9; x < 18; x += 6) {
-    r(t, x, 40, 2, 12, 'boisM'); // ses deux barreaux
-    cadre(t, x - 1, 40, 4, 12, 'trait');
+  r(t, 6, 74, 32, 6, 'boisC'); // la traverse de la tête
+  cadre(t, 6, 74, 32, 6, 'trait');
+  for (let x = 18; x < 36; x += 12) {
+    r(t, x, 80, 4, 24, 'boisM'); // ses deux barreaux
+    cadre(t, x - 1, 80, 6, 24, 'trait');
   }
-  r(t, 33, 47, 10, 3, 'boisC'); // la traverse du pied, plus basse et pleine
-  cadre(t, 33, 47, 10, 3, 'trait');
+  r(t, 66, 94, 20, 6, 'boisC'); // la traverse du pied, plus basse et pleine
+  cadre(t, 66, 94, 20, 6, 'trait');
 
-  r(t, 5, 52, 36, 4, 'boisF'); // le sommier
-  r(t, 5, 55, 36, 14, 'drap'); // le matelas
-  cadre(t, 5, 52, 36, 17, 'trait');
-  r(t, 5, 61, 36, 8, 'drapO'); // la couverture, tirée sur les jambes
-  r(t, 5, 61, 36, 1, 'trait');
-  for (let x = 9; x < 40; x += 8) r(t, x, 63, 1, 5, 'boisF'); // ses plis
+  r(t, 10, 104, 72, 8, 'boisF'); // le sommier
+  r(t, 10, 110, 72, 28, 'drap'); // le matelas
+  cadre(t, 10, 104, 72, 34, 'trait');
+  r(t, 10, 122, 72, 16, 'drapO'); // la couverture, tirée sur les jambes
+  r(t, 10, 122, 72, 2, 'trait');
+  for (let x = 18; x < 80; x += 16) r(t, x, 126, 2, 10, 'boisF'); // ses plis
 
   // L'ENFANT EST ASSIS, contre la tête de lit, et il vient de tendre le bras.
   // Couché, il fallait trois formes pour dire « une tête sur un oreiller » et
-  // ça se lisait comme un tas ; assis, une silhouette suffit — et surtout,
-  // c'est ce qu'il fait : il a eu peur, il a tendu le bras, il a allumé.
-  r(t, 7, 48, 14, 9, 'oreiller'); // l'oreiller, dressé derrière lui
-  r(t, 8, 55, 12, 2, 'drapO'); // son creux, un seul trait
-  cadre(t, 7, 48, 14, 9, 'trait');
-  r(t, 20, 53, 11, 10, 'chemise'); // le buste
-  cadre(t, 20, 53, 11, 10, 'trait');
-  for (let y = 56; y < 62; y += 3) r(t, 21, y, 9, 1, 'drapO'); // son pyjama rayé
-  // LE BRAS PART DE L'ÉPAULE. Détaché d'un pixel, il se lisait comme une
-  // planche posée sur la couverture, et la main comme un objet en plus.
-  r(t, 29, 56, 13, 4, 'chemise');
-  cadre(t, 29, 56, 13, 4, 'trait');
-  r(t, 41, 56, 5, 4, 'chair');
-  cadre(t, 41, 56, 5, 4, 'trait');
-  tete(t, 22, 44, 1); // la tête POSÉE sur les épaules, pas au-dessus
+  // ça se lisait comme un tas ; assis, on le voit faire : il a eu peur, il a
+  // tendu le bras, il a allumé.
+  r(t, 14, 96, 28, 18, 'oreiller'); // l'oreiller, dressé derrière lui
+  r(t, 16, 110, 24, 4, 'drapO'); // son creux, un seul trait
+  cadre(t, 14, 96, 28, 18, 'trait');
+  sprite(t, 38, 74, ENFANT, CLE_ENFANT);
+  sprite(t, 56, 98, BRAS, CLE_ENFANT);
 }
 
 // ---------------------------------------------------------------------------
@@ -603,18 +740,19 @@ let cache: Quatre | null = null;
  *  vingts pixels : la génération se compte en millisecondes. */
 export function quatre(): Quatre {
   if (cache) return cache;
-  const peindre = (dessin: (t: Toile) => void, jour: boolean): HTMLCanvasElement => {
+  const peindre = (i: number, jour: boolean): HTMLCanvasElement => {
+    const dessin = SCENES[i];
     const toile = document.createElement('canvas');
-    toile.width = LARGE;
-    toile.height = HAUT;
+    toile.width = GRILLE[i][0];
+    toile.height = GRILLE[i][1];
     const c = toile.getContext('2d');
     if (!c) throw new Error('Pas de contexte 2D pour les scènes de la fin.');
     dessin({ c, jour });
     return toile;
   };
   cache = {
-    nuit: SCENES.map((d) => peindre(d, false)),
-    jour: SCENES.map((d) => peindre(d, true)),
+    nuit: SCENES.map((_, i) => peindre(i, false)),
+    jour: SCENES.map((_, i) => peindre(i, true)),
   };
   return cache;
 }

@@ -24,7 +24,7 @@ import { decouper } from '../coeur/texte.js';
 import { FIN } from '../coeur/textes.js';
 import type { Partie } from '../coeur/types.js';
 import type { Ecran } from './ecran.js';
-import { FOYER, HAUT, LARGE, masque, pluie, quatre, VOLUME } from './quatre.js';
+import { FOYER, GRILLE, masque, pluie, quatre, VOLUME } from './quatre.js';
 import { texteCerne } from './texte.js';
 import { dessinerOmbre, dessinerTete } from './visages.js';
 
@@ -127,7 +127,7 @@ function cone(
 /** Où brûle la lumière de chaque case, en fraction de la case : le fil de la
  *  lumière s'y rend. On le DÉDUIT du pixel où la scène a peint sa source —
  *  écrit deux fois, ça dérivait dès qu'on déplaçait un lit. */
-const FEU = FOYER.map(([x, y]) => [x / LARGE, y / HAUT] as const);
+const FEU = FOYER.map(([x, y], i) => [x / GRILLE[i][0], y / GRILLE[i][1]] as const);
 
 /** Le petit canevas où l'on découpe la scène allumée. Il fait la taille d'une
  *  scène — 96 × 80 pixels — donc le découpage coûte huit mille pixels par
@@ -136,8 +136,10 @@ let decoupe: CanvasRenderingContext2D | null = null;
 function ciseaux(): CanvasRenderingContext2D {
   if (decoupe) return decoupe;
   const t = document.createElement('canvas');
-  t.width = LARGE;
-  t.height = HAUT;
+  // Assez grand pour la plus grande des scènes : on n'en fabrique qu'un, et
+  // chacune n'en occupe que son coin.
+  t.width = Math.max(...GRILLE.map(([w]) => w));
+  t.height = Math.max(...GRILLE.map(([, h]) => h));
   const c = t.getContext('2d');
   if (!c) throw new Error('Pas de contexte 2D pour les scènes de la fin.');
   decoupe = c;
@@ -170,22 +172,23 @@ function dessinerScene(
 ): void {
   const { ctx } = ecran;
   const q = quatre();
-  const e = Math.max(cw / LARGE, ch / HAUT);
-  const ox = Math.round(cx + (cw - LARGE * e) / 2);
-  const oy = Math.round(cy + (ch - HAUT * e) / 2);
+  const [L, H] = GRILLE[i];
+  const e = Math.max(cw / L, ch / H);
+  const ox = Math.round(cx + (cw - L * e) / 2);
+  const oy = Math.round(cy + (ch - H * e) / 2);
   const lisse = ctx.imageSmoothingEnabled;
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(q.nuit[i], ox, oy, LARGE * e, HAUT * e);
+  ctx.drawImage(q.nuit[i], ox, oy, L * e, H * e);
   if (k > 0.004) {
     const c = ciseaux();
     c.setTransform(1, 0, 0, 1, 0, 0);
     c.globalCompositeOperation = 'source-over';
-    c.clearRect(0, 0, LARGE, HAUT);
+    c.clearRect(0, 0, c.canvas.width, c.canvas.height);
     masque(i, c, k, temps); // la forme de la lumière, et elle seule
     c.globalCompositeOperation = 'source-in'; // la scène allumée, dedans
     c.drawImage(q.jour[i], 0, 0);
     c.globalCompositeOperation = 'source-over';
-    ctx.drawImage(c.canvas, ox, oy, LARGE * e, HAUT * e);
+    ctx.drawImage(c.canvas, 0, 0, L, H, ox, oy, L * e, H * e);
   }
   // LA PLUIE tombe par-dessus, et hors du masque : il pleut aussi là où le
   // lampadaire n'éclaire pas, et c'est même tout l'intérêt.

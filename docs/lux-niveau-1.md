@@ -1472,3 +1472,38 @@ chaque feuille, sinon elle se fond dans le joint clair d'une assise.
 Coût : 4 ms de fabrication au chargement, et **rien de mesurable par image** —
 sans garnitures 3/13/16 images perdues sur 300, avec 8/9/14, c'est-à-dire le
 même bruit.
+
+## Un essai : l'enfant posé pixel par pixel
+
+Question posée : *« au lieu de faire la scène de façon programmatique, tu peux
+pas faire des assets ? »* Réponse honnête d'abord — **il n'y a pas de
+générateur d'images ici.** Un asset, dans ces mains-là, c'est un pixel map
+écrit caractère par caractère. Ce qui change n'est donc pas la qualité du
+dessinateur, c'est le CONTRÔLE : une tête tracée par formules donne une tête
+moyenne, et une tête moyenne n'est personne.
+
+Et le ratage précédent ne venait pas du « programmatique » : il venait d'avoir
+refait **les quatre panneaux d'un coup** et cassé trois compositions qui
+marchaient. L'essai est donc borné à **une seule scène**, la chambre.
+
+Deux changements, et rien d'autre :
+
+- **une grille par scène.** Elles ne grandissent plus toutes ensemble : la
+  chambre passe à 160 × 192 parce qu'elle porte un enfant, les trois autres
+  restent à 80 × 96 parce qu'un phare et sa mer s'y disent très bien. C'est ce
+  qui permet de les reprendre une par une, en regardant ;
+- **l'enfant et son bras sont écrits**, pas calculés — trente-neuf lignes de
+  lettres, une par nuance. Idem pour l'étoile de l'abat-jour : un tas de
+  rectangles empilés faisait une tache, et une tache sur un abat-jour ne dit
+  rien.
+
+Mesuré sur la capture avant/après, à six fois la taille : le visage passe de
+neuf pixels de côté avec une fente pour œil à deux yeux, une mèche éclairée,
+une joue ombrée et une bouche. Le reste du panneau est inchangé — mêmes
+meubles, même composition, deux fois plus de pixels.
+
+Coût : **0 image perdue sur 300** pendant toute la cinématique.
+
+Ce qui reste faible et qui n'a pas été touché : le lit est encore une masse
+pâle, et le haut du mur est vide. On y reviendra si l'essai est validé — une
+scène à la fois.
