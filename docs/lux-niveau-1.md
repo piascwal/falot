@@ -1355,3 +1355,61 @@ l'image précédente : c'est bien un Guet que quelque chose avait déjà mis en
 Un Guet calme doit d'abord remarquer puis charger : on a une à deux secondes
 pour tirer le convoi hors du cône. Un Guet déjà en alerte a son front sorti, et
 l'âme part tout de suite. C'est exactement l'arbitrage demandé.
+
+## Les quatre scènes, en pixel art
+
+Demande : reproduire le quadriptyque de référence — un enfant et sa veilleuse,
+un couple et sa bougie, un piéton sous un lampadaire, un phare et son bateau —
+**en enlevant l'éclairage et en l'ajoutant après que l'âme les ait rejointes.**
+
+C'est la bonne occasion pour du vrai pixel art, parce que le jeu en fait déjà :
+chaque scène est peinte une fois au chargement dans un canevas de **80 × 96
+pixels** (`src/rendu/quatre.ts`), qu'on agrandit au plus proche voisin. Tout est
+en coordonnées entières — un rectangle à 0,5 pixel redevient du flou, et le
+flou est exactement ce qu'on ne veut pas. Le cadrage est un « cover » à échelle
+uniforme : les pixels restent carrés quelle que soit la fenêtre, alors
+qu'étirer pour remplir aurait donné des pixels rectangulaires, ce qui n'est
+plus du pixel art mais une image déformée.
+
+**La lumière ne s'ajoute pas, elle révèle.** Chaque scène existe en DEUX
+exemplaires, éteinte et allumée. Ce n'est pas la même image plus ou moins
+transparente : une chambre dans le noir n'est pas une chambre jaune atténuée,
+c'est une chambre bleue. On pose la version éteinte, puis on DÉCOUPE la version
+allumée dans la forme de sa lumière (`masque`) et on la pose par-dessus. À
+mi-chemin, le coin du lit est encore bleu nuit pendant que la table de chevet
+est déjà chaude — c'est la lumière qui avance, pas le contraste. Le découpage
+se fait en `source-in` sur un canevas de la taille d'une scène : huit mille
+pixels par case et par image, c'est-à-dire rien.
+
+Trois choses ne sont PAS dans le bitmap, et c'est voulu :
+
+- **le volume de lumière** — le grand coin jaune du phare, la colonne du
+  lampadaire. Le masque ne révèle que ce qui est peint, et au large il n'y a
+  rien à peindre : sans ce coin, le phare n'envoyait rien à personne ;
+- **la pluie**, parce qu'elle tombe, et parce qu'il pleut AUSSI là où le
+  lampadaire n'éclaire pas — c'est même tout l'intérêt ;
+- **la floraison** autour de chaque ampoule. Ces trois-là sont lisses et c'est
+  voulu : c'est de la lumière, pas de la matière, et seule la matière est en
+  pixels.
+
+Erreurs faites et corrigées en regardant les captures, dans l'ordre :
+
+- les scènes étaient **en paysage** (96 × 80) alors qu'une case est en portrait
+  (380 × 450) : le « cover » rognait tout sur les côtés et coupait les gens en
+  deux. Grille refaite en 80 × 96 ;
+- la tête de lit courait d'un montant à l'autre avec des barreaux sur toute la
+  longueur : ça ne fait pas un lit, ça fait une **barrière**, et l'enfant avait
+  l'air enfermé dedans ;
+- les chaises étaient rangées au bord du cadre : deux cages de but, et on ne
+  voyait plus sur quoi les deux étaient assis. Elles sont passées **derrière
+  les gens** ;
+- le rocher du phare montait et descendait à chaque colonne : une rangée de
+  **sapins**. C'est une masse arrondie cassée par deux ou trois ressauts ;
+- les assises de brique de la tour étaient un damier franc, donc un **escalier
+  en zigzag** au lieu d'un mur ;
+- le parapluie était dix pixels trop haut : il arrivait à hauteur de la
+  lanterne et se perdait dans son halo. On voyait un homme **tête nue sous la
+  pluie**, ce qui est exactement le contraire du plan.
+
+Coût mesuré : **0 image perdue sur 300** pendant toute la montée de lumière et
+les quatre scènes.

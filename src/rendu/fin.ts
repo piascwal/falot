@@ -24,6 +24,7 @@ import { decouper } from '../coeur/texte.js';
 import { FIN } from '../coeur/textes.js';
 import type { Partie } from '../coeur/types.js';
 import type { Ecran } from './ecran.js';
+import { FOYER, HAUT, LARGE, masque, pluie, quatre, VOLUME } from './quatre.js';
 import { texteCerne } from './texte.js';
 import { dessinerOmbre, dessinerTete } from './visages.js';
 
@@ -123,256 +124,93 @@ function cone(
   ctx.fill();
 }
 
-/**
- * Le gris d'une silhouette, selon ce qui l'éclaire.
- *
- * À zéro c'est EXACTEMENT le fond : une case pas encore allumée doit être
- * vide. Elle partait d'un gris un peu au-dessus du noir, et on voyait les
- * quatre scènes attendre leur lumière — toute la montée du fil ne révélait
- * plus rien.
- */
-const teinte = (k: number) =>
-  `rgb(${Math.round(8 + k * 136)},${Math.round(8 + k * 114)},${Math.round(14 + k * 88)})`;
+/** Où brûle la lumière de chaque case, en fraction de la case : le fil de la
+ *  lumière s'y rend. On le DÉDUIT du pixel où la scène a peint sa source —
+ *  écrit deux fois, ça dérivait dès qu'on déplaçait un lit. */
+const FEU = FOYER.map(([x, y]) => [x / LARGE, y / HAUT] as const);
 
-/** Une tête ronde sur des épaules : on ne dessine jamais un visage d'en haut,
- *  ce sont des gens et pas des personnages. */
-function silhouette(ecran: Ecran, x: number, sol: number, h: number, k: number): void {
-  const { ctx } = ecran;
-  const l = h * 0.4;
-  ctx.fillStyle = teinte(k);
-  const r = l * 0.34;
-  ctx.beginPath();
-  ctx.roundRect(x - l / 2, sol - h * 0.72, l, h * 0.72, [r, r, 0, 0]);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(x, sol - h * 0.82, l * 0.36, 0, TAU);
-  ctx.fill();
+/** Le petit canevas où l'on découpe la scène allumée. Il fait la taille d'une
+ *  scène — 96 × 80 pixels — donc le découpage coûte huit mille pixels par
+ *  case et par image : rien du tout. */
+let decoupe: CanvasRenderingContext2D | null = null;
+function ciseaux(): CanvasRenderingContext2D {
+  if (decoupe) return decoupe;
+  const t = document.createElement('canvas');
+  t.width = LARGE;
+  t.height = HAUT;
+  const c = t.getContext('2d');
+  if (!c) throw new Error('Pas de contexte 2D pour les scènes de la fin.');
+  decoupe = c;
+  return c;
 }
 
 /**
- * OÙ BRÛLE LA LUMIÈRE DE CHAQUE CASE, en fraction de la case.
+ * UNE SCÈNE, ÉTEINTE PUIS RÉVÉLÉE.
  *
- * Une seule source de vérité : la scène la dessine là, et le fil s'y rend. Les
- * deux se déduisaient de nombres écrits deux fois, et ça dérivait dès qu'on
- * déplaçait un lit.
+ * On pose d'abord la scène telle qu'elle est dans le noir — on devine un lit,
+ * une table, un mât, et rien de plus. Puis on DÉCOUPE la même scène allumée
+ * dans la forme de sa lumière et on la pose par-dessus. Ce n'est pas un fondu :
+ * à mi-chemin, le coin du lit est encore bleu nuit pendant que la table de
+ * chevet est déjà chaude. C'est la lumière qui avance, pas le contraste.
+ *
+ * L'agrandissement est au PLUS PROCHE VOISIN et le cadrage est un « cover » à
+ * échelle uniforme : les pixels restent carrés quelle que soit la fenêtre.
+ * Étirer pour remplir aurait donné des pixels rectangulaires, ce qui n'est
+ * plus du pixel art, c'est une image déformée.
  */
-const FEU = [
-  [0.77, 0.42], // la veilleuse, sur sa table de chevet
-  [0.5, 0.41], // la flamme de la bougie
-  [0.64, 0.16], // la tête du lampadaire
-  [0.19, 0.1], // la lanterne du phare
-] as const;
-
-// ---------------------------------------------------------------------------
-// LES QUATRE SCÈNES
-//
-// Chacune tient dans sa case et ne sait rien des autres. `k` va de 0 (noir,
-// la lumière n'est pas encore arrivée) à 1 (allumée). Aucune n'a de visage :
-// à cette distance un visage ferait un personnage, et ce sont des gens.
-// ---------------------------------------------------------------------------
-
-/** 1. UN ENFANT ALLUME SA VEILLEUSE. La plus petite lumière du jeu, et celle
- *  qui compte le plus : c'est littéralement ce que Falot était. */
-function veilleuse(
+function dessinerScene(
   ecran: Ecran,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  k: number,
-): void {
-  const { ctx } = ecran;
-  const lit = y + h * 0.56; // le haut du matelas
-  const sol = y + h * 0.78;
-  const lx = x + w * FEU[0][0];
-  const ly = y + h * FEU[0][1];
-  halo(ecran, lx, ly, w * 0.62, OR, 0.5 * k);
-  // IL EST ASSIS DANS SON LIT, contre la tête de lit, la couverture sur les
-  // jambes, la main du côté de la lampe — et il vient de l'allumer. Couché, il
-  // fallait trois formes pour dire « une tête sur un oreiller » et ça se lisait
-  // comme un tas ; assis, une silhouette suffit. Et surtout, c'est ce qu'il
-  // fait : il a eu peur, il a tendu le bras, il a allumé.
-  ctx.fillStyle = teinte(k * 0.45);
-  ctx.beginPath();
-  ctx.roundRect(x + w * 0.08, lit, w * 0.56, sol - lit, h * 0.02);
-  ctx.fill();
-  ctx.fillStyle = teinte(k * 0.6); // la tête de lit, du côté de la lampe
-  ctx.beginPath();
-  ctx.roundRect(x + w * 0.6, lit - h * 0.15, w * 0.04, h * 0.17, h * 0.015);
-  ctx.fill();
-  silhouette(ecran, x + w * 0.53, lit + h * 0.015, h * 0.19, k);
-  ctx.fillStyle = teinte(k * 0.72); // la couverture, tirée sur ses jambes
-  ctx.beginPath();
-  ctx.roundRect(x + w * 0.09, lit - h * 0.03, w * 0.38, h * 0.07, h * 0.028);
-  ctx.fill();
-  // la table de chevet, à portée de main, et la veilleuse posée dessus
-  ctx.fillStyle = teinte(k * 0.4);
-  ctx.fillRect(x + w * 0.71, y + h * 0.47, w * 0.12, sol - y - h * 0.47);
-  ctx.fillStyle = `rgba(${OR},${k})`;
-  ctx.beginPath();
-  ctx.roundRect(lx - w * 0.032, ly - h * 0.045, w * 0.064, h * 0.09, h * 0.028);
-  ctx.fill();
-}
-
-/** 2. UN COUPLE ALLUME UNE BOUGIE. Deux silhouettes qui se font face, et la
- *  lumière exactement entre elles : c'est tout le sujet du plan. */
-function bougie(ecran: Ecran, x: number, y: number, w: number, h: number, k: number): void {
-  const { ctx } = ecran;
-  const table = y + h * 0.62; // le plateau
-  const cx = x + w * FEU[1][0];
-  const fy = y + h * FEU[1][1] + h * 0.014;
-  halo(ecran, cx, fy, w * 0.66, OR, 0.52 * k);
-  // ILS SONT DE PART ET D'AUTRE, et le plateau leur coupe le buste. Dessinés
-  // au-dessus de la table, ils avaient l'air posés DESSUS : c'est l'ordre du
-  // tracé qui fait qu'on est attablé — le corps derrière, le plateau devant.
-  silhouette(ecran, x + w * 0.2, table + h * 0.16, h * 0.4, k);
-  silhouette(ecran, x + w * 0.8, table + h * 0.16, h * 0.4, k);
-  // les deux chaises, à peine : deux dossiers qui dépassent derrière eux
-  ctx.fillStyle = teinte(k * 0.32);
-  ctx.fillRect(x + w * 0.11, table - h * 0.04, w * 0.025, h * 0.22);
-  ctx.fillRect(x + w * 0.865, table - h * 0.04, w * 0.025, h * 0.22);
-  // le plateau, par-dessus les deux, et son pied
-  ctx.fillStyle = teinte(k * 0.6);
-  ctx.beginPath();
-  ctx.roundRect(x + w * 0.16, table, w * 0.68, h * 0.055, h * 0.02);
-  ctx.fill();
-  ctx.fillStyle = teinte(k * 0.42);
-  ctx.fillRect(cx - w * 0.03, table + h * 0.05, w * 0.06, h * 0.16);
-  // la bougie, un trait et une flamme, exactement entre eux
-  ctx.fillStyle = teinte(k * 0.85);
-  ctx.fillRect(cx - w * 0.011, fy, w * 0.022, h * 0.19);
-  ctx.fillStyle = `rgba(255,236,196,${k})`;
-  ctx.beginPath();
-  ctx.arc(cx, fy - h * 0.014, h * 0.024, 0, TAU);
-  ctx.fill();
-}
-
-/** 3. UN LAMPADAIRE ALLUME UN PIÉTON SOUS LA PLUIE. Personne ne lui a rien
- *  demandé et il ne saura jamais qu'il a été éclairé : c'est le plan qui dit
- *  que ça compte quand même. */
-function lampadaire(
-  ecran: Ecran,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
+  i: number,
+  cx: number,
+  cy: number,
+  cw: number,
+  ch: number,
   k: number,
   temps: number,
 ): void {
   const { ctx } = ecran;
-  const sol = y + h * 0.82;
-  const px = x + w * FEU[2][0];
-  const py = y + h * FEU[2][1];
-  cone(ecran, px, py + h * 0.03, Math.PI / 2, h * 0.72, 0.85, OR, 0.95 * k);
-  halo(ecran, px, py, w * 0.3, OR, 0.6 * k);
-  // le mât et sa potence
-  ctx.fillStyle = teinte(k * 0.45);
-  ctx.fillRect(px - w * 0.014, py, w * 0.028, sol - py);
-  ctx.fillRect(px - w * 0.08, py - h * 0.02, w * 0.096, h * 0.026);
-  ctx.fillStyle = `rgba(${OR},${k})`;
-  ctx.fillRect(px - w * 0.05, py + h * 0.004, w * 0.04, h * 0.022);
-  // la pluie : des traits, jamais des gouttes — une goutte ronde se lit comme
-  // une lumière, et il y en a déjà partout
-  ctx.strokeStyle = `rgba(190,206,230,${0.28 * k})`;
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  for (let i = 0; i < 46; i++) {
-    const rx = x + ((i * 97) % 100) * (w / 100);
-    const ry = y + ((((i * 53) % 100) * (h / 100) + temps * 420) % (h * 0.86));
-    ctx.moveTo(rx, ry);
-    ctx.lineTo(rx - w * 0.012, ry + h * 0.05);
+  const q = quatre();
+  const e = Math.max(cw / LARGE, ch / HAUT);
+  const ox = Math.round(cx + (cw - LARGE * e) / 2);
+  const oy = Math.round(cy + (ch - HAUT * e) / 2);
+  const lisse = ctx.imageSmoothingEnabled;
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(q.nuit[i], ox, oy, LARGE * e, HAUT * e);
+  if (k > 0.004) {
+    const c = ciseaux();
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    c.globalCompositeOperation = 'source-over';
+    c.clearRect(0, 0, LARGE, HAUT);
+    masque(i, c, k, temps); // la forme de la lumière, et elle seule
+    c.globalCompositeOperation = 'source-in'; // la scène allumée, dedans
+    c.drawImage(q.jour[i], 0, 0);
+    c.globalCompositeOperation = 'source-over';
+    ctx.drawImage(c.canvas, ox, oy, LARGE * e, HAUT * e);
   }
-  ctx.stroke();
-  // le piéton, qui traverse le cône et s'en va
-  const marche = (temps * 0.1) % 1;
-  const mx = x + w * (0.86 - marche * 0.66);
-  const sous = clamp(1 - Math.abs(mx - px) / (w * 0.22), 0, 1);
-  silhouette(ecran, mx, sol, h * 0.3, k * (0.22 + 0.78 * sous));
-  // le trottoir mouillé rend la lumière : c'est ça qui fait la pluie, pas les
-  // traits — donc un dégradé écrasé au sol, jamais un rectangle
-  ctx.fillStyle = '#08080e';
-  ctx.fillRect(x, sol, w, y + h - sol);
-  ctx.save();
-  ctx.translate(px, sol);
-  ctx.scale(1, 0.26);
-  halo(ecran, 0, 0, w * 0.34, OR, 0.5 * k);
-  ctx.restore();
-}
-
-/** 4. UN PHARE, ET AU LARGE UN BATEAU QUI REDRESSE SON CAP. La seule des
- *  quatre où la lumière ne rencontrera jamais celui qu'elle sauve — et c'est
- *  exprès : c'est elle qui prépare la scène d'après. */
-function phare(
-  ecran: Ecran,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  k: number,
-  temps: number,
-): void {
-  const { ctx } = ecran;
-  const horizon = y + h * 0.44;
-  const tx = x + w * FEU[3][0];
-  const ty = y + h * FEU[3][1];
-  const roche = horizon + h * 0.06; // le rocher est DANS l'eau, pas devant
-  // LE CIEL ET LA MER. Deux dégradés, jamais deux rectangles : un aplat qui
-  // s'arrête à l'horizontale se lit comme un carton posé sur l'image, et on
-  // voyait son coin. C'est la ligne d'horizon, et elle seule, qui fait la mer.
-  // LE CIEL N'EST PAS PEINT. Un aplat bleu, même très sombre, faisait de la
-  // case entière un rectangle de couleur posé à côté de trois cases noires —
-  // et c'est la case qu'on regardait, pas ce qu'il y avait dedans. La nuit du
-  // large, c'est du noir : une ligne d'horizon et trois reflets suffisent.
-  ctx.strokeStyle = `rgba(150,180,220,${0.15 * k})`;
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(x, horizon);
-  ctx.lineTo(x + w, horizon);
-  ctx.stroke();
-  // les reflets couchés : c'est ça qui fait de l'eau, pas la couleur
-  ctx.strokeStyle = `rgba(150,180,220,${0.12 * k})`;
-  ctx.beginPath();
-  for (let i = 1; i < 8; i++) {
-    const ly = horizon + (i * i * (y + h - horizon)) / 50;
-    ctx.moveTo(x + w * (0.06 + ((i * 31) % 45) / 100), ly);
-    ctx.lineTo(x + w * (0.3 + ((i * 17) % 45) / 100), ly);
+  // LA PLUIE tombe par-dessus, et hors du masque : il pleut aussi là où le
+  // lampadaire n'éclaire pas, et c'est même tout l'intérêt.
+  if (i === 2) pluie(ctx, ox, oy, e, temps, k);
+  ctx.imageSmoothingEnabled = lisse;
+  // LE VOLUME DE LUMIÈRE, pour les deux scènes qui en ont un. Le masque ne
+  // révèle que ce qui est peint, et au large il n'y a rien à peindre : sans
+  // ce coin jaune, le phare n'envoyait rien à personne. Il est lisse, et
+  // c'est voulu — c'est de la lumière, pas de la matière, et seule la matière
+  // est en pixels.
+  const v = VOLUME[i];
+  if (v && k > 0.01) {
+    const [vx, vy, ang, portee, ouv] = v;
+    const balaye = i === 3 ? Math.sin(temps * 0.8) * 0.26 : 0;
+    cone(
+      ecran,
+      ox + vx * e,
+      oy + vy * e,
+      ang + balaye,
+      portee * e * k,
+      ouv * 2,
+      OR,
+      0.7 * k,
+    );
   }
-  ctx.stroke();
-  // LE BALAYAGE. Il reste près de l'horizontale : c'est là qu'il y a
-  // quelqu'un, et un phare qui éclaire le ciel n'a jamais sauvé personne.
-  const angle = Math.sin(temps * 0.85) * 0.34;
-  cone(ecran, tx, ty, angle, w * 0.88, 0.16, OR, 0.95 * k);
-  halo(ecran, tx, ty, w * 0.2, OR, 0.7 * k);
-  // la tour, plus large en bas : une tour droite se lit comme une cheminée
-  ctx.fillStyle = teinte(k * 0.38);
-  ctx.beginPath();
-  ctx.moveTo(tx - w * 0.015, ty);
-  ctx.lineTo(tx + w * 0.015, ty);
-  ctx.lineTo(tx + w * 0.032, roche);
-  ctx.lineTo(tx - w * 0.032, roche);
-  ctx.closePath();
-  ctx.fill();
-  ctx.beginPath(); // le rocher
-  ctx.ellipse(tx, roche, w * 0.075, h * 0.025, 0, 0, TAU);
-  ctx.fill();
-  ctx.fillStyle = `rgba(${OR},${k})`;
-  ctx.fillRect(tx - w * 0.016, ty - h * 0.022, w * 0.032, h * 0.04);
-  // le bateau : une coque, un feu, et un cap qui se redresse quand il a vu
-  const vu = clamp(k * 1.2 - 0.3, 0, 1);
-  const bx = x + w * (0.74 + vu * 0.06);
-  const by = horizon + h * 0.1 - vu * h * 0.035;
-  ctx.save();
-  ctx.translate(bx, by);
-  ctx.rotate(0.24 * (1 - vu)); // il gîtait vers la côte ; il se redresse
-  ctx.fillStyle = teinte(k * 0.55);
-  ctx.beginPath();
-  ctx.roundRect(-w * 0.05, -h * 0.011, w * 0.1, h * 0.024, h * 0.011);
-  ctx.fill();
-  ctx.fillStyle = `rgba(${OR},${k * (0.45 + 0.45 * vu)})`;
-  ctx.beginPath();
-  ctx.arc(0, -h * 0.028, h * 0.01, 0, TAU);
-  ctx.fill();
-  ctx.restore();
 }
 
 /** Un point du chemin, et de quoi le parcourir. */
@@ -462,10 +300,13 @@ function dessinerQuatre(ecran: Ecran, k: number, enRoute: boolean, temps: number
     ctx.fillRect(cx, cy, cw, ch);
     // Chaque scène prend TOUTE sa case : une marge laissait les fonds (la
     // mer, le trottoir) s'arrêter net au milieu du noir, et ça se voyait.
-    if (i === 0) veilleuse(ecran, cx, cy, cw, ch, allume(i));
-    else if (i === 1) bougie(ecran, cx, cy, cw, ch, allume(i));
-    else if (i === 2) lampadaire(ecran, cx, cy, cw, ch, allume(i), temps);
-    else phare(ecran, cx, cy, cw, ch, allume(i), temps);
+    const kk = allume(i);
+    dessinerScene(ecran, i, cx, cy, cw, ch, kk, temps);
+    // LA FLORAISON, par-dessus les pixels : une ampoule qui vient de
+    // s'allumer déborde d'elle-même. Elle est lisse, et c'est voulu — c'est
+    // de la lumière, pas de la matière, et la matière seule est en pixels.
+    if (kk > 0.01)
+      halo(ecran, cx + cw * FEU[i][0], cy + ch * FEU[i][1], cw * 0.26, OR, 0.5 * kk);
     ctx.restore();
   }
 
