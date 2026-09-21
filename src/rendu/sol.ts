@@ -38,11 +38,43 @@ function ombreDeContact(
       if (zone.mur[cy][cx]) continue;
       const x = cx * CASE - cam.x;
       const y = cy * CASE - cam.y;
+      const h = plein(cx, cy - 1);
+      const bas = plein(cx, cy + 1);
+      const g = plein(cx - 1, cy);
+      const dr = plein(cx + 1, cy);
+      // La plupart des cases ne touchent aucune pierre : ouvrir un chemin et
+      // le tracer pour rien coûtait deux cents appels par image.
+      if (!h && !bas && !g && !dr) continue;
       const t = tuiles();
-      if (plein(cx, cy - 1)) ctx.drawImage(t.contacts[0], x, y, CASE + 1, CASE + 1);
-      if (plein(cx, cy + 1)) ctx.drawImage(t.contacts[1], x, y, CASE + 1, CASE + 1);
-      if (plein(cx - 1, cy)) ctx.drawImage(t.contacts[2], x, y, CASE + 1, CASE + 1);
-      if (plein(cx + 1, cy)) ctx.drawImage(t.contacts[3], x, y, CASE + 1, CASE + 1);
+      if (h) ctx.drawImage(t.contacts[0], x, y, CASE + 1, CASE + 1);
+      if (bas) ctx.drawImage(t.contacts[1], x, y, CASE + 1, CASE + 1);
+      if (g) ctx.drawImage(t.contacts[2], x, y, CASE + 1, CASE + 1);
+      if (dr) ctx.drawImage(t.contacts[3], x, y, CASE + 1, CASE + 1);
+      // L'ARÊTE. Un liseré clair sur le bord de la PIERRE, là où elle domine
+      // le sol. C'est ce qui dit « ça monte » : l'ombre de contact seule dit
+      // qu'il y a quelque chose, l'arête dit que ce quelque chose est en
+      // relief. Elle ne vient d'aucune direction non plus — c'est la même sur
+      // les quatre côtés, comme un angle vif vu de n'importe où.
+      ctx.strokeStyle = 'rgba(150,158,190,0.16)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      if (h) {
+        ctx.moveTo(x, y - 1);
+        ctx.lineTo(x + CASE, y - 1);
+      }
+      if (bas) {
+        ctx.moveTo(x, y + CASE + 1);
+        ctx.lineTo(x + CASE, y + CASE + 1);
+      }
+      if (g) {
+        ctx.moveTo(x - 1, y);
+        ctx.lineTo(x - 1, y + CASE);
+      }
+      if (dr) {
+        ctx.moveTo(x + CASE + 1, y);
+        ctx.lineTo(x + CASE + 1, y + CASE);
+      }
+      ctx.stroke();
     }
 }
 

@@ -218,13 +218,13 @@ let planches: Tuiles | null = null;
 /** Fabrique les planches une fois, et les garde. */
 export function tuiles(): Tuiles {
   if (planches) return planches;
+  // LE SOL : lisse, poussiéreux, de grandes dalles à joints fins. Il doit se
+  // faire oublier — c'est dessus qu'on marche, pas lui qu'on regarde.
   const sol = planche('#1a1a26', (c, d) => {
-    // DES DALLES, pas un carrelage : des tailles inégales, des joints qui ne
-    // s'alignent pas. Un damier régulier se voit à la première salle.
-    for (let i = 0; i < 7; i++) {
-      const w = T * (0.3 + d() * 0.42);
-      const h = T * (0.26 + d() * 0.36);
-      const g = 24 + Math.round(d() * 22);
+    for (let i = 0; i < 5; i++) {
+      const w = T * (0.42 + d() * 0.5);
+      const h = T * (0.38 + d() * 0.42);
+      const g = 26 + Math.round(d() * 10); // peu de contraste : c'est plat
       caillou(
         c,
         d() * T - w * 0.3,
@@ -232,36 +232,58 @@ export function tuiles(): Tuiles {
         w,
         h,
         T * 0.05,
-        (d() - 0.5) * 0.22,
+        (d() - 0.5) * 0.14,
         `rgb(${g},${g},${g + 12})`,
       );
     }
-    nappes(c, d, 26);
-    grain(c, d, 14);
-    for (let i = 0; i < 2; i++) felure(c, d, 'rgba(8,8,14,0.5)');
+    nappes(c, d, 22);
+    grain(c, d, 12);
+    for (let i = 0; i < 2; i++) felure(c, d, 'rgba(8,8,14,0.45)');
   });
 
-  const mur = planche('#0a0a11', (c, d) => {
-    // DE LA PIERRE ENTASSÉE, pas un mur bâti : des blocs plus gros, plus
-    // serrés, et des joints noirs. Personne n'a construit les Dessous.
-    for (let i = 0; i < 10; i++) {
-      const w = T * (0.3 + d() * 0.5);
-      const h = T * (0.2 + d() * 0.3);
-      const g = 8 + Math.round(d() * 14);
+  // LE MUR : de gros blocs entassés, des JOINTS NOIRS ET ÉPAIS, et beaucoup
+  // plus de contraste que le sol.
+  //
+  // Les deux avaient la même texture, et on ne distinguait plus un couloir
+  // d'une salle : un trait de séparation ne suffit pas à dire « ça monte ».
+  // Ce qui le dit, c'est la STRUCTURE — le sol est lisse et fait de grandes
+  // dalles, le mur est un tas de blocs avec du noir entre eux.
+  const mur = planche('#050509', (c, d) => {
+    for (let i = 0; i < 5; i++) {
+      // des blocs francs, bien plus gros que les dalles du sol ; le fond
+      // presque noir qui reste entre eux fait le mortier
+      const w = T * (0.4 + d() * 0.34);
+      const h = T * (0.36 + d() * 0.3);
+      const g = 13 + Math.round(d() * 22); // beaucoup de contraste : c'est un tas
       caillou(
         c,
         d() * T - w * 0.3,
         d() * T - h * 0.3,
         w,
         h,
-        T * 0.06,
-        (d() - 0.5) * 0.35,
-        `rgb(${g},${g},${g + 10})`,
+        T * 0.03,
+        (d() - 0.5) * 0.4,
+        `rgb(${g},${g},${g + 8})`,
       );
     }
-    nappes(c, d, 22);
-    grain(c, d, 12);
-    for (let i = 0; i < 3; i++) felure(c, d, 'rgba(4,4,8,0.6)');
+    // des éclats : la pierre a été cassée pour être entassée, pas taillée
+    for (let i = 0; i < 14; i++) {
+      const r = T * (0.02 + d() * 0.06);
+      const g = 8 + Math.round(d() * 24);
+      caillou(
+        c,
+        d() * T,
+        d() * T,
+        r * 2,
+        r * 1.6,
+        r * 0.5,
+        d() * 3,
+        `rgb(${g},${g},${g + 6})`,
+      );
+    }
+    nappes(c, d, 30);
+    grain(c, d, 16);
+    for (let i = 0; i < 4; i++) felure(c, d, 'rgba(0,0,0,0.75)');
   });
 
   const cendre = planche('#242430', (c, d) => {

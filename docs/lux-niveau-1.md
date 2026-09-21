@@ -1084,3 +1084,52 @@ sur quatre étages tirés au sort, on suit chaque rayon jusqu'à son bout, et on
 vérifie qu'il ne traverse **jamais** plus d'une pierre. Un troisième test tient
 l'autre moitié du marché — que la morsure reste franche, sinon on retomberait
 dans le liseré sans s'en apercevoir.
+
+## Un mur qui ressemble à un mur
+
+Premier essai raté : le sol et les murs avaient **la même texture**. Il y avait
+bien un trait de séparation, mais on confondait une salle, un couloir et un
+massif de pierre — et un trait ne suffit pas à dire « ça monte ».
+
+Ce qui le dit, c'est la **structure**, pas la valeur :
+
+- **le sol est lisse** — de grandes dalles à joints fins, peu de contraste. Il
+  doit se faire oublier : c'est dessus qu'on marche, pas lui qu'on regarde ;
+- **le mur est un tas** — de gros blocs de travers, des éclats, et surtout des
+  **joints noirs et épais** entre eux. Personne n'a bâti les Dessous : on y a
+  entassé.
+
+Plus une **arête** : un liseré clair sur le bord de la pierre, là où elle
+domine le sol. L'ombre de contact dit qu'il y a quelque chose ; l'arête dit que
+ce quelque chose est en relief. Elle ne vient d'aucune direction non plus —
+c'est la même sur les quatre côtés, comme un angle vif vu de n'importe où.
+
+## La coupure du faisceau suivait la grille
+
+Deuxième défaut, et le plus juste : *« l'ombre du faisceau est calculée pour
+chaque tuile de mur, ça n'a aucune cohérence. »*
+
+La morsure était bornée à la sortie de la **première** case touchée. Ça ne
+fuyait pas, mais la profondeur éclairée dépendait alors de l'endroit où le
+rayon entrait dans la case : un rayon qui entrait près du bord loin mordait à
+peine, son voisin mordait tout. La coupure du faisceau sur un mur suivait donc
+la grille au lieu de suivre le faisceau, en dents de scie.
+
+Deux corrections :
+
+- **la morsure traverse les pierres contiguës** et s'arrête à la dernière. Elle
+  ne ressort jamais dans le vide — c'est ça, et seulement ça, qui empêche de
+  voir la salle d'à côté, et le test le tient ;
+- **les cônes passent de 12 à 32 rayons.** Douze suffisaient quand le cône
+  s'arrêtait *avant* la pierre : la coupure tombait toujours sur une face bien
+  droite. Depuis qu'il la mord, deux rayons voisins peuvent s'arrêter à des
+  profondeurs très différentes, et le polygone entre eux devient une facette
+  grossière en travers du mur.
+
+Les cônes de **second plan** — le relais d'une lumière rallumée, le regard d'un
+Guet — en gardent 14 : ils sont dessinés en transparence et personne n'y compte
+les facettes. On ne paie la finesse que là où elle se voit.
+
+Et une bêtise trouvée en mesurant : l'arête ouvrait un chemin et le traçait
+pour **chaque** case du sol, même celles qui ne touchent aucune pierre — deux
+cents appels par image pour rien.

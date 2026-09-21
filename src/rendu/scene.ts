@@ -39,6 +39,7 @@ import {
   percerRond,
   portéesCone,
   portéesRond,
+  RAYONS_FOND,
   raccourcir,
   rayonsSource,
   tracerCone,
@@ -63,7 +64,15 @@ function preparerRayons(
   if (portee)
     joueur.rayons = portéesCone(zone, joueur.x, joueur.y, joueur.regard, portee, cone);
   for (const p of eclaires) {
-    p.rayonsRelais = portéesCone(zone, p.x, p.y, p.regard, D.portee * 5, D.cone + 0.05);
+    p.rayonsRelais = portéesCone(
+      zone,
+      p.x,
+      p.y,
+      p.regard,
+      D.portee * 5,
+      D.cone + 0.05,
+      RAYONS_FOND,
+    );
   }
   for (const p of zone.persos) {
     p.rayonsVue = null;
@@ -79,7 +88,7 @@ function preparerRayons(
     // un cône — c'est la seule chose qui prévienne qu'il n'a pas de dos.
     p.rayonsVue = p.oeil
       ? portéesRond(zone, p.x, p.y, PORTEE_OEIL)
-      : portéesCone(zone, p.x, p.y, p.regard, PORTEE_VUE, 0.42);
+      : portéesCone(zone, p.x, p.y, p.regard, PORTEE_VUE, 0.42, RAYONS_FOND);
   }
 }
 

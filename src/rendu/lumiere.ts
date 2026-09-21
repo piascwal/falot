@@ -22,7 +22,14 @@ import type { Ecran } from './ecran.js';
 // Un cône coupé par un mur n'est plus convexe, et une rastérisation logicielle
 // paie cher chaque segment. 22 -> 12 rayons : la marche d'escalier reste
 // lisible et le coût de dessin retombe.
-export const RAYONS = 12;
+// 12 rayons suffisaient quand le cône s'arrêtait AVANT la pierre : la coupure
+// tombait toujours sur une face de mur bien droite. Depuis qu'il la mord, deux
+// rayons voisins peuvent s'arrêter à des profondeurs très différentes, et le
+// polygone entre les deux devient une facette grossière en travers du mur.
+// Trente-deux : la coupure suit le faisceau, pas la grille.
+export const RAYONS = 32;
+/** Pour les cônes de second plan : un relais, un regard de Guet. */
+export const RAYONS_FOND = 14;
 export function portéesCone(
   zone: Zone,
   wx: number,
@@ -30,10 +37,14 @@ export function portéesCone(
   angle: number,
   portee: number,
   demiAngle: number,
+  /** Combien de rayons. Le faisceau du joueur les mérite tous ; un cône de
+   *  relais ou un regard de Guet est dessiné en transparence, et personne n'y
+   *  compte les facettes — on ne paie donc la finesse que là où elle se voit. */
+  rayons = RAYONS,
 ): number[] {
-  const out = new Array<number>(RAYONS + 1);
-  for (let i = 0; i <= RAYONS; i++) {
-    const a = angle - demiAngle + (2 * demiAngle * i) / RAYONS;
+  const out = new Array<number>(rayons + 1);
+  for (let i = 0; i <= rayons; i++) {
+    const a = angle - demiAngle + (2 * demiAngle * i) / rayons;
     // LE MÊME PARCOURS QUE LES SOURCES RONDES. Le cône avançait par pas fixes
     // et s'arrêtait AVANT la pierre : un faisceau braqué sur un mur laissait
     // ce mur noir, ce qui n'a aucun sens — et le pas fixe enjambait un coin
@@ -53,10 +64,13 @@ export function tracerCone(
   demiAngle: number,
   portees: number[],
 ): void {
+  // Le nombre de rayons se lit dans le tableau : il change d'un cône à
+  // l'autre, et une constante ici trahirait ceux qui en ont moins.
+  const n = portees.length - 1;
   c.beginPath();
   c.moveTo(sx, sy);
-  for (let i = 0; i <= RAYONS; i++) {
-    const a = angle - demiAngle + (2 * demiAngle * i) / RAYONS;
+  for (let i = 0; i <= n; i++) {
+    const a = angle - demiAngle + (2 * demiAngle * i) / n;
     c.lineTo(sx + Math.cos(a) * portees[i], sy + Math.sin(a) * portees[i]);
   }
   c.closePath();
@@ -149,17 +163,41 @@ function distanceMur(
       const porte = zone.porteDe[cy]?.[cx];
       // Une pierre fêlée laisse entrer la lumière plus profond qu'une pierre
       // saine. C'est ce qui rend la fente lisible quand le halo l'atteint — et
-      // ça ne l'éclaire toujours pas quand il ne l'atteint pas. Sans cette
-      // morsure on ne voyait qu'un liseré du haut de la case.
+      // ça ne l'éclaire toujours pas quand il ne l'atteint pas.
       const fendue =
         !porte && zone.fissureDe && zone.fissureDe[cy] && zone.fissureDe[cy][cx];
-      // LA MORSURE FAIT MAINTENANT PRESQUE UNE CASE. À un cinquième, on ne
-      // voyait qu'un liseré du mur et la pierre restait noire : tout le
-      // travail sur les tuiles ne se voyait que par terre. Et ça ne fuit
-      // jamais, parce que le résultat est borné à la SORTIE de la case
-      // touchée — un rayon ne peut pas dépasser la pierre qu'il éclaire,
-      // quelle que soit la morsure qu'on lui donne.
-      return Math.min(t + CASE * (porte ? 0.55 : fendue ? 1 : 0.85), tX, tY, portee);
+      // LA MORSURE FAIT PRESQUE UNE CASE. À un cinquième, on ne voyait qu'un
+      // liseré du mur et la pierre restait noire : tout le travail sur les
+      // tuiles ne se voyait que par terre.
+      const morsure = CASE * (porte ? 0.55 : fendue ? 1 : 0.85);
+      // ELLE TRAVERSE LES PIERRES CONTIGUËS, et s'arrête à la dernière.
+      //
+      // On la bornait à la sortie de la PREMIÈRE case touchée. Ça ne fuyait
+      // pas, mais la profondeur éclairée dépendait alors de l'endroit où le
+      // rayon entrait dans la case : un rayon qui entrait près du bord loin
+      // mordait à peine, son voisin mordait tout. Résultat, la coupure du
+      // faisceau sur un mur suivait la grille au lieu de suivre le faisceau,
+      // en dents de scie — « aucune cohérence », et c'était exact.
+      //
+      // On avance donc tant que la pierre continue, et on s'arrête soit à la
+      // morsure, soit à la sortie de la DERNIÈRE pierre. La lumière ne ressort
+      // jamais dans le vide : c'est ça, et seulement ça, qui empêche de voir
+      // la salle d'à côté.
+      let sortie = Math.min(tX, tY);
+      while (t + morsure > sortie) {
+        const px = tX < tY ? cx + versX : cx;
+        const py = tX < tY ? cy : cy + versY;
+        if (!solide(zone, px, py)) return Math.min(sortie, portee);
+        if (tX < tY) {
+          cx = px;
+          tX += sautX;
+        } else {
+          cy = py;
+          tY += sautY;
+        }
+        sortie = Math.min(tX, tY);
+      }
+      return Math.min(t + morsure, portee);
     }
   }
   return portee;
