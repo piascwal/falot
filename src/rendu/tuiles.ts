@@ -29,6 +29,12 @@ import { TAU } from '../coeur/geometrie.js';
  *  pixels par point, qui est la règle sur téléphone. */
 const FIN = 2;
 const T = CASE * FIN;
+/** Les tailles des objets, en pixels de jeu. Elles viennent de `torches.ts` et
+ *  de la scène : la planche doit être dessinée à la taille où elle s'affiche,
+ *  sinon on la redimensionne et le grain se brouille. */
+export const TORCHE = { haut: CASE * 0.42, large: CASE * 0.1, tete: CASE * 0.17 };
+export const PIERRE = 9;
+
 /** Combien de pierres différentes. Assez pour qu'on ne voie pas le damier,
  *  assez peu pour que la fabrication reste instantanée. */
 const VARIANTES = 6;
@@ -144,10 +150,63 @@ function felure(c: CanvasRenderingContext2D, d: () => number, teinte: string): v
   c.stroke();
 }
 
+/**
+ * LES OBJETS — la torche et la pierre.
+ *
+ * Même règle que les tuiles : de la MATIÈRE, aucune lumière peinte. Un manche
+ * de torche a du fil de bois et un collier de fer ; une pierre a des facettes
+ * et du grain. Ce qui brille — la tête qui brûle — est peint par la scène,
+ * par-dessus, parce que c'est elle qui sait ce qu'il reste de flamme.
+ *
+ * Ils étaient deux rectangles pleins et un rond blanc : à côté d'un sol qui a
+ * maintenant du grain, ça se voyait.
+ */
+function objet(
+  w: number,
+  h: number,
+  dessiner: (c: CanvasRenderingContext2D, d: () => number) => void,
+): HTMLCanvasElement {
+  const t = document.createElement('canvas');
+  t.width = Math.round(w * FIN);
+  t.height = Math.round(h * FIN);
+  const c = t.getContext('2d');
+  if (c) {
+    c.scale(FIN, FIN);
+    dessiner(c, des(0x5e1f));
+  }
+  return t;
+}
+
+/** Du grain sur un objet : le même bruit que sur la pierre, par blocs de deux
+ *  pixels, mais découpé dans ce qui est déjà dessiné. */
+function grainObjet(
+  c: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  force: number,
+): void {
+  const d = des(0x9a3c);
+  c.save();
+  c.globalCompositeOperation = 'source-atop';
+  for (let y = 0; y < h; y += 1)
+    for (let x = 0; x < w; x += 1) {
+      const n = (d() - 0.5) * force;
+      c.fillStyle = n > 0 ? `rgba(255,255,255,${n / 255})` : `rgba(0,0,0,${-n / 255})`;
+      c.fillRect(x, y, 1, 1);
+    }
+  c.restore();
+}
+
 export interface Tuiles {
   sol: HTMLCanvasElement;
   mur: HTMLCanvasElement;
   cendre: HTMLCanvasElement;
+  /** Le manche et le collier d'une torche : ce qui ne brûle pas. */
+  torche: HTMLCanvasElement;
+  /** Sa tête éteinte : du charbon. Allumée, c'est la scène qui la peint. */
+  charbon: HTMLCanvasElement;
+  /** Une pierre : la seule chose ici qui ne brille pas. */
+  pierre: HTMLCanvasElement;
   /** L'ombre de contact, cuite une fois par côté : haut, bas, gauche, droite.
    *  Fabriquer un dégradé par case et par côté coûtait une image de temps en
    *  temps ; quatre images à poser n'en coûtent aucune. */
@@ -220,11 +279,11 @@ export function tuiles(): Tuiles {
   if (planches) return planches;
   // LE SOL : lisse, poussiéreux, de grandes dalles à joints fins. Il doit se
   // faire oublier — c'est dessus qu'on marche, pas lui qu'on regarde.
-  const sol = planche('#1a1a26', (c, d) => {
+  const sol = planche('#20202e', (c, d) => {
     for (let i = 0; i < 5; i++) {
       const w = T * (0.42 + d() * 0.5);
       const h = T * (0.38 + d() * 0.42);
-      const g = 26 + Math.round(d() * 10); // peu de contraste : c'est plat
+      const g = 34 + Math.round(d() * 12); // peu de contraste : c'est plat
       caillou(
         c,
         d() * T - w * 0.3,
@@ -248,13 +307,13 @@ export function tuiles(): Tuiles {
   // d'une salle : un trait de séparation ne suffit pas à dire « ça monte ».
   // Ce qui le dit, c'est la STRUCTURE — le sol est lisse et fait de grandes
   // dalles, le mur est un tas de blocs avec du noir entre eux.
-  const mur = planche('#050509', (c, d) => {
+  const mur = planche('#030307', (c, d) => {
     for (let i = 0; i < 5; i++) {
       // des blocs francs, bien plus gros que les dalles du sol ; le fond
       // presque noir qui reste entre eux fait le mortier
       const w = T * (0.4 + d() * 0.34);
       const h = T * (0.36 + d() * 0.3);
-      const g = 13 + Math.round(d() * 22); // beaucoup de contraste : c'est un tas
+      const g = 9 + Math.round(d() * 16); // beaucoup de contraste : c'est un tas
       caillou(
         c,
         d() * T - w * 0.3,
@@ -269,7 +328,7 @@ export function tuiles(): Tuiles {
     // des éclats : la pierre a été cassée pour être entassée, pas taillée
     for (let i = 0; i < 14; i++) {
       const r = T * (0.02 + d() * 0.06);
-      const g = 8 + Math.round(d() * 24);
+      const g = 6 + Math.round(d() * 18);
       caillou(
         c,
         d() * T,
@@ -286,7 +345,7 @@ export function tuiles(): Tuiles {
     for (let i = 0; i < 4; i++) felure(c, d, 'rgba(0,0,0,0.75)');
   });
 
-  const cendre = planche('#242430', (c, d) => {
+  const cendre = planche('#2a2a38', (c, d) => {
     // LE SOL BRÛLÉ : plus clair, grumeleux, et il craque sous qui se presse.
     for (let i = 0; i < 90; i++) {
       const x = d() * T;
@@ -307,10 +366,96 @@ export function tuiles(): Tuiles {
     grain(c, d, 16);
   });
 
+  // LE MANCHE D'UNE TORCHE : du bois fendu, un collier de fer. C'était une
+  // barre pleine de 6 px de large, et elle n'avait plus rien à voir avec le
+  // sol depuis que le sol a du grain.
+  const torche = objet(TORCHE.large, TORCHE.haut, (c, d) => {
+    const w = TORCHE.large;
+    const h = TORCHE.haut;
+    c.fillStyle = '#3a332c';
+    c.beginPath();
+    c.roundRect(0, 0, w, h, w * 0.3);
+    c.fill();
+    // le fil du bois : trois ou quatre traits verticaux, jamais droits
+    for (let i = 0; i < 4; i++) {
+      c.strokeStyle = d() > 0.5 ? 'rgba(90,78,64,0.55)' : 'rgba(18,15,12,0.6)';
+      c.lineWidth = 0.7;
+      let x = w * (0.2 + d() * 0.6);
+      c.beginPath();
+      c.moveTo(x, 0);
+      for (let y = 0; y < h; y += h / 5) {
+        x += (d() - 0.5) * w * 0.25;
+        c.lineTo(x, y);
+      }
+      c.stroke();
+    }
+    // le collier : la seule pièce de métal, sous la tête
+    c.fillStyle = '#5a5a64';
+    c.fillRect(-w * 0.15, h * 0.16, w * 1.3, h * 0.1);
+    c.fillStyle = 'rgba(0,0,0,0.45)';
+    c.fillRect(-w * 0.15, h * 0.16 + h * 0.07, w * 1.3, h * 0.03);
+    grainObjet(c, w, h, 34);
+  });
+
+  // LA TÊTE ÉTEINTE : du charbon, pas un carré gris.
+  const charbon = objet(TORCHE.tete, TORCHE.tete, (c, d) => {
+    const s = TORCHE.tete;
+    for (let i = 0; i < 5; i++) {
+      const g = 30 + Math.round(d() * 34);
+      c.fillStyle = `rgb(${g},${g - 2},${g - 6})`;
+      c.save();
+      c.translate(s * (0.2 + d() * 0.6), s * (0.2 + d() * 0.6));
+      c.rotate(d() * 3);
+      c.beginPath();
+      c.roundRect(-s * 0.3, -s * 0.24, s * 0.6, s * 0.48, s * 0.1);
+      c.fill();
+      c.restore();
+    }
+    grainObjet(c, s, s, 46);
+  });
+
+  // LA PIERRE : la seule chose ici qui ne brille pas. Des facettes, donc, et
+  // aucune rondeur — un rond blanc se lisait comme une petite lumière, ce qui
+  // est exactement le contraire de ce qu'elle est.
+  const pierre = objet(PIERRE, PIERRE, (c, d) => {
+    const s = PIERRE;
+    c.fillStyle = '#4b505d';
+    c.beginPath();
+    c.moveTo(s * 0.5, s * 0.06);
+    for (let i = 1; i < 7; i++) {
+      const a2 = (i / 7) * TAU;
+      const r = s * (0.36 + d() * 0.12);
+      c.lineTo(s * 0.5 + Math.cos(a2 - 1.4) * r, s * 0.5 + Math.sin(a2 - 1.4) * r);
+    }
+    c.closePath();
+    c.fill();
+    // deux facettes, une claire et une sombre : c'est ça qui fait un caillou
+    c.globalCompositeOperation = 'source-atop';
+    c.fillStyle = 'rgba(150,160,182,0.4)';
+    c.beginPath();
+    c.moveTo(s * 0.18, s * 0.42);
+    c.lineTo(s * 0.54, s * 0.16);
+    c.lineTo(s * 0.66, s * 0.46);
+    c.closePath();
+    c.fill();
+    c.fillStyle = 'rgba(20,22,30,0.5)';
+    c.beginPath();
+    c.moveTo(s * 0.3, s * 0.62);
+    c.lineTo(s * 0.8, s * 0.5);
+    c.lineTo(s * 0.62, s * 0.9);
+    c.closePath();
+    c.fill();
+    c.globalCompositeOperation = 'source-over';
+    grainObjet(c, s, s, 40);
+  });
+
   planches = {
     sol,
     mur,
     cendre,
+    torche,
+    charbon,
+    pierre,
     contacts: [contact(0), contact(1), contact(2), contact(3)],
     taille: T,
     variantes: VARIANTES,

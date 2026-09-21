@@ -49,6 +49,7 @@ import { dessinerPuits } from './puits.js';
 import { dessinerSol } from './sol.js';
 import { flecheVers, texteCerne } from './texte.js';
 import { dessinerTorche } from './torches.js';
+import { PIERRE, tuiles } from './tuiles.js';
 import { dessinerVidange } from './vidange.js';
 import { dessinerOmbre, dessinerTete, dessinerYeuxSeuls } from './visages.js';
 
@@ -464,10 +465,15 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
     ctx.beginPath();
     ctx.arc(hx, hy, CASE * 0.42, 0, TAU);
     ctx.fill();
-    ctx.fillStyle = '#e4e9f5';
-    ctx.beginPath();
-    ctx.arc(hx, hy, 3.6, 0, TAU);
-    ctx.fill();
+    // LA PIERRE, et pas un rond blanc : un rond blanc se lit comme une petite
+    // lumière, ce qui est exactement le contraire de ce qu'elle est. Elle
+    // tourne en vol, parce qu'une pierre lancée tourne.
+    const t2 = tuiles();
+    ctx.save();
+    ctx.translate(hx, hy);
+    ctx.rotate(c.hauteur * 0.06 + c.x * 0.01);
+    ctx.drawImage(t2.pierre, -PIERRE / 2, -PIERRE / 2, PIERRE, PIERRE);
+    ctx.restore();
   }
 
   // --- ondes de choc ---

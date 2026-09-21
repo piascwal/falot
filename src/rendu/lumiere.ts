@@ -117,9 +117,8 @@ export const RAYONS_ROND = 64;
 // bien qu'aucune case traversée n'est omise. Un pas fixe, lui, enjambe un coin
 // dès qu'il le rase en diagonale — mesuré au pas de 0,2 case, 7 rayons sur
 // 7680 passaient au travers d'un mur, jusqu'à 1,7 case de pierre.
-// On dépasse la paroi d'un cinquième de case en s'y arrêtant : on veut voir la
-// face du mur allumée, elle serait bizarrement noire sinon. Une case fait au
-// moins une case d'épaisseur, la lumière ne ressort donc jamais de l'autre côté.
+// La lumière s'arrête à la face OPPOSÉE de la première pierre touchée : la
+// case est éclairée en entier, et le rayon ne va jamais au-delà.
 function distanceMur(
   zone: Zone,
   wx: number,
@@ -151,53 +150,25 @@ function distanceMur(
     }
     if (t >= portee) return portee;
     if (solide(zone, cx, cy)) {
-      // Un mur, on en mord la face. Une porte fermée, elle, est un panneau au
-      // MILIEU de sa case : la lumière doit aller jusqu'à lui, sinon le
-      // battant qui nous barre la route reste dans le noir et on ne comprend
-      // pas ce qui nous arrête.
-      // La morsure est bornée à la SORTIE de la case touchée (tX et tY
-      // pointent déjà la frontière suivante) : un rayon qui ne fait que raser
-      // un coin en diagonale n'y parcourt qu'une fraction de case, et une
-      // morsure fixe le faisait alors ressortir de l'autre côté — mesuré,
-      // 145 rayons sur 7680 filaient ainsi jusqu'à 2,7 cases dans la pierre.
       const porte = zone.porteDe[cy]?.[cx];
-      // Une pierre fêlée laisse entrer la lumière plus profond qu'une pierre
-      // saine. C'est ce qui rend la fente lisible quand le halo l'atteint — et
-      // ça ne l'éclaire toujours pas quand il ne l'atteint pas.
-      const fendue =
-        !porte && zone.fissureDe && zone.fissureDe[cy] && zone.fissureDe[cy][cx];
-      // LA MORSURE FAIT PRESQUE UNE CASE. À un cinquième, on ne voyait qu'un
-      // liseré du mur et la pierre restait noire : tout le travail sur les
-      // tuiles ne se voyait que par terre.
-      const morsure = CASE * (porte ? 0.55 : fendue ? 1 : 0.85);
-      // ELLE TRAVERSE LES PIERRES CONTIGUËS, et s'arrête à la dernière.
+      // UNE PORTE EST UN PANNEAU AU MILIEU DE SA CASE. La lumière doit aller
+      // jusqu'à lui, sinon le battant qui nous barre la route reste dans le
+      // noir et on ne comprend pas ce qui nous arrête.
+      if (porte) return Math.min(t + CASE * 0.55, tX, tY, portee);
+      // UNE PIERRE TOUCHÉE PAR LA LUMIÈRE EST ÉCLAIRÉE EN ENTIER. Le rayon va
+      // jusqu'à la face opposée de la case, et s'y arrête.
       //
-      // On la bornait à la sortie de la PREMIÈRE case touchée. Ça ne fuyait
-      // pas, mais la profondeur éclairée dépendait alors de l'endroit où le
-      // rayon entrait dans la case : un rayon qui entrait près du bord loin
-      // mordait à peine, son voisin mordait tout. Résultat, la coupure du
-      // faisceau sur un mur suivait la grille au lieu de suivre le faisceau,
-      // en dents de scie — « aucune cohérence », et c'était exact.
+      // On mordait d'une profondeur fixe depuis le point d'entrée, et ça
+      // creusait un coin noir en V dans chaque angle : un rayon à 45° entre
+      // par la pointe de la case, donc sa morsure s'arrête bien avant d'avoir
+      // traversé la diagonale, alors que ses voisins filent dans le couloir.
+      // Vu de près, la case d'angle était éclairée sur ses deux bords et noire
+      // en travers — et de loin, on croyait à un bloc manquant.
       //
-      // On avance donc tant que la pierre continue, et on s'arrête soit à la
-      // morsure, soit à la sortie de la DERNIÈRE pierre. La lumière ne ressort
-      // jamais dans le vide : c'est ça, et seulement ça, qui empêche de voir
-      // la salle d'à côté.
-      let sortie = Math.min(tX, tY);
-      while (t + morsure > sortie) {
-        const px = tX < tY ? cx + versX : cx;
-        const py = tX < tY ? cy : cy + versY;
-        if (!solide(zone, px, py)) return Math.min(sortie, portee);
-        if (tX < tY) {
-          cx = px;
-          tX += sautX;
-        } else {
-          cy = py;
-          tY += sautY;
-        }
-        sortie = Math.min(tX, tY);
-      }
-      return Math.min(t + morsure, portee);
+      // « Toute la case, et rien de plus » n'a pas ce défaut : c'est la même
+      // règle quel que soit l'angle d'entrée. Et ça ne fuit toujours pas —
+      // le rayon s'arrête SUR la face opposée, jamais au-delà.
+      return Math.min(tX, tY, portee);
     }
   }
   return portee;

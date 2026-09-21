@@ -1133,3 +1133,48 @@ les facettes. On ne paie la finesse que là où elle se voit.
 Et une bêtise trouvée en mesurant : l'arête ouvrait un chemin et le traçait
 pour **chaque** case du sol, même celles qui ne touchent aucune pierre — deux
 cents appels par image pour rien.
+
+## Le coin noir dans les angles
+
+Signalé en jouant : *« il y a un bug d'éclairage quand on est dans un coin de
+mur, la diagonale n'est pas éclairée »*, avec l'hypothèse qu'un bloc manquait à
+la construction. Reproduit sur un plan en croix fabriqué exprès, et agrandi
+trois fois : le bloc était bien là, et bien dessiné. C'est la **lumière** qui y
+creusait un coin noir en V.
+
+La cause : on mordait d'une **profondeur fixe depuis le point d'entrée**. Un
+rayon à 45° entre dans la case d'angle par sa pointe, donc sa morsure de 0,85
+case s'arrête bien avant d'avoir traversé la diagonale (qui en fait 1,41),
+pendant que ses deux voisins filent dans le couloir. Résultat : la case d'angle
+éclairée sur ses deux bords et noire en travers, et de loin on croit à un trou.
+
+La règle est maintenant : **une pierre touchée par la lumière est éclairée en
+entier.** Le rayon va jusqu'à la face opposée de la case, et s'y arrête. C'est
+la même règle quel que soit l'angle d'entrée, donc plus de V — et ça ne fuit
+toujours pas, puisqu'il s'arrête *sur* la face, jamais au-delà. Au passage,
+`morsure` disparaît : il n'y a plus rien à régler.
+
+Une porte garde son cas à part : c'est un panneau au **milieu** de sa case, et
+la lumière doit aller jusqu'à lui.
+
+## Le delta mur/sol, deuxième passe
+
+Toujours trop faible. Le sol monte (`#20202e`, dalles à 34-46), le mur descend
+(`#030307`, blocs à 9-25). Avec les joints noirs déjà en place, un couloir ne
+se confond plus avec une salle.
+
+## Les torches et la pierre ont de la matière
+
+Même traitement, même règle — de la matière, aucune lumière peinte :
+
+- **la torche** : un manche de bois avec son fil et ses fentes, et un collier
+  de fer sous la tête. C'était une barre pleine de six pixels de large ;
+- **la tête éteinte** : du charbon, plusieurs éclats sombres, plus un carré
+  gris ;
+- **la pierre** : un caillou à facettes, une claire et une sombre, qui tourne
+  en vol. C'était un rond blanc — et un rond blanc se lit comme une petite
+  lumière, ce qui est exactement le contraire de ce qu'elle est.
+
+Ce qui **brûle** reste peint par la scène, pas dans la planche : c'est elle qui
+sait ce qu'il reste de flamme, et de la braise ne se dessine pas dans une image
+figée.
