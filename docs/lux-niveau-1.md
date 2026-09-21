@@ -1698,3 +1698,21 @@ les cases reste : c'est un tableau de progression, pas un pense-bête vide.
 Vérifié en reproduisant le scénario signalé (quatre allers-retours au menu par
 la flèche du HUD, avec Playwright) : 12 boutons avant et après, le bouton
 bascule normalement, et l'étage 10 se choisit sans jamais l'avoir atteint.
+
+## Falot était doré dans la cage, avec le mauvais visage
+
+Retour de test : *« quand Falot monte de niveau dans l'animation où il est
+suivi par les âmes, il est jaune et a une émotion pas bonne. »* Exact —
+`dessinerPuits` le peignait en `#ffe9a8`, l'or des lumières qu'il escorte,
+avec l'humeur `intrigue`. Deux erreurs de copier-coller probables au moment
+d'écrire la cage : sa propre couleur et son propre visage avaient été
+remplacés par ceux de ce qu'il porte.
+
+Il reprend son bleu (`#8fd0ff`, la même valeur que dans `fin.ts` — non
+exportée de `formes.ts`, donc redéfinie localement comme `fin.ts` le fait déjà)
+et son humeur de repos, `inquiet` : la peur au calme, pas la curiosité. C'est
+la même règle partout dans le jeu — il ne change jamais de couleur, seule sa
+lumière grandit.
+
+Vérifié au pixel dans la cage : `148,210,255`, à trois points près de
+`#8fd0ff`.

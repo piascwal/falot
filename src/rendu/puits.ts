@@ -22,6 +22,12 @@ import { texteCerne } from './texte.js';
 import { tuiles } from './tuiles.js';
 import { dessinerTete } from './visages.js';
 
+/** Le bleu de Falot. Il ne change jamais de couleur, dans la cage non plus
+ *  (voir la bible, « les deux lumières »). Redéfini ici comme dans `fin.ts` :
+ *  ce n'est pas exporté de `formes.ts`, et une couleur ne mérite pas un
+ *  import de plus. */
+const BLEU = '#8fd0ff';
+
 /** Hauteur d'un étage dans la cage, et demi-largeur du conduit. */
 const ETAGE = CASE * 7;
 const LARGE = CASE * 2.2;
@@ -332,7 +338,11 @@ export function dessinerPuits(ecran: Ecran, partie: Partie, temps: number): void
   corps.y = fy;
   corps.sx = 1 + puits.vh * 0.14;
   corps.sy = 1 - puits.vh * 0.14;
-  dessinerTete(ecran, corps, '#ffe9a8', D.taille, true, 1, 'intrigue', temps, 1);
+  // IL RESTE LUI. Peint en `#ffe9a8` — l'or des lumières qu'il escorte, pas le
+  // sien — et avec `intrigue` au lieu de sa peur au repos, on le confondait
+  // avec ce qu'il porte. Il ne change jamais de couleur (voir la bible,
+  // « les deux lumières ») : bleu, et inquiet quand rien ne le presse.
+  dessinerTete(ecran, corps, BLEU, D.taille, true, 1, 'inquiet', temps, 1);
 
   // --- « monte » : dit une fois, sans bouton ---
   // Deux secondes de flèche qui pulse au-dessus de lui. Personne ne lit une
