@@ -19,6 +19,7 @@ import {
 } from './interface/ouverture.js';
 import { retenirBilan, retenirLaFin } from './interface/sauvegarde.js';
 import { chargerAtlas, poserLAtlas } from './rendu/atlas.js';
+import { chargerDecors } from './rendu/decors.js';
 import {
   cadrer,
   creerEcran,
@@ -181,6 +182,11 @@ chargerAtlas().then(poserLAtlas);
 // La charger au dernier moment aurait fait clignoter quatre cases noires
 // pendant la seule scène du jeu qu'on ne voit qu'une fois.
 void chargerScenes();
+
+// LES LAMPES MORTES du décor. Elles servent dès la première salle, donc on ne
+// les attend pas mais on les demande tout de suite : une case qui se
+// peuplerait de lampes trois secondes après qu'on y soit entré se verrait.
+void chargerDecors();
 
 // LE SERVICE WORKER, qui rend le jeu installable et jouable hors ligne — même
 // discipline : s'il échoue (vieux navigateur, page ouverte en `file://`), le

@@ -1966,3 +1966,82 @@ Cinq assets de la planche restent inutilisés pour l'instant : les trois
 cônes, le grand faisceau et le dégradé d'ambiance. Le jeu trace déjà ses
 cônes lui-même (`VOLUME` et `cone()` dans `fin.ts`), et il en a besoin :
 celui du phare **balaye**, ce qu'une image ne peut pas faire.
+
+## Des lampes mortes dans les Dessous
+
+La pierre avait du lierre, de la mousse, des racines : de quoi dire que le
+lieu est vieux. Rien ne disait que quelqu'un y était venu. D'où ces objets :
+une lampe à huile ébréchée au pied d'un mur, un chandelier renversé, une
+lanterne couchée, une applique décrochée.
+
+**Toutes éteintes, et ce n'est pas un détail d'habillage.** Ce jeu est un
+moteur de lumière. Une lampe de décor qui brillerait serait une *source*,
+donc du gameplay — et de la lumière gratuite dans un jeu dont le sujet est
+qu'elle manque. Éteinte, elle raconte au contraire exactement ce que sont
+les Dessous : l'endroit où tombe ce qui s'est éteint. C'est la phrase
+d'ouverture du jeu, posée par terre.
+
+**Un aller-retour raté, et sa leçon.** Premier essai : les dessiner *par
+formules*, comme `tuiles.ts` dessine déjà le lierre et la mousse. Résultat
+jeté sans être commité — une lampe à huile en primitives lit comme une
+taupe, l'ampoule comme une tache, et tout était plat à côté d'un lierre qui,
+lui, a du grain. Le projet avait pourtant déjà écrit la règle, à propos des
+visages : *« un visage ne se calcule pas… une tête tracée par formules donne
+une tête moyenne, et une tête moyenne n'est personne. »* Elle vaut pour tout
+objet identifiable. Le procédural est excellent pour de la **matière** —
+personne ne reconnaît une mousse de travers — et mauvais pour un **objet**.
+Ils viennent donc d'une planche dessinée, comme les scènes de la fin.
+
+**Le découpage** (`outils/decors.mjs`) est plus simple que celui de la fin :
+la planche est une grille régulière de 8 × 4 panneaux de 157 px, relevée au
+pixel. Deux particularités. Elle a **deux fonds** — la page à (39,37,32) et
+l'intérieur des panneaux à (70,63,55) — et c'est le second qu'on retire.
+Surtout, chaque objet est posé sur une **ligne de sol dessinée**, à y = 132 :
+on coupe trois pixels au-dessus, sinon chaque lampe traînerait un trait
+horizontal sous elle dans un jeu qui a déjà son propre sol.
+
+**Trois familles ont été écartées, et c'est le vrai travail.** La planche
+promettait huit familles ; elle en a rendu six complètes, une partielle et un
+panneau corrompu (un artefact en étoile). Deux de ses étiquettes sont
+fausses — on découpe donc par **position**, jamais par légende. Ont été
+retirées :
+
+- les **lanternes de table**, dont les quatre panneaux n'étaient pas le même
+  objet à quatre états mais une grande lanterne couchée et trois petites
+  debout : à hauteur normalisée, quatre objets sans rapport ;
+- les **ampoules brisées**, et celle-là a demandé deux essais. Agrandies une
+  fois, elles restaient illisibles : à la taille d'une case, un verre pâle
+  couché sur la pierre n'a plus de silhouette et se lit comme **un petit
+  animal mort** — un contresens franc dans un jeu dont le sujet est d'avoir
+  peur de ce qu'on devine dans le noir.
+
+Restent **cinq familles × quatre variantes** : lampe à huile, chandelier,
+lanterne (dont la seule vraiment couchée de la planche, pour que la famille
+mélange debout et tombé), bougeoir, applique murale.
+
+**La hauteur est réglée famille par famille**, et c'est ce qui donne son
+échelle à la salle : un chandelier occupe 62 % de la case, une lampe à huile
+40 %. À hauteur égale, la petite lampe aurait la taille d'un candélabre.
+
+**Le placement ne coûte rien**, parce que `sol.ts` savait déjà le faire : la
+case est sa propre graine, et les décors se posent *selon ce que la case est*.
+Les lampes vont au pied d'un mur **du bas** uniquement — celui qu'on voit de
+face. Deux raisons : une lampe au milieu d'une salle n'a aucune raison d'y
+être, et contre un mur latéral il faudrait la tourner d'un quart comme on
+tourne la mousse, or une lampe tournée n'est plus une lampe posée. Les
+appliques vont au mur, posées **après** le lierre pour ne pas lui changer sa
+fréquence.
+
+Elles sont **rares** : 13 % des cases de sol adossées à un mur, contre 22 %
+pour la mousse. La mousse est de la texture, une lampe est une phrase — une
+salle en compte quatre ou cinq, et c'est à ce prix qu'on la remarque.
+
+Vérifié de trois façons, parce qu'à 13 % on ne tombe pas dessus en marchant :
+les cinq familles rendues à la taille exacte du jeu sur la vraie pierre du
+tileset (elles lisent toutes) ; `dessinerSol` appelé sur une salle entière
+avec le code de placement réel, sans le voile d'obscurité (quatre lampes au
+pied du mur du bas, une applique sur un pilier) ; et une marche en jeu, qui
+confirme surtout que la feuille se charge. La feuille pèse **156 ko**, la
+palette fait 40 couleurs et sa luminance va de 10 à 136 — au-dessus de la
+pierre (14 à 51), donc lisible, et bien en dessous de ce qui se lirait comme
+allumé. `npm run verifie` : 167 tests verts ; `npm run build` sans erreur.

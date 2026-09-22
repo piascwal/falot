@@ -9,6 +9,7 @@
 import { CASE } from '../coeur/dimensions.js';
 import { TAU } from '../coeur/geometrie.js';
 import type { Partie } from '../coeur/types.js';
+import { decors } from './decors.js';
 import type { Ecran } from './ecran.js';
 import { ornements, tuiles, VARIANTES_GARNITURE, variante } from './tuiles.js';
 import { carreArrondi } from './visages.js';
@@ -111,6 +112,9 @@ function poserGarnitures(
   const { ctx, cam } = ecran;
   const zone = partie.zone;
   const g = ornements();
+  // Les lampes sont une image à charger, pas un calcul : `null` tant qu'elle
+  // n'est pas là, et la pierre se garnit alors comme avant.
+  const d = decors();
   const t = tuiles();
   const pierre = (cx: number, cy: number) =>
     cx < 0 || cy < 0 || cx >= zone.cols || cy >= zone.lignes || zone.mur[cy][cx] === 1;
@@ -158,10 +162,41 @@ function poserGarnitures(
         else if (deFace && h < 0.24) poser(g.suintement, variantePosee(cx, cy, 2), cx, cy);
         else if (h < 0.3 && (deFace || !pierre(cx, cy - 1)))
           poser(g.racines, variantePosee(cx, cy, 3), cx, cy);
+        // UNE APPLIQUE DÉCROCHÉE, et rien d'autre au mur. Posée APRÈS ce qui
+        // pousse, pour ne pas changer la fréquence du lierre : la pierre se
+        // couvre d'abord, l'objet vient combler.
+        else if (deFace && d && h < 0.325)
+          poser(d.applique, variantePosee(cx, cy, 7), cx, cy);
         continue;
       }
       // SUR LE SOL : de la mousse au pied d'une pierre, et du côté de la
       // pierre. Au milieu d'une salle il n'y a rien à faire pousser.
+      // LES LAMPES MORTES, adossées au mur du bas — celui qu'on voit de face.
+      // Deux raisons de ne les poser QUE là : une lampe au milieu d'une salle
+      // n'a aucune raison d'y être, et contre un mur latéral il faudrait la
+      // tourner comme on tourne la mousse — or une lampe tournée d'un quart
+      // n'est plus une lampe posée, c'est un objet qui tombe.
+      //
+      // Elles sont RARES, bien plus que ce qui pousse : la mousse est de la
+      // texture, une lampe est une phrase. Une salle en compte une ou deux,
+      // et c'est à ce prix qu'on la remarque.
+      if (d && pierre(cx, cy + 1)) {
+        const l = HASARD(cx, cy, 8);
+        const famille =
+          l < 0.04
+            ? d.lanterne
+            : l < 0.075
+              ? d.lampeHuile
+              : l < 0.105
+                ? d.bougeoir
+                : l < 0.13
+                  ? d.chandelier
+                  : null;
+        if (famille) {
+          poser(famille, variantePosee(cx, cy, 9), cx, cy);
+          continue;
+        }
+      }
       const cotes: number[] = [];
       if (pierre(cx, cy + 1)) cotes.push(0); // la pierre est en bas
       if (pierre(cx - 1, cy)) cotes.push(1); // à gauche
