@@ -130,7 +130,7 @@ function cone(
 const FEU = FOYER.map(([x, y], i) => [x / GRILLE[i][0], y / GRILLE[i][1]] as const);
 
 /** Le petit canevas où l'on découpe la scène allumée. Il fait la taille d'une
- *  scène — 96 × 80 pixels — donc le découpage coûte huit mille pixels par
+ *  scène — 160 × 192 pixels — donc le découpage coûte trente mille pixels par
  *  case et par image : rien du tout. */
 let decoupe: CanvasRenderingContext2D | null = null;
 function ciseaux(): CanvasRenderingContext2D {
@@ -172,6 +172,7 @@ function dessinerScene(
 ): void {
   const { ctx } = ecran;
   const q = quatre();
+  if (!q) return; // la feuille n'est pas encore arrivée : la case reste noire
   const [L, H] = GRILLE[i];
   const e = Math.max(cw / L, ch / H);
   const ox = Math.round(cx + (cw - L * e) / 2);

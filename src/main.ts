@@ -26,6 +26,7 @@ import {
   surveillerCadence,
   veillerSurLEcran,
 } from './rendu/ecran.js';
+import { chargerScenes } from './rendu/quatre.js';
 import { dessiner } from './rendu/scene.js';
 import { tuiles } from './rendu/tuiles.js';
 
@@ -172,6 +173,14 @@ requestAnimationFrame(boucle);
 // arrivée. Absente, personne ne s'en aperçoit — c'est la même discipline que
 // pour la sauvegarde, un luxe et jamais une dépendance.
 chargerAtlas().then(poserLAtlas);
+
+// LES QUATRE SCÈNES DE LA FIN, chargées tout de suite alors qu'elles ne
+// servent qu'à l'étage douze. C'est exprès : douze étages séparent le
+// démarrage du moment où on en a besoin, donc l'image est là depuis longtemps
+// quand la fin s'ouvre, et le service worker l'a rangée pour les fois d'après.
+// La charger au dernier moment aurait fait clignoter quatre cases noires
+// pendant la seule scène du jeu qu'on ne voit qu'une fois.
+void chargerScenes();
 
 // LE SERVICE WORKER, qui rend le jeu installable et jouable hors ligne — même
 // discipline : s'il échoue (vieux navigateur, page ouverte en `file://`), le

@@ -1853,3 +1853,116 @@ propre panneau de statistiques ; le bouton d'effacement s'arme, se confirme,
 et l'Histoire rouverte ensuite reflète bien la remise à zéro. `npm run
 verifie` reste à 167 tests, tous verts, et `npm run build` construit sans
 erreur.
+
+## Les quatre scènes de la fin sont dessinées, plus peintes en rectangles
+
+Une planche de référence est arrivée : les quatre sujets de la fin — un
+garçon au lit, un couple à table, un piéton sous un réverbère, un phare —
+dessinés, plus les sources de lumière, les tuiles et les effets, chacun
+isolé sur un fond brun uniforme. La question était de savoir si on pouvait
+en tirer des assets utilisables.
+
+**Trois mesures avant de décider.** La planche a **41 863 couleurs
+distinctes** et aucune grille de pixels (des blocs de 2 × 2 ne sont
+uniformes qu'à 51 %, le profil d'une image lisse) : c'est une illustration
+en *style* pixel art, pas du pixel art. Posée telle quelle à côté du
+tileset des souterrains, ça se verrait. Son fond, en revanche, est très
+uniforme — écart-type de 1,8 sur un brun (52, 47, 43) — donc parfaitement
+détourable. Et réduits à la grille du jeu puis **quantifiés à 48
+couleurs**, les sujets redeviennent du vrai pixel art. C'est cette
+troisième mesure qui a débloqué l'affaire.
+
+**Un outil, trois opérations** (`outils/fin-scenes.mjs`, une page Chromium
+comme `pwa-icones.mjs`, donc sans importer le TypeScript du jeu) :
+
+1. **Découper.** L'alpha se déduit de l'écart au brun du fond, puis on
+   **démate** — on retire du bord la part de brun qui s'y est mélangée.
+   Sans ça, chaque sujet garde un liseré marron sur le noir du jeu. Deux
+   familles : un meuble a un bord et se détoure ; une flamme n'en a pas,
+   elle s'ajoute. Pour les huit sources on garde donc l'excès de lumière
+   au-dessus du fond et on les dessine en `lighter` — le brun s'annule
+   alors exactement, sur n'importe quel fond. C'était déjà la grammaire du
+   jeu : halo, cône et floraison passent tous par `lighter`.
+2. **Mettre en scène.** Les sujets sont isolés, les scènes non : chacune se
+   compose dans la grille du jeu (160 × 192, celle que la chambre avait
+   déjà), fond et sol d'abord, sujets ensuite. La version allumée ajoute sa
+   source ; l'éteinte passe la même base par `eteindre()`, la formule du
+   jeu — une chambre dans le noir n'est pas une chambre jaune atténuée,
+   c'est une chambre bleue.
+3. **Quantifier.** Médiane itérative sur les huit scènes **à la fois**,
+   donc une seule palette pour les quatre : sinon chacune dérive vers la
+   sienne et le quadriptyque ne tient plus ensemble.
+
+**Deux plans ont été remis en scène**, parce que la planche ne les cadrait
+pas comme le jeu les racontait. La chambre : le code avait l'enfant *assis,
+bras tendu vers une table de chevet* ; la planche a le garçon couché et
+aucune table de chevet, donc la veilleuse est posée **à même le plancher**,
+devant le pied du lit. Le large : le code avait *une barque au large avec un
+marin dedans* ; la planche a une barque vide et un pêcheur debout, donc le
+pêcheur est **sur les rochers que le phare balaye**, et la barque est tirée
+au sec. Le sens de chaque plan tient — quelqu'un est éclairé sans l'avoir
+demandé, et ne saura jamais par qui.
+
+**Trois bugs, dans l'ordre où ils sont tombés.**
+
+Le premier : l'outil ne resserrait pas la boîte de découpe sur son contenu.
+Un mât de réverbère de soixante pixels flottait au milieu d'une zone vide de
+cent cinquante, et quand on le posait « à quarante-cinq pixels de large »,
+c'est la *boîte* qui faisait quarante-cinq — le mât, lui, en faisait dix-sept
+et disparaissait. Les quinze zones sont maintenant **mesurées** au pixel, et
+resserrées en plus, par sécurité.
+
+Le deuxième : les foyers étaient estimés à l'œil, et faux. Le verre de la
+lanterne du réverbère est à **mi-hauteur** de sa tête (y 26..58 sur 196), pas
+à son sommet : posé trop haut, le foyer faisait briller le ciel *au-dessus*
+de la lampe.
+
+Le troisième, le plus instructif : `dessinerScene` cadre en « cover » — la
+scène est agrandie jusqu'à remplir sa case, donc ce qui dépasse est coupé, et
+la case fait la moitié de l'écran, dont la forme change du téléphone au
+bureau. Mesuré sur les deux extrêmes : un téléphone droit ne laisse voir que
+**x 32..128**, un écran 16/9 que **y 51..141**. La première mise en scène
+posait la veilleuse à x 128 : sur téléphone elle était hors champ, et la
+chambre s'allumait donc sans qu'on voie par quoi. La seconde a mis les deux
+lanternes à y 46, et sur écran large elles étaient coupées par le haut. Tout
+ce qui porte le sens d'un plan tient désormais dans x 34..126 **et**
+y 55..138 ; les fonds, eux, vont jusqu'au bord — c'est même pour ça qu'on
+cadre en « cover » plutôt qu'en « contain », qui laisserait la mer s'arrêter
+net au milieu du noir.
+
+**Le foyer reste écrit deux fois** — dans l'outil, où la lampe est posée, et
+dans `rendu/quatre.ts`, où le masque s'ouvre et où le fil de la lumière se
+rend. C'est exactement la dérive que le jeu s'était déjà prise (« écrit deux
+fois, ça dérivait dès qu'on déplaçait un lit »). On ne peut pas la supprimer
+sans générer du TypeScript ; l'outil **relit donc `quatre.ts` à chaque
+fabrication** et refuse de finir en silence si les deux ne sont plus
+d'accord.
+
+`rendu/quatre.ts` passe de **759 à 249 lignes** : le nuancier, les quatre
+peintres, l'enfant posé pixel par pixel et ses aides de tracé disparaissent.
+Il ne garde que ce qui **bouge**, et qu'on ne peut donc pas peindre dans une
+image : le masque qui grandit, la pluie qui tombe, et les nombres dont le
+faisceau du phare a besoin pour balayer. Le bundle JavaScript passe de
+**133,9 à 126,0 ko** (44,7 ko gzippé), et la feuille des huit scènes pèse
+**63 ko**.
+
+Elle est chargée **au démarrage** alors qu'elle ne sert qu'à l'étage douze :
+douze étages séparent les deux, donc elle est là depuis longtemps quand la
+fin s'ouvre, et le service worker (réseau d'abord, sans liste écrite à la
+main) la range pour les fois suivantes. Le temps qu'elle arrive, la fin
+dessine ses fils et ses halos sur des cases noires — ce qui ne peut se voir
+qu'en ouvrant la fin par le raccourci d'essai, sans avoir joué.
+
+Vérifié dans le jeu, au Playwright, sur les deux formes d'écran (430 × 860
+et 1280 × 720) : à l'étape du fil, on devine les quatre scènes éteintes
+pendant que les lumières remontent ; à l'étape des quatre, chacune est
+révélée dans la forme de sa source — la bulle de la veilleuse, celle de la
+bougie, la colonne du réverbère avec sa pluie par-dessus, et le faisceau du
+phare qui balaye et vient prendre le pêcheur au passage. Les quatre lampes
+tiennent dans le cadre sur les deux écrans. `npm run verifie` : 167 tests,
+tous verts ; `npm run build` construit sans erreur, image comprise.
+
+Cinq assets de la planche restent inutilisés pour l'instant : les trois
+cônes, le grand faisceau et le dégradé d'ambiance. Le jeu trace déjà ses
+cônes lui-même (`VOLUME` et `cone()` dans `fin.ts`), et il en a besoin :
+celui du phare **balaye**, ce qu'une image ne peut pas faire.
