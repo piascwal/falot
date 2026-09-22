@@ -2045,3 +2045,68 @@ confirme surtout que la feuille se charge. La feuille pèse **156 ko**, la
 palette fait 40 couleurs et sa luminance va de 10 à 136 — au-dessus de la
 pierre (14 à 51), donc lisible, et bien en dessous de ce qui se lirait comme
 allumé. `npm run verifie` : 167 tests verts ; `npm run build` sans erreur.
+
+## Les quatre variantes n'en faisaient qu'une
+
+Retour de jeu sur les lampes mortes : trop rares, toutes contre les murs, et
+« ça lag ». Trois reproches, trois réponses — dont une qui a exhumé un défaut
+bien plus vieux que les lampes.
+
+**Le ralenti ne vient pas d'elles**, mesuré en A/B sur le build de production
+(une fois normalement, une fois en bloquant le chargement de la feuille) :
+**0,06 ms par image** d'écart, les deux à 60 i/s. Sous frein processeur ×4 —
+l'ordre de grandeur d'un téléphone — l'écart monte à 1,33 ms sur 57, soit
+2,3 % ; sous frein ×8 il devient *négatif*, c'est-à-dire du bruit.
+
+Le profil dit en revanche où passe le temps : **62 % de travail natif et
+17,5 % de `drawImage`**, aucune fonction JavaScript au-dessus de 1 %. Le coût
+est dans le dessin du sol — chaque case visible reçoit sa tuile, puis jusqu'à
+quatre images d'ombre de contact, soit près d'un millier d'appels par image.
+Les lampes en ajoutent une dizaine. Le ralenti est antérieur, et sa correction
+est ailleurs : garder le sol immobile dans un canevas hors écran et ne le
+redessiner qu'au déplacement de la caméra.
+
+**Elles vont maintenant partout.** Le premier jet ne les posait que contre le
+mur du bas, au motif qu'une lampe au milieu d'une salle n'aurait pas de raison
+d'y être. C'était faux deux fois : on n'en croisait presque jamais, et surtout
+quelqu'un qui traverse une pièce dans le noir pose sa lampe **là où il
+s'arrête**. Elles restent plus denses le long des pierres (13 % contre 3,5 %
+en plein milieu) — on longe les murs quand on a peur — sans y être confinées.
+
+**Et le vrai défaut, trouvé en cherchant pourquoi toutes les lampes se
+ressemblaient.** Le semis tirait :
+
+```
+((cx + 1) * A) ^ ((cy + 1) * B) ^ (sel * C)
+```
+
+À `sel` près, c'est le MÊME nombre décalé d'un masque constant : les tirages
+n'étaient pas indépendants, ils étaient la même valeur vue sous un autre angle.
+Chacun paraissait uniforme pris isolément — c'est ce qui a permis au défaut de
+vivre si longtemps — mais **filtrer sur un tirage contraint mécaniquement tous
+les autres**. Mesuré sur une grille de 300 × 300 :
+
+| Tirage | Sans filtre | Tel que le jeu l'utilise |
+|---|---|---|
+| Variante du lierre | 22508 / 22508 / 22490 / 22494 | **0 / 0 / 0 / 11702** |
+| Variante de la mousse | idem | **19804 / 0 / 0 / 0** |
+| Famille de lampe | — | **96 % de lampes à huile** |
+
+Autrement dit : depuis le début, **tout le lierre du jeu portait la même
+variante et toute la mousse la sienne.** Les « quatre variantes » annoncées
+dans `tuiles.ts` n'en ont jamais fait qu'une. Personne ne l'avait vu, parce que
+c'est invisible tant qu'on ne compare pas deux cases voisines.
+
+La correction tient en trois lignes, dans un module à part (`rendu/semis.ts`) :
+après avoir mélangé les trois entrées, on passe le tout dans une **avalanche**
+(le final de Murmur3), où chaque bit d'entrée influence tous les bits de
+sortie. `variante()` du tileset, elle, n'a pas de sel et n'était pas touchée.
+
+Le module est séparé pour une raison précise : **c'est testable sans DOM**, et
+cette propriété-là méritait cinq tests (`tests/semis.test.ts`). Ils ne
+vérifient pas que le hasard « a l'air uniforme » — la version fautive le
+paraissait aussi — mais l'indépendance entre sels : sur les cases retenues par
+un tirage, les quatre variantes doivent toutes peser près d'un quart. Avec
+l'ancienne formule, trois d'entre elles valaient zéro.
+
+172 tests verts, `npm run build` sans erreur.

@@ -11,6 +11,7 @@ import { TAU } from '../coeur/geometrie.js';
 import type { Partie } from '../coeur/types.js';
 import { decors } from './decors.js';
 import type { Ecran } from './ecran.js';
+import { hasard, varianteDe } from './semis.js';
 import { ornements, tuiles, VARIANTES_GARNITURE, variante } from './tuiles.js';
 import { carreArrondi } from './visages.js';
 
@@ -94,12 +95,10 @@ function ombreDeContact(
  *   — les RACINES traversent n'importe quelle pierre exposée ;
  *   — la MOUSSE se tient sur le sol, contre une pierre, du côté de la pierre.
  */
-const HASARD = (cx: number, cy: number, sel: number): number =>
-  ((((cx + 1) * 374761393) ^ ((cy + 1) * 668265263) ^ (sel * 2246822519)) >>> 0) /
-  4294967296;
+const HASARD = hasard;
 
 const variantePosee = (cx: number, cy: number, sel: number): number =>
-  Math.floor(HASARD(cx, cy, sel + 17) * VARIANTES_GARNITURE) % VARIANTES_GARNITURE;
+  varianteDe(cx, cy, sel + 17, VARIANTES_GARNITURE);
 
 function poserGarnitures(
   ecran: Ecran,
@@ -171,28 +170,37 @@ function poserGarnitures(
       }
       // SUR LE SOL : de la mousse au pied d'une pierre, et du côté de la
       // pierre. Au milieu d'une salle il n'y a rien à faire pousser.
-      // LES LAMPES MORTES, adossées au mur du bas — celui qu'on voit de face.
-      // Deux raisons de ne les poser QUE là : une lampe au milieu d'une salle
-      // n'a aucune raison d'y être, et contre un mur latéral il faudrait la
-      // tourner comme on tourne la mousse — or une lampe tournée d'un quart
-      // n'est plus une lampe posée, c'est un objet qui tombe.
       //
-      // Elles sont RARES, bien plus que ce qui pousse : la mousse est de la
-      // texture, une lampe est une phrase. Une salle en compte une ou deux,
-      // et c'est à ce prix qu'on la remarque.
-      if (d && pierre(cx, cy + 1)) {
-        const l = HASARD(cx, cy, 8);
-        const famille =
-          l < 0.04
-            ? d.lanterne
-            : l < 0.075
-              ? d.lampeHuile
-              : l < 0.105
-                ? d.bougeoir
-                : l < 0.13
-                  ? d.chandelier
-                  : null;
-        if (famille) {
+      // LES LAMPES MORTES, elles, vont PARTOUT. Le premier jet ne les posait
+      // que contre le mur du bas, en se disant qu'une lampe au milieu d'une
+      // salle n'aurait pas de raison d'y être — c'était deux fois faux. On n'en
+      // croisait presque jamais, et surtout : quelqu'un qui traverse une pièce
+      // dans le noir pose sa lampe LÀ OÙ IL S'ARRÊTE, pas contre un mur. Une
+      // lampe abandonnée au milieu d'un couloir raconte même davantage.
+      //
+      // Elles restent PLUS DENSES LE LONG DES PIERRES — on longe les murs
+      // quand on a peur — sans jamais y être confinées. Et contrairement à la
+      // mousse, elles ne tournent pas : un objet posé n'a pas d'orientation à
+      // accorder au mur d'à côté.
+      if (d) {
+        const contre =
+          pierre(cx, cy + 1) ||
+          pierre(cx - 1, cy) ||
+          pierre(cx, cy - 1) ||
+          pierre(cx + 1, cy);
+        if (HASARD(cx, cy, 8) < (contre ? 0.13 : 0.035)) {
+          // La famille se tire d'un AUTRE hasard que la présence : avec un
+          // seul, les rares cases du milieu n'auraient jamais eu droit qu'aux
+          // premières familles du barème.
+          const f = HASARD(cx, cy, 12);
+          const famille =
+            f < 0.3
+              ? d.lanterne
+              : f < 0.56
+                ? d.lampeHuile
+                : f < 0.8
+                  ? d.bougeoir
+                  : d.chandelier;
           poser(famille, variantePosee(cx, cy, 9), cx, cy);
           continue;
         }
