@@ -1,23 +1,34 @@
 /**
- * L'écran-titre et l'écran noir d'ouverture.
+ * L'ÉCRAN-TITRE, l'écran noir d'ouverture, et la navigation entre étages.
  *
- * Deux lignes, aucun bouton, il s'efface tout seul. C'est le seul arrêt qu'on
- * s'autorise avant la première image — et on peut l'écourter d'un geste, parce
- * qu'on le reverra à chaque partie.
+ * Trois vues dans un seul écran : l'ACCUEIL (deux portes, Histoire ou Niveau
+ * infini), l'HISTOIRE (douze étages, débloqués dans l'ordre, un « Continuer »
+ * qui reprend où l'on s'était arrêté), et le PUITS SANS FIN (les étages qu'on
+ * y a déjà joués — une grille de douze n'a aucun sens sur l'infini, alors
+ * cette vue liste ce qui existe et laisse « Continuer » ouvrir le prochain).
+ *
+ * Cliquer un étage jamais fait le lance directement. Cliquer un étage déjà
+ * fait ouvre son bilan — trois barres, une note en étoiles — avec un bouton
+ * pour le rejouer : on retrouve ce qu'on y a laissé avant d'y retourner.
  */
 
 import { chargerZone } from '../coeur/monde/chargement.js';
 import { DERNIER_ETAGE } from '../coeur/monde/paliers.js';
-import { sansFaute } from '../coeur/regles/bilan.js';
 import { lancerLaFin } from '../coeur/regles/fin.js';
 import { lancerLaChute } from '../coeur/regles/seuil.js';
 import type { Partie } from '../coeur/types.js';
-import { lireProgression } from './sauvegarde.js';
+import {
+  lireProgression,
+  oublierLaProgression,
+  type Progression,
+  type Trace,
+} from './sauvegarde.js';
+import { type Etoiles, etoilesDe, noteDe, parfait } from './score.js';
 
-const el = (id: string): HTMLElement => {
+const el = <T extends HTMLElement>(id: string): T => {
   const e = document.getElementById(id);
   if (!e) throw new Error(`Élément « ${id} » absent de la page`);
-  return e;
+  return e as T;
 };
 
 /** Le saut du prologue ne s'ouvre qu'à qui l'a déjà fini une fois. On ne
@@ -108,38 +119,303 @@ export function voirLaFin(partie: Partie): void {
   lancerLaFin(partie);
 }
 
+// ---------------------------------------------------------------------------
+// LA NAVIGATION ENTRE LES TROIS VUES
+// ---------------------------------------------------------------------------
+
+type NomVue = 'accueil' | 'histoire' | 'infini';
+
+/** Bascule quelle vue se voit à l'intérieur de `.titre`, et remonte le
+ *  défilement en haut : sans ça on rouvrait l'Histoire là où le Puits sans
+ *  fin avait été laissé, défilé à mi-hauteur. */
+function montrerVue(nom: NomVue): void {
+  el('vue-accueil').hidden = nom !== 'accueil';
+  el('vue-histoire').hidden = nom !== 'histoire';
+  el('vue-infini').hidden = nom !== 'infini';
+  el('titre').scrollTop = 0;
+}
+
+/** Le plus haut étage débloqué dans l'HISTOIRE : jamais avant 1, jamais après
+ *  le douzième — ce qui est atteint au-delà appartient au Puits sans fin, pas
+ *  à un rang qui n'existe pas ici. */
+const dernierDebloque = (progres: Progression): number =>
+  Math.max(1, Math.min(DERNIER_ETAGE, progres.atteint));
+
+/** Remplit le bouton « Continuer » et le branche sur l'étage visé. Une
+ *  assignation à `.onclick`, jamais `addEventListener` : ce bouton n'est
+ *  reconstruit à chaque ouverture de vue, et un écouteur de plus à chaque
+ *  passage est exactement le bug qui rendait « Choisir un étage » muet
+ *  quelques versions plus tôt — voir le commit qui l'a corrigé. */
+function poserContinuer(
+  bouton: HTMLButtonElement,
+  titre: string,
+  sousTitre: string,
+  cible: number,
+  partie: Partie,
+): void {
+  bouton.innerHTML = '';
+  const b = document.createElement('b');
+  b.textContent = titre;
+  const s = document.createElement('small');
+  s.textContent = sousTitre;
+  bouton.append(b, s);
+  bouton.hidden = false;
+  bouton.onclick = () => descendre(partie, cible);
+}
+
+/** La rangée d'étoiles sous une case, ou l'étoile spéciale à sa place quand
+ *  rien n'est resté dans le noir — voir `interface/score.ts`. */
+function construireEtoiles(e: Etoiles, brillant: boolean): HTMLElement {
+  const rangee = document.createElement('span');
+  rangee.className = 'etoiles';
+  if (brillant) {
+    const speciale = document.createElement('span');
+    speciale.className = 'brillante';
+    speciale.textContent = '✦';
+    rangee.appendChild(speciale);
+    return rangee;
+  }
+  for (let i = 0; i < 3; i++) {
+    const etoile = document.createElement('span');
+    if (i < e) etoile.className = 'pleine';
+    etoile.textContent = '★';
+    rangee.appendChild(etoile);
+  }
+  return rangee;
+}
+
+/** Une ligne du panneau de stats : le mot, la valeur, et une barre épaisse
+ *  colorée par `couleur` — la même donnée que `rendu/bilan.ts` affiche en
+ *  jeu, mais posée ici pour qu'on la regarde posément. */
+function construireLigneStats(
+  mot: string,
+  valeur: string,
+  part: number,
+  couleur: string,
+): HTMLElement {
+  const ligne = document.createElement('div');
+  ligne.className = 'ligne';
+  ligne.style.color = couleur;
+  const entete = document.createElement('div');
+  entete.className = 'entete';
+  const m = document.createElement('span');
+  m.className = 'mot';
+  m.textContent = mot;
+  const v = document.createElement('span');
+  v.className = 'valeur';
+  v.textContent = valeur;
+  entete.append(m, v);
+  const barre = document.createElement('div');
+  barre.className = 'barre-epaisse';
+  const remplissage = document.createElement('i');
+  const pourcent = Math.round(Math.max(0, Math.min(1, part)) * 100);
+  remplissage.style.setProperty('--part', `${pourcent}%`);
+  barre.appendChild(remplissage);
+  ligne.append(entete, barre);
+  return ligne;
+}
+
+/** Ouvre le panneau de stats d'un étage déjà fait : trois lignes, et un
+ *  bouton pour le rejouer. C'est ÇA, cliquer une case déjà faite — on
+ *  retrouve d'abord ce qu'on y a laissé, on ne replonge pas dedans tout de
+ *  suite. */
+function ouvrirPanneau(
+  partie: Partie,
+  n: number,
+  trace: Trace,
+  bouton: HTMLButtonElement,
+  grille: HTMLElement,
+  panneau: HTMLElement,
+): void {
+  for (const autre of grille.querySelectorAll('button.choisi'))
+    autre.classList.remove('choisi');
+  bouton.classList.add('choisi');
+  panneau.innerHTML = '';
+  panneau.hidden = false;
+
+  const titre = document.createElement('h3');
+  titre.textContent = `Étage ${n}`;
+  panneau.appendChild(titre);
+
+  panneau.appendChild(
+    construireLigneStats(
+      'Lumière',
+      `${Math.round(trace.lumiere * 100)} %`,
+      trace.lumiere,
+      '#ffe9a8',
+    ),
+  );
+  panneau.appendChild(
+    construireLigneStats(
+      'Lumières remontées',
+      `${trace.lumieres} / ${trace.lumieresTotal}`,
+      trace.lumieresTotal ? trace.lumieres / trace.lumieresTotal : 1,
+      '#a8f0c8',
+    ),
+  );
+  panneau.appendChild(
+    construireLigneStats(
+      'Pris',
+      trace.morts === 0 ? 'jamais' : `${trace.morts} fois`,
+      trace.morts === 0 ? 1 : 1 / (1 + trace.morts),
+      trace.morts === 0 ? '#a8f0c8' : '#ff7a6b',
+    ),
+  );
+
+  if (parfait(trace)) {
+    const note = document.createElement('p');
+    note.className = 'note-parfaite';
+    note.textContent = '✦ Rien n’est resté dans le noir.';
+    panneau.appendChild(note);
+  }
+
+  const rejouer = document.createElement('button');
+  rejouer.type = 'button';
+  rejouer.className = 'btn rejouer';
+  rejouer.textContent = 'Rejouer';
+  rejouer.addEventListener('click', () => descendre(partie, n));
+  panneau.appendChild(rejouer);
+
+  panneau.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
 /**
- * LA GRILLE DES ÉTAGES. Douze carrés : ce qu'on a éclairé de chacun, et un
- * cadre vert pour ceux qu'on a faits sans faute. On peut y repartir d'où l'on
- * veut, N'IMPORTE LEQUEL, N'IMPORTE QUAND — c'est le tableau de progression
- * et le raccourci pour rejouer un étage précis, et les deux méritaient le
- * même écran plutôt qu'un verrou qui empêchait d'y retourner.
- *
- * ELLE SE RECONSTRUIT ENTIÈREMENT À CHAQUE APPEL. `retourAuTitre` la rappelle
- * chaque fois qu'on revient au menu en cours de partie — sans vider `grille`
- * d'abord, les boutons d'un précédent passage restaient là, et un deuxième
- * retour en ajoutait douze de plus : la grille grossissait sans fin.
+ * BÂTIT UNE GRILLE D'ÉTAGES — l'histoire ou le Puits sans fin, selon la liste
+ * qu'on lui donne et la règle de verrou qu'on lui passe. Elle se reconstruit
+ * ENTIÈREMENT à chaque appel (`grille.innerHTML = ''` d'abord) : les boutons
+ * sont donc toujours neufs, et leur écouteur avec — poser un `addEventListener`
+ * dessus ne peut pas s'empiler d'un passage à l'autre, contrairement à un
+ * bouton statique qu'on ne détruit jamais (voir `poserContinuer`).
  */
-function poserLaGrille(partie: Partie): void {
-  const grille = el('etages');
+function construireGrille(
+  partie: Partie,
+  progres: Progression,
+  etages: readonly number[],
+  verrouille: (n: number) => boolean,
+  grille: HTMLElement,
+  panneau: HTMLElement,
+): void {
   grille.innerHTML = '';
-  const progres = lireProgression();
-  for (let n = 1; n <= DERNIER_ETAGE; n++) {
+  panneau.hidden = true;
+  panneau.innerHTML = '';
+  for (const n of etages) {
     const b = document.createElement('button');
     b.type = 'button';
     b.textContent = String(n);
-    const trace = progres.etages[n];
+    const bloque = verrouille(n);
+    b.disabled = bloque;
+    const trace = bloque ? undefined : progres.etages[n];
     if (trace) {
       b.classList.add('fait');
-      if (sansFaute(trace)) b.classList.add('parfait');
-      const barre = document.createElement('i');
-      barre.style.setProperty('--part', `${Math.round(trace.lumiere * 100)}%`);
-      b.appendChild(barre);
-      b.title = `${Math.round(trace.lumiere * 100)} % éclairé, ${trace.lumieres}/${trace.lumieresTotal} lumières, pris ${trace.morts} fois`;
+      const brillant = parfait(trace);
+      if (brillant) b.classList.add('parfait');
+      b.appendChild(construireEtoiles(etoilesDe(trace), brillant));
+      b.title = `${Math.round(trace.lumiere * 100)} % éclairé, ${trace.lumieres}/${trace.lumieresTotal} lumières, pris ${trace.morts} fois — note ${Math.round(noteDe(trace) * 100)}/100`;
+      b.addEventListener('click', () =>
+        ouvrirPanneau(partie, n, trace, b, grille, panneau),
+      );
+    } else if (!bloque) {
+      b.addEventListener('click', () => descendre(partie, n));
     }
-    b.addEventListener('click', () => descendre(partie, n));
     grille.appendChild(b);
   }
+}
+
+/** L'HISTOIRE : douze étages dans l'ordre, verrouillés au-delà du plus haut
+ *  atteint, et le bouton Continuer qui reprend juste après. */
+function ouvrirHistoire(partie: Partie): void {
+  montrerVue('histoire');
+  const progres = lireProgression();
+  const continuer = el<HTMLButtonElement>('histoire-continuer');
+  if (progres.atteint > DERNIER_ETAGE) {
+    // toute l'histoire a déjà été traversée : rien à reprendre, la grille
+    // seule suffit — chaque case est débloquée et se rejoue directement
+    continuer.hidden = true;
+  } else {
+    const prochain = dernierDebloque(progres);
+    const commence = progres.atteint > 1 || Boolean(progres.etages[1]);
+    poserContinuer(
+      continuer,
+      commence ? 'Continuer' : 'Commencer l’aventure',
+      commence ? `Étage ${prochain}` : 'Le réveil',
+      prochain,
+      partie,
+    );
+  }
+  const etages: number[] = [];
+  for (let n = 1; n <= DERNIER_ETAGE; n++) etages.push(n);
+  construireGrille(
+    partie,
+    progres,
+    etages,
+    (n) => n > dernierDebloque(progres),
+    el('etages'),
+    el('histoire-stats'),
+  );
+}
+
+/** LE PUITS SANS FIN : aucun verrou — il n'y a pas d'ordre à respecter sur
+ *  une infinité d'étages — seulement la liste de ceux qu'on a déjà ouverts, et
+ *  « Continuer » pour en découvrir un de plus. */
+function ouvrirInfini(partie: Partie): void {
+  montrerVue('infini');
+  const progres = lireProgression();
+  const prochain = Math.max(DERNIER_ETAGE + 1, progres.atteint);
+  poserContinuer(
+    el<HTMLButtonElement>('infini-continuer'),
+    'Continuer',
+    `Étage ${prochain}`,
+    prochain,
+    partie,
+  );
+  const joues = Object.keys(progres.etages)
+    .map(Number)
+    .filter((n) => n > DERNIER_ETAGE)
+    .sort((a, b) => a - b);
+  el('infini-vide').hidden = joues.length > 0;
+  construireGrille(
+    partie,
+    progres,
+    joues,
+    () => false,
+    el('infini-etages'),
+    el('infini-stats'),
+  );
+}
+
+/**
+ * EFFACER LA PROGRESSION SAUVEGARDÉE — en deux temps, jamais d'un seul clic :
+ * un premier clic arme le bouton (son texte le dit, sa couleur vire au rouge
+ * d'alerte du jeu) pendant quatre secondes, et seul un second clic DANS ce
+ * délai efface pour de bon. Passé le délai, il se désarme tout seul — se
+ * tromper de bouton ne coûte donc jamais la sauvegarde.
+ */
+let effacementArme: ReturnType<typeof setTimeout> | null = null;
+
+function brancherEffacement(partie: Partie): void {
+  const bouton = el<HTMLButtonElement>('titre-effacer');
+  const repos = bouton.textContent ?? '';
+  bouton.addEventListener('click', () => {
+    if (effacementArme) {
+      clearTimeout(effacementArme);
+      effacementArme = null;
+      oublierLaProgression();
+      bouton.textContent = repos;
+      bouton.classList.remove('arme');
+      // Si on est déjà sur l'une des deux vues de sélection, elle doit
+      // montrer le vide tout de suite — pas seulement au prochain passage.
+      if (!el('vue-histoire').hidden) ouvrirHistoire(partie);
+      if (!el('vue-infini').hidden) ouvrirInfini(partie);
+      return;
+    }
+    bouton.textContent = 'Confirmer — tout effacer ?';
+    bouton.classList.add('arme');
+    effacementArme = setTimeout(() => {
+      effacementArme = null;
+      bouton.textContent = repos;
+      bouton.classList.remove('arme');
+    }, 4000);
+  });
 }
 
 /** Vrai une fois les boutons de l'écran-titre branchés : on y revient en cours
@@ -151,51 +427,48 @@ let branche = false;
  *
  * La flèche en haut à gauche renvoyait au hub du SITE, c'est-à-dire hors du
  * jeu : on quittait la page pour revenir choisir un étage. Elle ramène
- * maintenant là où l'on choisit un étage, sans quitter quoi que ce soit.
- *
- * On repose la grille au passage : on vient peut-être de finir un étage, et
- * elle doit le montrer.
+ * maintenant là où l'on choisit un étage, sans quitter quoi que ce soit — et
+ * toujours sur l'ACCUEIL : revenir en cours de partie ne doit pas rouvrir la
+ * grille précise qu'on avait laissée trois étages plus tôt.
  */
 export function retourAuTitre(partie: Partie): void {
   partie.gele = true;
   partie.fin = null;
   el('titre').classList.add('on');
-  poserLaGrille(partie);
+  montrerVue('accueil');
 }
 
 /** L'écran-titre, et ses boutons. */
 export function poserLEcranTitre(partie: Partie): void {
   partie.gele = true;
   el('titre').classList.add('on');
-  if (branche) {
-    poserLaGrille(partie);
-    return;
-  }
+  montrerVue('accueil');
+  if (branche) return;
   branche = true;
   // Le saut reste visible en permanence. La règle « débloqué après une première
   // fin » est la bonne pour un jeu publié, mais elle rend l'étage 1 obligatoire
   // à chaque essai pendant qu'on le construit. Pour la rétablir :
   // `hidden = !prologueFini()`.
   (el('titre-plus-haut') as HTMLButtonElement).hidden = false;
-  el('titre-descendre').addEventListener('click', () => descendre(partie, 1));
   el('titre-plus-haut').addEventListener('click', () => descendre(partie, 2));
   el('titre-fin').addEventListener('click', () => voirLaFin(partie));
-  // LE BOUTON QUI OUVRE LA GRILLE, branché UNE SEULE FOIS : c'était lui qui
-  // partait en vrille. `poserLaGrille` était rappelée à chaque retour au menu
-  // et rebranchait un écouteur de plus dessus à chaque fois ; après deux ou
-  // trois allers-retours, les clics s'annulaient entre eux et le bouton avait
-  // l'air mort.
-  const grille = el('etages');
-  const bouton = el('titre-etages') as HTMLButtonElement;
-  bouton.addEventListener('click', () => {
-    grille.hidden = !grille.hidden;
-    bouton.textContent = grille.hidden ? 'Choisir un étage' : 'Masquer les étages';
-  });
+  el<HTMLButtonElement>('bouton-histoire').addEventListener('click', () =>
+    ouvrirHistoire(partie),
+  );
+  el<HTMLButtonElement>('bouton-infini').addEventListener('click', () =>
+    ouvrirInfini(partie),
+  );
+  el<HTMLButtonElement>('histoire-retour').addEventListener('click', () =>
+    montrerVue('accueil'),
+  );
+  el<HTMLButtonElement>('infini-retour').addEventListener('click', () =>
+    montrerVue('accueil'),
+  );
+  brancherEffacement(partie);
   // Le timbre de construction, injecté par Vite. En développement il n'existe
   // pas : on ne se demande jamais si on a la dernière version d'un serveur qui
   // recharge tout seul.
   const bati = typeof __BATI__ === 'string' ? `version ${__BATI__}` : '';
   el('bati').textContent = bati;
   el('bati-jeu').textContent = bati;
-  poserLaGrille(partie);
 }

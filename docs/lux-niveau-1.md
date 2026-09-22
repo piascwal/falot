@@ -1762,3 +1762,94 @@ version 13) :
   jeu (page, script, style, police) ;
 - **réseau coupé, rechargement complet** : l'écran-titre s'affiche, on clique
   sur Descendre, l'ouverture se joue — le jeu tourne entièrement hors ligne.
+
+## Deux portes au lieu d'une : Histoire, et le Puits sans fin
+
+Demande : remplacer le bouton unique « Descendre » par deux entrées
+séparées, chacune ouvrant sa propre sélection d'étages plutôt que de
+plonger directement dans le jeu. « Histoire » doit se souvenir d'où on
+s'est arrêté, verrouiller ce qui n'est pas encore atteint, et montrer sous
+chaque étage joué une note en étoiles ; le Puits sans fin suit le même
+principe mais sans verrou — il n'y a pas d'ordre à verrouiller sur
+l'infini. Une progression sauvegardée qui grossit indéfiniment inquiète :
+il faut un bouton pour tout effacer.
+
+**Un seul écran-titre, trois vues.** `#titre` contenait jusqu'ici un seul
+bloc plat ; il en contient maintenant trois (`#vue-accueil`,
+`#vue-histoire`, `#vue-infini`), chacune un `<div class="vue">` que
+`montrerVue()` bascule en posant `hidden`. Le fondu d'ouverture/fermeture du
+menu entier reste réservé à `.titre` elle-même — changer de vue à
+l'intérieur ne rejoue pas cette transition, ce n'est pas un nouvel écran,
+c'est le même écran qui change de contenu.
+
+**La note : une moyenne à trois termes égaux.** `interface/score.ts` calcule,
+pour chaque `Trace` enregistrée (part éclairée, lumières remontées, morts),
+une note de 0 à 1 — la moyenne de trois valeurs ramenées entre 0 et 1, dont
+la part « jamais pris » vaut `1 / (1 + morts)`, exactement la formule que la
+barre « Pris » du bilan affichait déjà. Pas de formule inventée pour
+l'occasion : la même question mérite la même réponse partout. Trois paliers
+calés à vue (0,8 et 0,5) donnent 1, 2 ou 3 étoiles ; un étage qui a une
+`Trace` du tout a été fini, donc jamais zéro étoile. Un passage parfait
+(`sansFaute` — déjà le critère du texte « Rien n'est resté dans le noir » du
+bilan) affiche une étoile spéciale unique, verte et pulsante plutôt qu'un
+nouvel or : `.etages button.parfait` bordait déjà ses cartes de ce vert-là,
+c'est la couleur que le jeu utilise déjà pour dire « parfait » à cet endroit
+précis.
+
+**Le verrou vit dans la grille, pas dans la donnée.** `dernierDebloque()`
+regarde `progression.atteint` et n'autorise que les étages déjà atteints (+1
+pour le suivant à découvrir) ; la grille de l'Histoire l'utilise, celle du
+Puits sans fin passe `() => false` — rien n'y est jamais verrouillé, et elle
+n'affiche de toute façon que les étages qui ont déjà une `Trace` (impossible
+d'y afficher « tous les étages possibles », il n'y a pas de fin). Cette
+décision revient sur une demande plus tôt dans le projet qui retirait tout
+verrou : la dernière consigne l'emporte, et elle ne s'applique qu'à
+l'Histoire — un puits sans fin n'a pas d'ordre à respecter.
+
+**Cliquer un étage fait deux choses différentes selon son état.** Un étage
+sans `Trace` (le prochain non joué) lance directement la partie. Un étage
+déjà fini ouvre son panneau de statistiques à la place — mêmes trois barres
+que le bilan en jeu, réécrites en HTML/CSS (`.panneau-stats`), avec un
+bouton « Rejouer » pour relancer volontairement. Rejouer un étage déjà fait
+ne fait donc jamais perdre le fil par erreur.
+
+**Les barres, plus épaisses partout.** La demande visait d'abord les barres
+du bilan en jeu (`rendu/bilan.ts`) : `EPAISSEUR` passe de 3 px à 7 px. Les
+barres du nouveau panneau de statistiques en HTML reprennent la même
+épaisseur en CSS (`.barre-epaisse`), pour que les deux présentations du même
+chiffre se ressemblent.
+
+**Le bilan s'anime : le calcul se voit, il ne s'affiche plus tout fait.**
+`ligne()` distinguait déjà `vu` (le texte qui apparaît) — sa barre et son
+chiffre grandissaient pourtant dans le même souffle d'une demi-seconde, trop
+vite pour qu'on voie autre chose qu'un résultat déjà écrit. Un second
+paramètre, `avance`, les détache : une fois le texte apparu, chaque barre
+part 0,18 s après la précédente et met 1,1 s à courir jusqu'à sa valeur, en
+ease-out (le même cube que le dézoom de la caméra utilise déjà). Le chiffre
+au-dessus compte en même temps (`monte()`), sauf « jamais » qui reste
+immédiat — il n'y a rien à compter. Le décalage en cascade entre les trois
+lignes fait qu'on voit le bilan se calculer ligne par ligne, plutôt qu'un
+tableau s'afficher d'un bloc.
+
+**Tout vidable en un geste volontairement lent.** Le lien discret « Effacer
+la progression sauvegardée », en bas de l'accueil, ne vide rien au premier
+clic : il se transforme en « Confirmer — tout effacer ? », rouge, et se
+réarme tout seul après quatre secondes sans confirmation. `localStorage`
+est vidé (`oublierLaProgression`, déjà présente mais jusqu'ici jamais
+appelée) seulement sur ce second clic — le même principe de sécurité à deux
+temps qu'on retrouve ailleurs dans les interfaces qui suppriment quelque
+chose sans retour possible.
+
+Vérifié avec Playwright, `localStorage` pré-rempli d'une progression
+synthétique (cinq étages joués dont un parfait et un avec une mort, l'étage
+6 comme dernier atteint, deux étages du Puits sans fin) : l'accueil affiche
+bien les deux boutons et le lien d'effacement ; l'Histoire montre le
+« Continuer / Étage 6 », les étoiles attendues sur chaque étage joué
+(l'étoile spéciale verte pulsante sur le seul étage parfait), et les
+étages 7 à 12 visiblement verrouillés ; cliquer un étage joué ouvre son
+panneau avec les bonnes valeurs, les barres épaisses et « Rejouer » ; le
+Puits sans fin ne liste que les deux étages joués, sans verrou, avec son
+propre panneau de statistiques ; le bouton d'effacement s'arme, se confirme,
+et l'Histoire rouverte ensuite reflète bien la remise à zéro. `npm run
+verifie` reste à 167 tests, tous verts, et `npm run build` construit sans
+erreur.

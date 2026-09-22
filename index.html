@@ -82,21 +82,52 @@
 <small class="bati coin" id="bati-jeu"></small>
 
 <!-- L'écran-titre et l'écran noir d'ouverture. Ils ne servent qu'une fois par
-     partie : passé le premier Seuil, le jeu ne s'arrête plus. -->
+     partie : passé le premier Seuil, le jeu ne s'arrête plus.
+
+     TROIS VUES DANS UN SEUL ÉCRAN : l'accueil, l'histoire (douze étages,
+     verrouillés dans l'ordre), le Puits sans fin (une sélection de ce qu'on y
+     a déjà joué). Une seule est visible à la fois ; `ouverture.ts` bascule
+     entre elles sans jamais quitter `.titre`, donc sans le refondu d'opacité
+     qui, lui, reste réservé à l'ouverture et la fermeture du menu entier. -->
 <div class="titre" id="titre">
-  <em>Les Dessous</em>
-  <strong>Lux &amp; Paranoïa</strong>
-  <p>Falot est la plus petite lampe d'ici. Il ne se souvient pas de qui il
-     éclairait — seulement que quelqu'un, quelque part, avait moins peur grâce
-     à lui.</p>
-  <button type="button" class="btn" id="titre-descendre">Descendre</button>
-  <button type="button" class="lien" id="titre-plus-haut" hidden>Passer le prologue — reprendre à l'étage 2</button>
-  <!-- Raccourci d'essai : la dernière salle sans traverser les onze étages. -->
-  <button type="button" class="lien" id="titre-fin">Voir la fin — raccourci d'essai</button>
-  <!-- La grille des étages : ce qu'on a fait de chacun, et de quoi y retourner.
-       Elle sert de tableau de progression ET de raccourci de mise au point. -->
-  <button type="button" class="lien" id="titre-etages">Choisir un étage</button>
-  <div class="etages" id="etages" hidden></div>
+
+  <div class="vue" id="vue-accueil">
+    <em>Les Dessous</em>
+    <strong>Lux &amp; Paranoïa</strong>
+    <p>Falot est la plus petite lampe d'ici. Il ne se souvient pas de qui il
+       éclairait — seulement que quelqu'un, quelque part, avait moins peur grâce
+       à lui.</p>
+    <button type="button" class="btn" id="bouton-histoire">Histoire</button>
+    <button type="button" class="btn btn-secondaire" id="bouton-infini">Niveau infini</button>
+    <button type="button" class="lien" id="titre-plus-haut" hidden>Passer le prologue — reprendre à l'étage 2</button>
+    <!-- Raccourci d'essai : la dernière salle sans traverser les onze étages. -->
+    <button type="button" class="lien" id="titre-fin">Voir la fin — raccourci d'essai</button>
+    <!-- Rangée basse, discrète : ce n'est pas un choix qu'on fait en jouant,
+         c'est un ménage qu'on fait une fois de temps en temps. -->
+    <button type="button" class="lien discret" id="titre-effacer">Effacer la progression sauvegardée</button>
+  </div>
+
+  <!-- L'HISTOIRE : douze étages, un « Continuer » au-dessus, et le détail
+       d'un étage déjà fait quand on clique dessus (voir `#panneau-stats`). -->
+  <div class="vue" id="vue-histoire" hidden>
+    <button type="button" class="back retour-vue" id="histoire-retour" aria-label="Retour">←</button>
+    <strong class="titre-vue">Histoire</strong>
+    <button type="button" class="continuer" id="histoire-continuer" hidden></button>
+    <div class="etages" id="etages"></div>
+    <div class="panneau-stats" id="histoire-stats" hidden></div>
+  </div>
+
+  <!-- LE PUITS SANS FIN : même principe, mais la liste n'a que les étages
+       déjà joués — une grille de douze n'aurait aucun sens sur l'infini. -->
+  <div class="vue" id="vue-infini" hidden>
+    <button type="button" class="back retour-vue" id="infini-retour" aria-label="Retour">←</button>
+    <strong class="titre-vue">Le Puits sans fin</strong>
+    <button type="button" class="continuer" id="infini-continuer"></button>
+    <p class="etages-vide" id="infini-vide" hidden>Rien d'encore joué ici : « Continuer » ouvre le premier.</p>
+    <div class="etages" id="infini-etages"></div>
+    <div class="panneau-stats" id="infini-stats" hidden></div>
+  </div>
+
   <!-- La date de construction : de quoi vérifier d'un coup d'œil qu'on a bien
        la dernière version, quand le cache de Pages en sert une ancienne. -->
   <small class="bati" id="bati"></small>

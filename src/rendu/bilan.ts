@@ -18,7 +18,22 @@ import type { Partie } from '../coeur/types.js';
 import type { Ecran } from './ecran.js';
 import { texteCerne } from './texte.js';
 
-/** Une ligne de bilan : un mot, un chiffre, et une barre qui se remplit. */
+/** L'épaisseur d'une barre de bilan. Elle valait 3 px, la largeur d'un trait
+ *  de séparation — on la regarde pourtant plusieurs secondes, immobile,
+ *  pendant que le reste de l'écran attend qu'on lève le doigt. Ça mérite plus
+ *  de poids que ce qu'on croise en courant. */
+const EPAISSEUR = 7;
+
+/**
+ * Une ligne de bilan : un mot, un chiffre, et une barre qui se remplit.
+ *
+ * `avance` MESURE LE REMPLISSAGE, SÉPARÉMENT DE `vu` QUI MESURE L'APPARITION.
+ * Les deux valaient un seul nombre avant : la ligne apparaissait ET sa barre
+ * grandissait dans le même souffle de 0,5 seconde, si vite qu'on ne voyait
+ * qu'un bilan déjà écrit, jamais un bilan qui s'écrit. Elles sont maintenant
+ * décorrélées — `vu` fait apparaître le texte, `avance` fait ensuite courir
+ * la barre et compter le chiffre, sur son propre tempo, plus lent.
+ */
 function ligne(
   ecran: Ecran,
   y: number,
@@ -27,6 +42,7 @@ function ligne(
   part: number,
   couleur: string,
   vu: number,
+  avance: number,
 ): void {
   const { ctx, W } = ecran;
   const large = Math.min(W * 0.74, 340);
@@ -38,12 +54,22 @@ function ligne(
   ctx.font = '700 17px ui-sans-serif, system-ui, sans-serif';
   texteCerne(ecran, valeur, x0 + large, y + 2, rgba(couleur, 0.95 * vu), 3.5);
   // la barre : elle dit d'un coup d'œil ce qui manque
-  const by = y + 10;
+  const by = y + 12;
   ctx.fillStyle = `rgba(255,255,255,${0.08 * vu})`;
-  ctx.fillRect(x0, by, large, 3);
-  ctx.fillStyle = rgba(couleur, 0.8 * vu);
-  ctx.fillRect(x0, by, large * clamp(part, 0, 1) * vu, 3);
+  ctx.fillRect(x0, by, large, EPAISSEUR);
+  ctx.fillStyle = rgba(couleur, 0.85 * vu);
+  ctx.fillRect(x0, by, large * clamp(part, 0, 1) * clamp(avance, 0, 1), EPAISSEUR);
 }
+
+/**
+ * UN CHIFFRE QUI MONTE. Le pourcentage, le compte de lumières, le nombre de
+ * morts — les trois s'écrivaient déjà à leur valeur finale dès que `vu`
+ * dépassait son seuil. Ils comptent maintenant depuis zéro, au même rythme
+ * que la barre qu'ils surmontent (`avance`) : c'est ce qui fait qu'on VOIT le
+ * bilan se calculer, plutôt que de le lire tout fait.
+ */
+const monte = (cible: number, avance: number): number =>
+  Math.round(cible * clamp(avance, 0, 1));
 
 export function dessinerBilan(ecran: Ecran, partie: Partie, temps: number): void {
   const bilan = partie.bilan;
@@ -124,33 +150,51 @@ export function dessinerBilan(ecran: Ecran, partie: Partie, temps: number): void
     `rgba(232,232,240,${0.45 * vu})`,
     3,
   );
+  // LE REMPLISSAGE, DÉCALÉ APRÈS L'APPARITION, ET DÉCALÉ ENTRE LES TROIS
+  // LIGNES. `vu` fait apparaître le texte en une demi-seconde ; une fois là,
+  // chaque barre part 0,18 s après la précédente et met 1,1 s à courir
+  // jusqu'à sa valeur — c'est ce petit décalage en cascade qui donne
+  // l'impression d'un calcul qui se fait ligne par ligne, pas d'un tableau
+  // qui s'affiche d'un bloc. Ease-out (le même cube qu'utilise déjà le
+  // dézoom) : ça part vite, ça se pose en douceur.
+  const DEBUT = 0.95; // vu a fini de monter vers 0,45 + 0,5
+  const DUREE = 1.1;
+  const DECALAGE = 0.18;
+  const dou = (x: number) => 1 - (1 - x) ** 3;
+  const avanceA = dou(clamp((bilan.t - DEBUT) / DUREE, 0, 1));
+  const avanceB = dou(clamp((bilan.t - DEBUT - DECALAGE) / DUREE, 0, 1));
+  const avanceC = dou(clamp((bilan.t - DEBUT - DECALAGE * 2) / DUREE, 0, 1));
+
   const y0 = haut + 50;
   ligne(
     ecran,
     y0,
     'Lumière',
-    `${Math.round(bilan.lumiere * 100)} %`,
+    `${monte(Math.round(bilan.lumiere * 100), avanceA)} %`,
     bilan.lumiere,
     '#ffe9a8',
     vu,
+    avanceA,
   );
   ligne(
     ecran,
     y0 + 44,
     'Lumières remontées',
-    `${bilan.lumieres} / ${bilan.lumieresTotal}`,
+    `${monte(bilan.lumieres, avanceB)} / ${bilan.lumieresTotal}`,
     bilan.lumieresTotal ? bilan.lumieres / bilan.lumieresTotal : 1,
     RALLUME,
     vu,
+    avanceB,
   );
   ligne(
     ecran,
     y0 + 88,
     'Pris',
-    bilan.morts === 0 ? 'jamais' : `${bilan.morts} fois`,
+    bilan.morts === 0 ? 'jamais' : `${monte(bilan.morts, avanceC)} fois`,
     bilan.morts === 0 ? 1 : 1 / (1 + bilan.morts),
     bilan.morts === 0 ? '#a8f0c8' : '#ff7a6b',
     vu,
+    avanceC,
   );
 
   if (parfait) {

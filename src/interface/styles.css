@@ -499,13 +499,13 @@ canvas {
   position: fixed;
   inset: 0;
   z-index: 24;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.55rem;
+  /* Il défile, lui — ce n'est plus une seule carte centrée : l'histoire porte
+     un bouton « Continuer » et une grille de douze, le Puits sans fin une
+     liste qui grandit avec ce qu'on y a joué. Centrer un contenu plus haut
+     que l'écran coupe son sommet ; on laisse `.vue` grandir et on défile. */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   text-align: center;
-  padding: 2rem 1.6rem;
   background: radial-gradient(120% 90% at 50% 45%, #14141d 0%, #06060a 70%);
   opacity: 0;
   pointer-events: none;
@@ -516,6 +516,29 @@ canvas {
   opacity: 1;
   pointer-events: auto;
 }
+
+/* UNE VUE = un écran plein à l'intérieur de `.titre` : l'accueil, l'histoire,
+   le Puits sans fin. `min-height` la centre quand elle tient dans l'écran
+   (l'accueil) et la laisse simplement grandir sinon (une grille + son
+   panneau de stats) — c'est `.titre` qui défile, pas elle. */
+.vue {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 2rem 1.6rem 3rem;
+}
+@supports (min-height: 100dvh) {
+  .vue {
+    min-height: 100dvh;
+  }
+}
+.vue[hidden] {
+  display: none;
+}
+
 .titre em {
   font-style: normal;
   font-size: 0.68rem;
@@ -541,6 +564,14 @@ canvas {
   padding: 0.6rem 2.1rem;
   letter-spacing: 0.08em;
 }
+/* HISTOIRE et NIVEAU INFINI sont deux portes égales, pas un choix principal
+   et une option — même forme, seule la seconde perd son fond pour rester en
+   retrait derrière la première, qui est celle que la plupart choisiront. */
+.titre .btn-secondaire {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.16);
+  color: rgba(232, 232, 240, 0.72);
+}
 .titre .lien {
   font: inherit;
   font-size: 0.78rem;
@@ -555,14 +586,91 @@ canvas {
 .titre .lien[hidden] {
   display: none;
 }
+/* Effacer la progression : en retrait, et rouge seulement au moment où le
+   clic est armé — le reste du temps, ça ne doit pas attirer l'œil. */
+.titre .lien.discret {
+  margin-top: 1.7rem;
+  font-size: 0.66rem;
+  color: rgba(232, 232, 240, 0.2);
+}
+.titre .lien.discret.arme {
+  color: #ff7a6b;
+}
 
-/* LA GRILLE DES ÉTAGES. Un carré par étage, son numéro, et ce qu'on y a laissé :
-     une barre de lumière, et une pastille quand il est sans faute. */
+/* La flèche de retour d'une sous-vue : même bouton que celui du HUD en jeu,
+   fixé au même coin — on quitte un menu comme on quitte une zone. */
+.retour-vue {
+  position: fixed;
+  top: max(1rem, env(safe-area-inset-top, 0px));
+  left: max(1rem, env(safe-area-inset-left, 0px));
+  z-index: 2;
+}
+.titre-vue {
+  display: block;
+  font-size: 1.35rem;
+  letter-spacing: 0.02em;
+  color: #ffe9a8;
+  text-shadow: 0 0 20px rgba(255, 200, 110, 0.24);
+  margin: 1.6rem 0 0.1rem;
+}
+
+/* LE BOUTON CONTINUER, au-dessus de la grille : il reprend l'histoire (ou le
+   Puits sans fin) exactement où on l'a laissée, et se lit d'un coup d'œil
+   comme LE geste à faire — plus large que les cases, et doré comme ce qu'on
+   y gagne. */
+.continuer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  width: min(252px, 84vw);
+  margin: 0.5rem 0 1.1rem;
+  padding: 0.6rem 1rem 0.65rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 233, 168, 0.42);
+  background: rgba(255, 233, 168, 0.08);
+  color: #ffe9a8;
+  font: inherit;
+  cursor: pointer;
+}
+.continuer:active {
+  background: rgba(255, 233, 168, 0.17);
+}
+.continuer[hidden] {
+  display: none;
+}
+.continuer b {
+  font-size: 1.02rem;
+  letter-spacing: 0.02em;
+}
+.continuer small {
+  font-size: 0.68rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: rgba(255, 233, 168, 0.6);
+}
+
+.etages-vide {
+  max-width: 19rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: rgba(232, 232, 240, 0.4);
+  margin: 0.3rem 0 0.2rem;
+}
+.etages-vide[hidden] {
+  display: none;
+}
+
+/* LA GRILLE DES ÉTAGES. Un carré par étage, son numéro, et sa NOTE en
+     étoiles — ce qu'on y a laissé se lisait avant dans une barre de 3 pixels
+     qui ne disait qu'un seul des trois chiffres du bilan ; l'étoile en résume
+     les trois d'un coup (voir `interface/score.ts`). */
 .etages {
   display: grid;
   grid-template-columns: repeat(4, 56px);
   gap: 0.5rem;
-  margin-top: 0.9rem;
+  margin-top: 0.2rem;
+  justify-content: center;
 }
 .etages[hidden] {
   display: none;
@@ -582,6 +690,12 @@ canvas {
   cursor: pointer;
   padding: 0;
 }
+/* VERROUILLÉ : encore hors d'atteinte. On ne le cache pas — voir un « 9 »
+   griffé fait comprendre qu'il existe, avant même d'avoir fini le « 8 ». */
+.etages button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
 .etages button.fait {
   border-color: rgba(255, 233, 168, 0.4);
   color: #ffe9a8;
@@ -590,23 +704,122 @@ canvas {
   border-color: rgba(168, 240, 200, 0.75);
   color: #a8f0c8;
 }
-/* la part de lumière, en bas du carré */
-.etages i {
+/* Celui dont le panneau de stats est ouvert, juste en dessous : un fond un
+   peu plus clair, pour qu'on sache à quelle case le panneau répond. */
+.etages button.choisi {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+/* LES ÉTOILES, en bas du carré. Vides par défaut (le gris ambiant), pleines
+   en doré — la même couleur que « fait », parce que c'est la même idée. */
+.etoiles {
   position: absolute;
-  left: 6px;
-  right: 6px;
-  bottom: 7px;
-  height: 3px;
-  border-radius: 2px;
-  background: rgba(255, 255, 255, 0.1);
+  left: 0;
+  right: 0;
+  bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  font-size: 8px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.16);
+}
+.etoiles .pleine {
+  color: #ffe9a8;
+}
+/* L'ÉTOILE SPÉCIALE, pour un étage sans faute. Elle REMPLACE la rangée — une
+   quatrième étoile à côté des trois aurait fait un total à quatre, ce qui ne
+   veut rien dire. Verte, la couleur d'une lumière sauvée (`RALLUME`) : c'est
+   déjà elle qui borde une case « parfait » plus haut, c'est la bonne teinte
+   à faire pulser. */
+.etoiles .brillante {
+  color: #a8f0c8;
+  font-size: 13px;
+  text-shadow: 0 0 7px rgba(168, 240, 200, 0.9);
+  animation: pulse-parfait 1.8s ease-in-out infinite;
+}
+@keyframes pulse-parfait {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+/* LE PANNEAU DE STATS : ce qu'on retrouve en cliquant un étage déjà fait.
+   Mêmes trois chiffres que le bilan en jeu (`rendu/bilan.ts`), mais des
+   barres BIEN PLUS ÉPAISSES — ici on les regarde posément, on ne les découvre
+   pas en une demi-seconde entre deux gestes. */
+.panneau-stats {
+  width: min(300px, 88vw);
+  margin-top: 0.9rem;
+  padding: 0.9rem 1.1rem 1.05rem;
+  border-radius: 14px;
+  border: 1px solid rgba(232, 232, 240, 0.14);
+  background: rgba(255, 255, 255, 0.035);
+  text-align: left;
+}
+.panneau-stats[hidden] {
+  display: none;
+}
+.panneau-stats h3 {
+  margin: 0 0 0.8rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(232, 232, 240, 0.5);
+  text-align: center;
+}
+.panneau-stats .ligne {
+  margin-bottom: 0.65rem;
+}
+.panneau-stats .entete {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.72rem;
+  margin-bottom: 0.3rem;
+}
+.panneau-stats .mot {
+  color: rgba(232, 232, 240, 0.5);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.panneau-stats .valeur {
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.panneau-stats .barre-epaisse {
+  height: 9px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.08);
   overflow: hidden;
 }
-.etages i::before {
-  content: "";
+.panneau-stats .barre-epaisse i {
   display: block;
   height: 100%;
   width: var(--part, 0%);
+  border-radius: 5px;
   background: currentColor;
+}
+.panneau-stats .note-parfaite {
+  margin: 0.75rem 0 0.85rem;
+  font:
+    italic 0.8rem Georgia,
+    serif;
+  color: #a8f0c8;
+  text-align: center;
+}
+.panneau-stats .rejouer {
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin-top: 0.15rem;
 }
 
 /* Le seul arrêt qu'on s'autorise avant la première image : deux lignes, pas
