@@ -14,6 +14,7 @@ import { clamp, TAU } from '../coeur/geometrie.js';
 import { forme } from '../coeur/lectures.js';
 import type { Partie } from '../coeur/types.js';
 import type { Ecran } from './ecran.js';
+import { toileLueur } from './obscurite.js';
 import { carreArrondi } from './visages.js';
 
 export function dessinerVidange(ecran: Ecran, partie: Partie): void {
@@ -32,7 +33,7 @@ export function dessinerVidange(ecran: Ecran, partie: Partie): void {
   // La lumière, sur le calque des lumières (`ecran.ts`) : additive, elle doit
   // s'ajouter à l'image entière, nuit comprise. Posée en `lighter` sur le
   // calque transparent d'au-dessus, elle ne s'ajoutait plus à rien.
-  let ctx = ecran.luctx;
+  let ctx = toileLueur(ecran);
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
 

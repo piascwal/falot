@@ -13,6 +13,26 @@ import type { Partie, Point } from '../coeur/types.js';
  *  l'œil et quatre fois moins cher à rastériser. */
 export const QLUM = 0.5;
 
+/**
+ * LES CALQUES DANS LA PAGE, en option seulement (`?calques=1`).
+ *
+ * Poser la nuit, les lumières et le dessus comme trois toiles superposées
+ * divisait par deux le calcul sur notre machine de mesure — qui n'a pas de
+ * carte graphique. Sur un téléphone, c'est l'inverse qui compte : trois toiles
+ * plein écran de plus à composer à chaque image, dont une en `plus-lighter`
+ * qui oblige le navigateur à relire tout ce qu'il y a dessous. C'est du
+ * remplissage de pixels, précisément ce qui manque à une carte graphique de
+ * téléphone, et le jeu s'est remis à ramer juste après. Par défaut, tout se
+ * compose donc à nouveau dans UNE seule toile.
+ */
+export const CALQUES = (() => {
+  try {
+    return new URLSearchParams(location.search).get('calques') === '1';
+  } catch {
+    return false;
+  }
+})();
+
 /** Le dernier palier passe sous le pixel d'écran : sur une machine qui peine,
  *  mieux vaut une image légèrement floue qu'une image en retard. */
 const PALIERS = [2, 1.5, 1, 0.8];
@@ -98,7 +118,7 @@ export function creerEcran(canvas: HTMLCanvasElement): Ecran {
   dessus.hidden = true;
   // dans cet ordre : le jeu, la nuit (posée juste après lui par
   // `obscurite.ts`), les lumières, puis ce qui passe au-dessus de tout
-  canvas.after(lueur, dessus);
+  if (CALQUES) canvas.after(lueur, dessus);
   const ecran: Ecran = {
     canvas,
     ctx,
@@ -158,10 +178,11 @@ export function redimensionner(ecran: Ecran): void {
   ecran.lum.height = Math.ceil(ecran.canvas.height * QLUM);
   ecran.trou.width = ecran.lum.width;
   ecran.trou.height = ecran.lum.height;
-  ecran.lueur.width = ecran.canvas.width;
-  ecran.lueur.height = ecran.canvas.height;
-  ecran.dessus.width = ecran.canvas.width;
-  ecran.dessus.height = ecran.canvas.height;
+  // sans calques, ces deux toiles ne servent pas : pas de mémoire pour rien
+  ecran.lueur.width = CALQUES ? ecran.canvas.width : 1;
+  ecran.lueur.height = CALQUES ? ecran.canvas.height : 1;
+  ecran.dessus.width = CALQUES ? ecran.canvas.width : 1;
+  ecran.dessus.height = CALQUES ? ecran.canvas.height : 1;
   ecran.ctx.setTransform(ecran.DPR, 0, 0, ecran.DPR, 0, 0);
 }
 

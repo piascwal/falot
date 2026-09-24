@@ -2319,3 +2319,53 @@ lampadaire, dans le noir ; il est maintenant dessous, en entier dans la
 lumière (`outils/fin-scenes.mjs`).
 
 175 tests verts, `npm run build` sans erreur.
+
+## La fin en vrai pixel art, et les calques qui se retournaient contre nous
+
+**Les quatre scènes de la fin** viennent d'une nouvelle planche
+(`outils/planche-fin-2.png`), dessinée cette fois en vrai pixel art : chaque
+pixel du dessin y est un bloc uni, agrandi par le générateur. La grille a été
+retrouvée plutôt que devinée — une transformée de Fourier de l'énergie des
+bords donne un pic net à 2,93 pixels d'image par pixel du dessin, dans les deux
+sens — et chaque case est lue par la médiane de son intérieur. Les sujets
+sortent ainsi à leur taille d'origine, et sont posés **à l'échelle 1, sans
+lissage** : plus de bouillie de réduction. La découpe a un bord franc, et seul
+le fond relié au bord devient transparent (un bois sombre au milieu d'un lit
+ne se troue plus). La version allumée fait briller ce qui est du verre ou une
+flamme dans le dessin même. Le réverbère est retourné pour que le piéton
+marche sous sa lanterne ; le phare est descendu dans la zone sûre ; foyers,
+masques et volumes de `quatre.ts` sont recalés.
+
+**Le jeu ramait de nouveau sur téléphone** après la séance sur l'éclairage.
+La cause la plus probable est la nôtre : poser la nuit, les lumières et le
+dessus comme trois toiles superposées divisait le calcul par deux sur notre
+machine de mesure — mais elle n'a pas de carte graphique. Sur un téléphone,
+c'est ajouter deux toiles plein écran à composer à chaque image, dont une en
+`plus-lighter` qui oblige à relire tout ce qu'il y a dessous : du remplissage
+de pixels, exactement ce qui manque à une carte graphique de téléphone. On
+l'avait écrit en le livrant (« ce chiffre-là reste à confirmer ») ; il ne
+s'est pas confirmé.
+
+Par défaut, tout se recompose donc dans **une seule toile**, et on garde ce
+qui était bon partout : le flou sans filtre (deux réductions de moitié). Les
+calques restent disponibles (`?calques=1`), WebGL aussi (`?lumiere=webgl`),
+mais plus aucun des deux n'est choisi tout seul : faire monter une toile 2D en
+texture WebGL à chaque image est rapide sous Chrome, et Safari la relit par le
+processeur.
+
+Mesuré sur la machine sans carte graphique, processeur bridé ×4 : une toile,
+49 à 51 ms par image immobile et 55 en marchant — contre 58,6 et 61 avant la
+séance sur l'éclairage, et 45 à 48 avec les calques. C'est un peu moins bien
+ici qu'avec les calques, et c'est voulu : ici n'est pas un téléphone. Image
+identique à l'originale (écart moyen 0,02 niveau, aucun pixel à plus de 4).
+
+**Pour ne plus deviner : `?diag`.** Un bandeau dans le coin donne, sur
+l'appareil lui-même, les images par seconde, l'écart moyen et le 95ᵉ centile
+entre deux images, le calcul par image, la finesse de l'écran, le chemin de la
+nuit et le nom de la carte graphique. Rien n'est mesuré sans lui.
+
+Une piste essayée et retirée : sécher la mousse case par case (humidité lue aux
+quatre coins plutôt qu'à chaque grain). Mesuré : 0,7 à 1 ms par bloc avant
+comme après, dans le bruit de la mesure — ce n'est pas là que ça coûte.
+
+175 tests verts, `npm run build` sans erreur.

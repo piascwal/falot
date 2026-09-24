@@ -10,6 +10,7 @@ import { avancer, creerPartie, PAS, PAS_MAX_PAR_IMAGE } from './coeur/partie.js'
 import { montrerToast } from './coeur/voix.js';
 import { brancherClavier } from './entrees/clavier.js';
 import { brancherPointeur, brancherSouffle, brancherTorche } from './entrees/pointeur.js';
+import { brancherDiagnostic } from './interface/diagnostic.js';
 import { creerHud } from './interface/hud.js';
 import {
   descendre,
@@ -52,6 +53,7 @@ brancherPointeur(canvas, hud.pierre, partie);
 brancherSouffle(hud.souffle, partie);
 brancherTorche(hud.torche, partie);
 brancherClavier(partie);
+if (reglages.has('diag')) brancherDiagnostic(ecran);
 
 // L'horloge de la boucle. Déclarée ici parce que `replanter` la remet à zéro :
 // revenir d'une autre application ne doit pas donner plusieurs secondes de

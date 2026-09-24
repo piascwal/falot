@@ -41,7 +41,7 @@
  * pilote qui décroche), on bascule sur la réduction sans rien dire.
  */
 
-import type { Ecran } from './ecran.js';
+import { CALQUES, type Ecran } from './ecran.js';
 import { PENOMBRE } from './lumiere.js';
 
 export type Mode = 'webgl' | 'reduction' | 'filtre';
@@ -75,16 +75,19 @@ function force(): Mode | null {
 export function poserLObscurite(ecran: Ecran): void {
   utilise = true;
   if (!mode) {
-    const voulu = force();
-    mode = voulu ?? (gl.ouvrir(ecran, false) ? 'webgl' : 'reduction');
-    if (mode === 'webgl' && !gl.ouvrir(ecran, voulu === 'webgl')) mode = 'reduction';
+    // WebGL seulement si on le demande : faire monter le calque des trous en
+    // texture à chaque image est rapide sur Chrome, mais Safari relit alors
+    // toute la toile par le processeur. La réduction est bon marché partout.
+    mode = force() ?? 'reduction';
+    if (mode === 'webgl' && !gl.ouvrir(ecran, true)) mode = 'reduction';
   }
   if (mode === 'webgl' && !gl.poser(ecran)) mode = 'reduction';
   if (mode === 'webgl' && gl.etat) {
-    montrer(ecran, gl.etat.toile);
+    if (CALQUES) montrer(ecran, gl.etat.toile);
+    else recopier(ecran, gl.etat.toile);
     return;
   }
-  montrer(ecran, ecran.lum);
+  if (CALQUES) montrer(ecran, ecran.lum);
 
   const { lum, lctx } = ecran;
   lctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -105,7 +108,22 @@ export function poserLObscurite(ecran: Ecran): void {
     lctx.drawImage(q, 0, 0, t.width / 4, t.height / 4, 0, 0, lum.width, lum.height);
   }
   lctx.globalCompositeOperation = 'source-over';
+  if (!CALQUES) recopier(ecran, lum);
 }
+
+/** Sans calques : la nuit est posée dans l'image, étirée à sa taille. Sur une
+ *  toile tenue par la carte graphique, c'est un seul rectangle texturé. */
+function recopier(ecran: Ecran, toile: HTMLCanvasElement): void {
+  ecran.ctx.save();
+  ecran.ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ecran.ctx.imageSmoothingEnabled = true;
+  ecran.ctx.drawImage(toile, 0, 0, ecran.canvas.width, ecran.canvas.height);
+  ecran.ctx.restore();
+}
+
+/** Où dessiner les lumières additives : leur calque, ou l'image elle-même. */
+export const toileLueur = (ecran: Ecran): CanvasRenderingContext2D =>
+  CALQUES ? ecran.luctx : ecran.ctx;
 
 // ---------------------------------------------------------------------------
 // LES CALQUES DANS LA PAGE
@@ -138,7 +156,7 @@ export function ouvrirLesCalques(): void {
  * la nuit de la dernière image resterait sinon posée sur eux.
  */
 export function fermerLesCalques(ecran: Ecran): void {
-  if (utilise === visibles) return;
+  if (!CALQUES || utilise === visibles) return;
   visibles = utilise;
   for (const t of [nuit, ecran.lueur, ecran.dessus]) if (t) t.hidden = !visibles;
 }

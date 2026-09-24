@@ -30,7 +30,7 @@ import { eclaireParAutrui, estEclaire } from '../coeur/regles/lumiere.js';
 import { decouper } from '../coeur/texte.js';
 import type { Partie, Perso } from '../coeur/types.js';
 import { dessinerBilan } from './bilan.js';
-import { type Ecran, QLUM } from './ecran.js';
+import { CALQUES, type Ecran, QLUM } from './ecran.js';
 import { dessinerFin } from './fin.js';
 import { dessinerFantomeManche, dessinerManche, dessinerVisee } from './gestes.js';
 import {
@@ -50,6 +50,7 @@ import {
   fermerLesCalques,
   ouvrirLesCalques,
   poserLObscurite,
+  toileLueur,
 } from './obscurite.js';
 import { dessinerPuits } from './puits.js';
 import { dessinerSol } from './sol.js';
@@ -673,10 +674,13 @@ function dessinerTout(ecran: Ecran, partie: Partie, temps: number): void {
   // LE PERÇAGE, EN UN SEUL COUP ET ADOUCI : voir `obscurite.ts`, qui choisit
   // entre la carte graphique et une réduction sans filtre.
   poserLObscurite(ecran);
-  // Tout ce qui suit passe PAR-DESSUS la nuit : sur le calque `dessus`.
-  effacer(ecran.dctx, ecran.DPR);
-  ctx = ecran.dctx;
-  ecran.ctx = ctx;
+  // Tout ce qui suit passe PAR-DESSUS la nuit : sur le calque `dessus`, quand
+  // les calques sont en service (voir `CALQUES`), et sinon dans l'image.
+  if (CALQUES) {
+    effacer(ecran.dctx, ecran.DPR);
+    ctx = ecran.dctx;
+    ecran.ctx = ctx;
+  }
 
   /* ---- ce qui reste visible par-dessus l'obscurité ---- */
   // On se souvient des OBJETS, jamais du terrain : le fil qu'on a tracé, les
@@ -835,8 +839,8 @@ function dessinerTout(ecran: Ecran, partie: Partie, temps: number): void {
   // Sur le calque `lueur`, fondu en `plus-lighter` dans la page : le même
   // `lighter` qu'avant, mais par-dessus la nuit posée à part.
   const pardessus = ctx;
-  effacer(ecran.luctx, ecran.DPR);
-  ctx = ecran.luctx;
+  if (CALQUES) effacer(ecran.luctx, ecran.DPR);
+  ctx = toileLueur(ecran);
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
   const couleurLumiere = joueur.bonus ? BONUS[joueur.bonus].couleur : f.couleur;
