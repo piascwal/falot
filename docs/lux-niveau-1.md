@@ -2450,3 +2450,30 @@ d'affilée** pour baisser ; un test reproduit le piège (lente, normale, lente,
 normale) et vérifie que la finesse ne bouge pas.
 
 179 tests verts, `npm run build` sans erreur.
+
+## Le lierre revient, et la cage de la fin est en pierre
+
+**« Tu as enlevé les feuillages sur les murs ? »** Pas exprès, mais presque :
+mesuré sur sept étages, le lierre couvrait environ 21 % des parois de face
+avec l'ancien hasard — qui n'était pas uniforme et en posait bien plus que les
+13 % visés — puis exactement 13 % une fois le hasard réparé. Et la mousse
+venait de quitter la moitié des murs avec les zones sèches. Le vert des murs
+avait fondu de deux côtés à la fois.
+
+Le lierre suit maintenant **l'humidité de la mousse** (`humidite()`, exportée
+par `mousse.ts`) : jusqu'à deux parois sur cinq dans les coins humides, une sur
+neuf là où c'est sec — **20 % en moyenne**, et groupé : les murs verts et les
+sols verts se retrouvent aux mêmes endroits, au lieu d'un semis uniforme.
+
+**La cage de la fin.** Quand Falot remonte une dernière fois avec son convoi,
+puis quand il retombe, les parois étaient deux aplats et les paliers des
+traits — la cage des débuts, alors que celle de chaque changement d'étage a
+depuis longtemps la pierre du jeu. Les parois et les dalles de `puits.ts`
+sont devenues deux fonctions partagées (`paroisDePierre`, `dalleDePierre`),
+et la fin s'en sert : la pierre défile vers le bas quand il monte, vers le
+haut quand il tombe. Au passage, les parois de l'escorte s'écartaient si vite
+(×3,4) qu'elles quittaient un écran de téléphone au bout de deux secondes :
+elles ne s'ouvrent plus qu'aux trois quarts de la montée, quand le dehors
+approche.
+
+179 tests verts, `npm run build` sans erreur.

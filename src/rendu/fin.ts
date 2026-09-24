@@ -24,6 +24,7 @@ import { decouper } from '../coeur/texte.js';
 import { FIN } from '../coeur/textes.js';
 import type { Partie } from '../coeur/types.js';
 import type { Ecran } from './ecran.js';
+import { dalleDePierre, paroisDePierre } from './puits.js';
 import { FOYER, GRILLE, masque, pluie, quatre, VOLUME } from './quatre.js';
 import { texteCerne } from './texte.js';
 import { dessinerOmbre, dessinerTete } from './visages.js';
@@ -807,25 +808,36 @@ export function dessinerFin(ecran: Ecran, partie: Partie, temps: number): void {
     const monte = k * k * 0.5 + k * 0.5; // il accélère un peu vers la sortie
     const fyF = H * 0.88 - monte * H * 0.58;
     // les parois du puits, qui s'écartent à mesure qu'on approche du dehors
-    const large = Math.min(W * 0.3, CASE * 2.6) * (1 + monte * 2.4);
-    ctx.fillStyle = '#12121a';
-    ctx.fillRect(0, 0, Math.max(0, W / 2 - large), H);
-    ctx.fillRect(Math.min(W, W / 2 + large), 0, W, H);
+    // Elles s'écartaient si vite (×3,4) que sur un téléphone elles quittaient
+    // l'écran au bout de deux secondes : on ne voyait jamais leur pierre. Elles
+    // ne s'ouvrent plus qu'aux trois quarts de la montée, quand le dehors
+    // approche.
+    const large = Math.min(W * 0.3, CASE * 2.6) * (1 + monte * monte * 1.6);
+    // LA MÊME CAGE QU'À CHAQUE ÉTAGE (`puits.ts`) : la pierre du jeu sur les
+    // côtés, qui défile vers le bas quand il monte, et de vraies dalles au
+    // lieu de traits. C'étaient deux aplats et des lignes : la dernière montée
+    // ne ressemblait à aucune des onze autres.
+    const gauche = Math.max(0, W / 2 - large);
+    const droite = Math.min(W, W / 2 + large);
+    const montee = monte * H * 0.58;
+    paroisDePierre(ecran, gauche, droite, -montee);
     // LES PALIERS QUI DÉFILENT. Sans eux on ne monte pas : deux murs qui
     // s'écartent dans du noir, ça ne bouge pas, ça grandit.
-    ctx.strokeStyle = 'rgba(255,255,255,0.075)';
-    ctx.lineWidth = 2;
     const ecartE = 150;
-    const defileE = (monte * H * 0.58) % ecartE;
-    ctx.beginPath();
+    const defileE = montee % ecartE;
     for (let i = -1; i < H / ecartE + 2; i++) {
       const y = i * ecartE + defileE;
-      ctx.moveTo(Math.max(0, W / 2 - large), y);
-      ctx.lineTo(W / 2 - D.taille * 1.4, y);
-      ctx.moveTo(W / 2 + D.taille * 1.4, y);
-      ctx.lineTo(Math.min(W, W / 2 + large), y);
+      dalleDePierre(
+        ecran,
+        gauche,
+        W / 2 - D.taille * 1.4,
+        W / 2 + D.taille * 1.4,
+        droite,
+        y,
+        0.8 * (1 - monte * 0.5),
+        -montee,
+      );
     }
-    ctx.stroke();
     // le fil qu'il laisse derrière lui, celui du jeu
     ctx.strokeStyle = `rgba(${VERT},0.16)`;
     ctx.lineWidth = 1.4;
@@ -877,24 +889,26 @@ export function dessinerFin(ecran: Ecran, partie: Partie, temps: number): void {
   // consolation — c'est la raison pour laquelle il recommence : en bas, il en
   // reste à remonter, et lui, il tient encore.
   const reprend = clamp((chute - 0.45) / 0.3, 0, 1);
-  ctx.strokeStyle = 'rgba(255,255,255,0.09)';
-  ctx.lineWidth = 2;
   const large = Math.min(W * 0.34, CASE * 2.2);
-  ctx.fillStyle = '#12121a';
-  ctx.fillRect(0, 0, W / 2 - large, H);
-  ctx.fillRect(W / 2 + large, 0, W, H);
-  // les paliers défilent vers le haut, de plus en plus vite
+  // la cage de pierre, comme à chaque étage — mais c'est elle qui file vers
+  // le haut, de plus en plus vite
+  const tombe = chute * 2600;
+  paroisDePierre(ecran, W / 2 - large, W / 2 + large, tombe);
   const ecart = 160;
-  const defile = (chute * 2600) % ecart;
-  ctx.beginPath();
+  const defile = tombe % ecart;
   for (let i = -1; i < H / ecart + 2; i++) {
     const y = i * ecart - defile;
-    ctx.moveTo(W / 2 - large, y);
-    ctx.lineTo(W / 2 - D.taille * 1.3, y);
-    ctx.moveTo(W / 2 + D.taille * 1.3, y);
-    ctx.lineTo(W / 2 + large, y);
+    dalleDePierre(
+      ecran,
+      W / 2 - large,
+      W / 2 - D.taille * 1.3,
+      W / 2 + D.taille * 1.3,
+      W / 2 + large,
+      y,
+      0.85,
+      tombe,
+    );
   }
-  ctx.stroke();
   // CE QU'IL A LAISSÉ EN MONTANT. À chaque palier, les petites lumières qu'il
   // y a rallumées ; elles défilent à l'envers pendant qu'il retombe. C'est
   // tout le tunnel qu'il vient de faire, repris en cinq secondes — et c'est la

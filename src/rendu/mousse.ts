@@ -65,6 +65,17 @@ const TRANSITION = 0.16;
 
 const lisse = (t: number): number => t * t * (3 - 2 * t);
 
+/**
+ * L'HUMIDITÉ en un point du monde (en cases), de 0 (sec) à 1 (ruisselant).
+ * C'est la même que celle de la mousse : le lierre la lit aussi (`sol.ts`), si
+ * bien que les murs verts et les sols verts se retrouvent aux mêmes endroits.
+ */
+export function humidite(x: number, y: number): number {
+  return lisse(
+    Math.max(0, Math.min(1, (bruit(x, y, MAILLE_HUMIDE, 41) - SEC) / TRANSITION)),
+  );
+}
+
 /** Un bruit de valeur, continu : des nombres tirés aux nœuds d'une grille,
  *  interpolés entre eux. C'est lui qui fait des TACHES plutôt qu'un liseré. */
 function bruit(x: number, y: number, maille: number, sel: number): number {
@@ -179,9 +190,7 @@ export function semerMousse(
         const px = cx + u;
         const py = cy + v;
         const n = 0.66 * bruit(px, py, MAILLE, 31) + 0.34 * bruit(px, py, MAILLE_FINE, 37);
-        const humide = lisse(
-          Math.max(0, Math.min(1, (bruit(px, py, MAILLE_HUMIDE, 41) - SEC) / TRANSITION)),
-        );
+        const humide = humidite(px, py);
         if (humide <= 0) continue;
         // forte au pied du mur (f²), là où c'est humide, rongée par les taches (n)
         const h = f * f * humide * (0.35 + 1.1 * n);

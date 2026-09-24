@@ -11,7 +11,7 @@ import { TAU } from '../coeur/geometrie.js';
 import type { Partie } from '../coeur/types.js';
 import { decors } from './decors.js';
 import type { Ecran } from './ecran.js';
-import { semerMousse } from './mousse.js';
+import { humidite, semerMousse } from './mousse.js';
 import { type Pinceau, poserLePlancher } from './plancher.js';
 import { hasard, varianteDe } from './semis.js';
 import { ornements, tuiles, VARIANTES_GARNITURE, variante } from './tuiles.js';
@@ -134,14 +134,22 @@ function poserGarnitures(
         // pierre enfouie, une liane serait dessinée dans le noir pour rien.
         const deFace = !pierre(cx, cy + 1);
         const h = HASARD(cx, cy, 1);
-        if (deFace && h < 0.13) poser(g.lierre, variantePosee(cx, cy, 1), cx, cy);
-        else if (deFace && h < 0.24) poser(g.suintement, variantePosee(cx, cy, 2), cx, cy);
-        else if (h < 0.3 && (deFace || !pierre(cx, cy - 1)))
+        // LE LIERRE SUIT L'EAU, comme la mousse. Il était tiré au hasard sur
+        // une paroi sur huit, partout pareil ; depuis que la mousse ne pousse
+        // plus que là où c'est humide, les murs avaient presque perdu leur
+        // vert. Il couvre maintenant jusqu'à deux parois sur cinq dans les
+        // coins humides, et en garde une sur neuf là où c'est sec : les murs
+        // verts et les sols verts se retrouvent aux mêmes endroits.
+        const pL = deFace ? 0.11 + 0.29 * humidite(cx + 0.5, cy + 1) : 0;
+        if (h < pL) poser(g.lierre, variantePosee(cx, cy, 1), cx, cy);
+        else if (deFace && h < pL + 0.11)
+          poser(g.suintement, variantePosee(cx, cy, 2), cx, cy);
+        else if (h < pL + 0.17 && (deFace || !pierre(cx, cy - 1)))
           poser(g.racines, variantePosee(cx, cy, 3), cx, cy);
         // UNE APPLIQUE DÉCROCHÉE, et rien d'autre au mur. Posée APRÈS ce qui
         // pousse, pour ne pas changer la fréquence du lierre : la pierre se
         // couvre d'abord, l'objet vient combler.
-        else if (deFace && d && h < 0.325)
+        else if (deFace && d && h < pL + 0.195)
           poser(d.applique, variantePosee(cx, cy, 7), cx, cy);
         continue;
       }

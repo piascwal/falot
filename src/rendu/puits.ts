@@ -97,6 +97,87 @@ function caler(m: CanvasPattern | null, cx: number, cy: number): void {
   m?.setTransform(new DOMMatrix().translate(-cx, -cy));
 }
 
+/**
+ * LES DEUX PAROIS DE PIERRE d'un conduit, de part et d'autre du vide qui va de
+ * `xg` à `xd` (en pixels d'écran). `decalage` est la hauteur dont la pierre a
+ * défilé : c'est lui qui fait qu'on monte, ou qu'on tombe.
+ *
+ * Partagé avec la fin (`fin.ts`) : quand Falot remonte une dernière fois avec
+ * son convoi, puis quand il retombe, c'est la même cage qu'à chaque changement
+ * d'étage. Elle y était encore dessinée en deux aplats et des traits.
+ */
+export function paroisDePierre(
+  ecran: Ecran,
+  xg: number,
+  xd: number,
+  decalage: number,
+): void {
+  const { ctx, W, H } = ecran;
+  const pierre = motifs(ctx);
+  caler(pierre.mur, 0, decalage);
+  ctx.fillStyle = '#12121a';
+  ctx.fillRect(0, 0, Math.max(0, xg), H);
+  ctx.fillRect(xd, 0, Math.max(0, W - xd), H);
+  if (pierre.mur) {
+    ctx.fillStyle = pierre.mur;
+    ctx.fillRect(0, 0, Math.max(0, xg), H);
+    ctx.fillRect(xd, 0, Math.max(0, W - xd), H);
+  }
+  // L'OMBRE DU CONDUIT : la pierre s'assombrit en s'éloignant du vide. Sans
+  // elle la paroi est un mur plat collé au bord de l'écran, et on ne sent pas
+  // qu'on est dans un trou.
+  const creux = (x0: number, x1: number) => {
+    if (Math.abs(x1 - x0) < 1) return;
+    const g = ctx.createLinearGradient(x0, 0, x1, 0);
+    g.addColorStop(0, 'rgba(6,6,11,0.94)');
+    g.addColorStop(1, 'rgba(6,6,11,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(Math.min(x0, x1), 0, Math.abs(x1 - x0), H);
+  };
+  creux(0, xg);
+  creux(W, xd);
+  ctx.strokeStyle = 'rgba(255,255,255,0.13)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(xg, 0);
+  ctx.lineTo(xg, H);
+  ctx.moveTo(xd, 0);
+  ctx.lineTo(xd, H);
+  ctx.stroke();
+}
+
+/**
+ * UNE DALLE de la cage, vue par la tranche, de `x0` à `x1` avec son ouverture
+ * au milieu (de `o0` à `o1`) : c'est par là qu'on passe. `y` est son dessus.
+ */
+export function dalleDePierre(
+  ecran: Ecran,
+  x0: number,
+  o0: number,
+  o1: number,
+  x1: number,
+  y: number,
+  alpha: number,
+  decalage: number,
+): void {
+  const { ctx } = ecran;
+  const pierre = motifs(ctx);
+  const ep = 11;
+  if (pierre.sol) {
+    caler(pierre.sol, 0, decalage);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = pierre.sol;
+    ctx.fillRect(x0, y - ep, o0 - x0, ep);
+    ctx.fillRect(o1, y - ep, x1 - o1, ep);
+    // le dessous de la dalle : une dalle vue d'en bas est sombre
+    ctx.fillStyle = 'rgba(6,6,11,0.55)';
+    ctx.fillRect(x0, y - 3, o0 - x0, 3);
+    ctx.fillRect(o1, y - 3, x1 - o1, 3);
+    ctx.restore();
+  }
+}
+
 /** Un Seuil : un rond de lumière, au milieu de la cage. */
 function portail(ecran: Ecran, x: number, y: number, r: number, force: number): void {
   if (force <= 0.01) return;
@@ -140,36 +221,9 @@ export function dessinerPuits(ecran: Ecran, partie: Partie, temps: number): void
   const ey = (y: number) => y - cam.y;
 
   // --- les parois : de la pierre, comme partout ailleurs ---
-  const pierre = motifs(ctx);
-  caler(pierre.mur, cam.x, cam.y);
-  ctx.fillStyle = '#12121a';
-  ctx.fillRect(0, 0, ex(-LARGE), H);
-  ctx.fillRect(ex(LARGE), 0, W - ex(LARGE), H);
-  if (pierre.mur) {
-    ctx.fillStyle = pierre.mur;
-    ctx.fillRect(0, 0, ex(-LARGE), H);
-    ctx.fillRect(ex(LARGE), 0, W - ex(LARGE), H);
-  }
-  // L'OMBRE DU CONDUIT : la pierre s'assombrit en s'éloignant du vide. Sans
-  // elle la paroi est un mur plat collé au bord de l'écran, et on ne sent pas
-  // qu'on est dans un trou.
-  const creux = (x0: number, x1: number) => {
-    const g = ctx.createLinearGradient(x0, 0, x1, 0);
-    g.addColorStop(0, 'rgba(6,6,11,0.94)');
-    g.addColorStop(1, 'rgba(6,6,11,0)');
-    ctx.fillStyle = g;
-    ctx.fillRect(Math.min(x0, x1), 0, Math.abs(x1 - x0), H);
-  };
-  creux(0, ex(-LARGE));
-  creux(W, ex(LARGE));
-  ctx.strokeStyle = 'rgba(255,255,255,0.13)';
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.moveTo(ex(-LARGE), 0);
-  ctx.lineTo(ex(-LARGE), H);
-  ctx.moveTo(ex(LARGE), 0);
-  ctx.lineTo(ex(LARGE), H);
-  ctx.stroke();
+  // (le motif était calé sur la caméra entière ; seul son défilement vertical
+  // se voit, la paroi ne bougeant pas de côté)
+  paroisDePierre(ecran, ex(-LARGE), ex(LARGE), cam.y);
 
   // --- les paliers ---
   // Le plus bas dessiné est le premier étage de l'aventure, le plus haut trois
@@ -187,20 +241,16 @@ export function dessinerPuits(ecran: Ecran, partie: Partie, temps: number): void
     // LA DALLE, avec son ouverture au milieu : c'est par là qu'on passe. Elle
     // a maintenant une épaisseur, et c'est le dallage du jeu qu'on voit par la
     // tranche — deux traits ne faisaient pas un plancher.
-    if (pierre.sol) {
-      caler(pierre.sol, cam.x, cam.y);
-      ctx.save();
-      ctx.globalAlpha = vu * (futur ? 0.4 : 1);
-      ctx.fillStyle = pierre.sol;
-      const ep = 11;
-      ctx.fillRect(ex(-LARGE), ey(y) - ep, LARGE - D.taille * 1.3, ep);
-      ctx.fillRect(ex(D.taille * 1.3), ey(y) - ep, LARGE - D.taille * 1.3, ep);
-      // le dessous de la dalle : une dalle vue d'en bas est sombre
-      ctx.fillStyle = 'rgba(6,6,11,0.55)';
-      ctx.fillRect(ex(-LARGE), ey(y) - 3, LARGE - D.taille * 1.3, 3);
-      ctx.fillRect(ex(D.taille * 1.3), ey(y) - 3, LARGE - D.taille * 1.3, 3);
-      ctx.restore();
-    }
+    dalleDePierre(
+      ecran,
+      ex(-LARGE),
+      ex(-D.taille * 1.3),
+      ex(D.taille * 1.3),
+      ex(LARGE),
+      ey(y),
+      vu * (futur ? 0.4 : 1),
+      cam.y,
+    );
     ctx.strokeStyle = `rgba(255,255,255,${0.1 * vu + (futur ? 0 : 0.06)})`;
     ctx.lineWidth = 2;
     ctx.beginPath();
