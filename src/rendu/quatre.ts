@@ -50,10 +50,10 @@ export const GRILLE: readonly (readonly [number, number])[] = [
  * étaient écrits séparément avant, et ça dérivait dès qu'on déplaçait un lit.
  */
 export const FOYER: readonly (readonly [number, number])[] = [
-  [110, 134], // l'ampoule de la veilleuse, posée à même le plancher
-  [81, 82], // la flamme de la bougie, entre eux deux
-  [98, 55], // le verre de la lanterne du réverbère
-  [55, 54], // la lanterne du phare
+  [109, 132], // le dôme de la veilleuse, posée à même le plancher
+  [80, 80], // la flamme de la bougie, entre eux deux
+  [59, 63], // le verre de la lanterne du réverbère
+  [50, 58], // la lanterne du phare
 ];
 
 /**
@@ -70,8 +70,8 @@ export const VOLUME: readonly (readonly [number, number, number, number, number]
   [
     null,
     null,
-    [98, 60, Math.PI / 2, 120, 0.56], // x, y, angle, portée, demi-ouverture
-    [59, 54, 0, 150, 0.24],
+    [59, 68, Math.PI / 2, 120, 0.7], // x, y, angle, portée, demi-ouverture
+    [54, 58, 0, 150, 0.24],
   ];
 
 /**
@@ -136,23 +136,24 @@ export function masque(
   k: number,
   temps: number,
 ): void {
-  if (i === 0) bulle(c, 110, 134, 140 * k, 1, 0.88);
+  if (i === 0) bulle(c, 109, 132, 140 * k, 1, 0.88);
   else if (i === 1) {
     // une flamme n'est jamais stable : elle respire, à peine
     const vacille = 1 + Math.sin(temps * 6.1) * 0.03 + Math.sin(temps * 2.3) * 0.02;
-    bulle(c, 81, 82, 124 * k * vacille, 1, 0.94);
+    bulle(c, 80, 80, 124 * k * vacille, 1, 0.94);
   } else if (i === 2) {
     // le verre, puis la colonne qui tombe : un lampadaire n'éclaire pas
     // derrière lui, il éclaire SOUS lui
-    bulle(c, 98, 55, 44 * k, 1, 1);
-    faisceau(c, 98, 60, Math.PI / 2, 120 * k, 0.58);
+    // assez large pour prendre le piéton en entier, parapluie compris
+    bulle(c, 59, 63, 44 * k, 1, 1);
+    faisceau(c, 59, 68, Math.PI / 2, 120 * k, 0.72);
   } else {
     // la tour et son rocher, puis le trait vers le large. LE BALAYAGE reste
     // près de l'horizontale : c'est là qu'il y a quelqu'un, et un phare qui
     // éclaire le ciel n'a jamais sauvé personne. La bulle s'arrête avant le
     // pêcheur : c'est le faisceau qui vient le prendre, en passant.
-    bulle(c, 56, 100, 84 * k, 1, 1);
-    faisceau(c, 59, 54, Math.sin(temps * 0.8) * 0.26, 160 * k, 0.24);
+    bulle(c, 48, 105, 84 * k, 1, 1);
+    faisceau(c, 54, 58, Math.sin(temps * 0.8) * 0.26, 160 * k, 0.24);
   }
 }
 
@@ -180,7 +181,7 @@ export function pluie(
     const y = gy % HAUT;
     if (y > 150) continue; // elle s'écrase sur le trottoir
     // plus visible dans la colonne de lumière, comme dehors
-    const dedans = Math.abs(gx - 98) < 36 && y > 68 ? 0.6 : 0.22;
+    const dedans = Math.abs(gx - FOYER[2][0]) < 36 && y > FOYER[2][1] + 10 ? 0.6 : 0.22;
     c.fillStyle = `rgba(166,182,208,${dedans * (0.35 + 0.65 * k)})`;
     c.fillRect(Math.round(ox + gx * e), Math.round(oy + y * e), p, p * 3);
   }
