@@ -46,6 +46,28 @@ export interface Ecran {
    */
   trou: HTMLCanvasElement;
   tctx: CanvasRenderingContext2D;
+  /**
+   * LES CALQUES POSÉS PAR-DESSUS LE JEU, dans la page et non plus dans l'image.
+   *
+   * L'obscurité était recopiée sur l'image à chaque image, étirée du double :
+   * mesuré, cette seule copie prenait un cinquième du temps de calcul. Elle est
+   * maintenant une toile posée sur le jeu (voir `obscurite.ts`), et c'est le
+   * navigateur qui l'étire en composant la page — sur la carte graphique, pour
+   * rien. Du coup, ce qui se dessinait APRÈS l'obscurité ne peut plus aller
+   * dans l'image du dessous : il lui faut ses propres toiles, au-dessus.
+   *
+   *   — `lueur` : les lumières additives (halos chauds, balayages rouges, la
+   *     lumière qui quitte le corps). Elle est fondue en `plus-lighter`,
+   *     c'est-à-dire exactement le `lighter` du canevas, mais entre deux
+   *     éléments de la page. Pleine résolution : les motes de la vidange ont
+   *     un cœur blanc d'un pixel, qu'une demi-résolution éteignait ;
+   *   — `dessus` : tout ce qui reste visible par-dessus la nuit (le fil, les
+   *     lueurs aperçues, les textes, les jauges, la manche). Pleine résolution.
+   */
+  lueur: HTMLCanvasElement;
+  luctx: CanvasRenderingContext2D;
+  dessus: HTMLCanvasElement;
+  dctx: CanvasRenderingContext2D;
   W: number;
   H: number;
   DPR: number;
@@ -64,8 +86,19 @@ export function creerEcran(canvas: HTMLCanvasElement): Ecran {
   const lctx = lum.getContext('2d');
   const trou = document.createElement('canvas');
   const tctx = trou.getContext('2d');
-  if (!ctx || !lctx || !tctx)
+  const lueur = document.createElement('canvas');
+  const luctx = lueur.getContext('2d');
+  const dessus = document.createElement('canvas');
+  const dctx = dessus.getContext('2d');
+  if (!ctx || !lctx || !tctx || !luctx || !dctx)
     throw new Error('Pas de contexte 2D : ce navigateur ne peut pas jouer.');
+  lueur.className = 'calque additif';
+  dessus.className = 'calque';
+  lueur.hidden = true;
+  dessus.hidden = true;
+  // dans cet ordre : le jeu, la nuit (posée juste après lui par
+  // `obscurite.ts`), les lumières, puis ce qui passe au-dessus de tout
+  canvas.after(lueur, dessus);
   const ecran: Ecran = {
     canvas,
     ctx,
@@ -73,6 +106,10 @@ export function creerEcran(canvas: HTMLCanvasElement): Ecran {
     lctx,
     trou,
     tctx,
+    lueur,
+    luctx,
+    dessus,
+    dctx,
     W: 0,
     H: 0,
     DPR: 1,
@@ -121,6 +158,10 @@ export function redimensionner(ecran: Ecran): void {
   ecran.lum.height = Math.ceil(ecran.canvas.height * QLUM);
   ecran.trou.width = ecran.lum.width;
   ecran.trou.height = ecran.lum.height;
+  ecran.lueur.width = ecran.canvas.width;
+  ecran.lueur.height = ecran.canvas.height;
+  ecran.dessus.width = ecran.canvas.width;
+  ecran.dessus.height = ecran.canvas.height;
   ecran.ctx.setTransform(ecran.DPR, 0, 0, ecran.DPR, 0, 0);
 }
 

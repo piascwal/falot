@@ -44,6 +44,31 @@ canvas {
   touch-action: none;
 }
 
+/* LES CALQUES DU JEU (`rendu/ecran.ts`, `rendu/obscurite.ts`) : la nuit, les
+   lumières, et ce qui passe par-dessus, posés exactement sur le canevas du jeu.
+   C'est le navigateur qui les étire et les superpose, sur la carte graphique :
+   c'est tout l'intérêt. Ils laissent passer le doigt jusqu'au jeu. */
+.calque {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+.calque[hidden] {
+  display: none;
+}
+/* le `lighter` du canevas, entre deux éléments de la page ; `screen` pour les
+   navigateurs qui ne le connaissent pas encore — presque pareil sur des
+   lumières aussi faibles */
+.calque.additif {
+  mix-blend-mode: screen;
+}
+@supports (mix-blend-mode: plus-lighter) {
+  .calque.additif {
+    mix-blend-mode: plus-lighter;
+  }
+}
+
 /* ---- interface ---- */
 
 /* LA PIERRE DU JEU, posée par `hud.ts` : une tuile de mur et une de sol,

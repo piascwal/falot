@@ -147,8 +147,10 @@ const SCENES = [
       ['mat-reverbere', 82, 24, 45],
       // SOUS la colonne de lumière, pas à côté : c'est tout le sujet du plan
       // — personne ne lui a rien demandé et il ne saura jamais qu'il a été
-      // éclairé. Posé plus à gauche, il marchait dans le noir à côté.
-      ['homme-parapluie', 36, 72, 46],
+      // éclairé. À x = 36, il marchait encore au bord du cône, le parapluie
+      // dans le noir : on ne lisait que ses jambes. Collé au mât, il est en
+      // entier dans la lumière qui tombe.
+      ['homme-parapluie', 58, 72, 46],
     ],
     // le verre de la lanterne haute, mesuré dans le sujet : y 26..58 sur 196,
     // donc bien plus bas que le sommet du mât — le foyer posé trop haut

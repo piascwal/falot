@@ -2228,3 +2228,94 @@ test nouveau dans `paliers.test.ts` vérifie les chiffres du bilan ; les trois
 tests de la fin passent désormais par lui.
 
 173 tests verts, `npm run build` sans erreur.
+
+## L'éclairage : la nuit posée dans la page, et le flou sans filtre
+
+**D'abord mesurer où ça coûte.** On a coupé tour à tour chaque étape de
+l'éclairage, processeur bridé ×4 (l'ordre d'un téléphone), étage 6 :
+
+| Ce qu'on coupe | Image (moy.) | Calcul JS |
+|---|---|---|
+| Rien | 55 à 65 ms | 24 à 30 ms |
+| Le calque d'obscurité entier | **22 ms** | **5 ms** |
+| Seulement le flou (`filter: blur`) | 43 à 51 ms | 12 à 15 ms |
+| Seulement la lumière additive | 52 à 60 ms | 23 à 27 ms |
+| Les perçages (vidés avant le flou) | inchangé | inchangé |
+
+Le calque d'obscurité, c'était **les deux tiers de l'image**. Et pas à cause des
+perçages — les polygones de lumière et leurs dégradés, qui ne coûtent presque
+rien — mais de ce qu'on en faisait ensuite : le **filtre de flou**, qui coûte la
+même chose quel que soit ce qu'il floute, et la **copie** du calque sur
+l'image, étirée du double. Le profileur, ligne par ligne, donne cette copie à
+elle seule à 22 % du temps processeur. C'est aussi ce calque qui faisait
+tomber la finesse de l'écran à 0,8 au bout d'une seconde.
+
+**La nuit n'est plus recopiée : elle est posée dans la page.** Sa toile est un
+élément placé exactement sur le canevas du jeu, et c'est le navigateur qui
+l'étire en composant la page — sur la carte graphique d'un téléphone, pour
+rien. Conséquence : ce qui se dessinait *après* la nuit ne peut plus aller
+dans l'image du dessous. Deux calques de plus, dans cet ordre (`ecran.ts`) :
+
+- `lueur`, les lumières additives (halos chauds, balayages rouges, la lumière
+  qui quitte le corps), fondu en `mix-blend-mode: plus-lighter` — le `lighter`
+  du canevas, mais entre deux éléments de la page (`screen` pour les
+  navigateurs qui ne le connaissent pas) ;
+- `dessus`, tout ce qui reste visible par-dessus le noir : le fil, les yeux,
+  les textes, les jauges, la manche.
+
+Ils ne s'affichent que quand le monde est dessiné : le bilan, la cage et la fin
+se dessinent seuls, et la nuit de la dernière image resterait sinon posée sur
+eux.
+
+**Le flou sans filtre, deux façons** (`obscurite.ts`) :
+
+- **WebGL**, quand il y a une vraie carte graphique : un flou gaussien en deux
+  passes, de même écart type que la `PENOMBRE`, et la nuit calculée dans la
+  même passe. La toile WebGL *est* le calque posé dans la page : aucune copie
+  entre WebGL et le canevas 2D. Les perçages, eux, restent en Canvas 2D — c'est
+  l'identité du jeu, on n'y touche pas ; le calque des trous monte seulement
+  comme texture ;
+- **la réduction**, sinon : deux réductions exactes de moitié (chacune fait la
+  moyenne de quatre pixels), puis un agrandissement bilinéaire. Une boîte de
+  quatre suivie d'une tente de quatre : un flou d'écart type 2, la même
+  pénombre, pour trois petits `drawImage`.
+
+**Le repli.** WebGL absent, contexte qui ne se crée pas, programme qui ne se
+compile pas, contexte perdu en cours de partie (onglet en arrière-plan) : on
+bascule sur la réduction, sans rien dire. Et WebGL n'est pas pris quand il est
+**émulé sur le processeur** (SwiftShader, llvmpipe…) : mesuré ici même, il
+coûtait 50 ms de calcul par image, contre 11 pour la réduction. Un test vérifie
+ce tri sur des noms de cartes réels. `?lumiere=webgl`, `?lumiere=reduction` ou
+`?lumiere=filtre` forcent un chemin, pour comparer.
+
+**Même image.** Comparé pixel à pixel à l'ancienne version, sur une image
+rendue avec une horloge synthétique (le monde avance exactement pareil) :
+écart moyen de 0,24 niveau sur 255 pour la réduction, 0,47 pour WebGL, et
+0,004 % des pixels à plus de 8 niveaux. Deux vrais écarts trouvés en route et
+corrigés : les motes de la vidange, dessinées en `lighter` sur le calque
+transparent, ne s'ajoutaient plus à rien (elles vont maintenant sur `lueur`) ;
+et `lueur` en demi-résolution éteignait leur cœur blanc d'un pixel (il est
+maintenant en pleine résolution).
+
+**Le résultat, en A/B** — l'ancienne version servie à côté, les deux en
+alternance, trois passes chacune, processeur bridé ×4 :
+
+| | Avant | Après |
+|---|---|---|
+| Immobile, image moyenne | 58,6 ms | **45,0 ms** (−23 %) |
+| En marchant, image moyenne | 61,0 ms | **51,8 ms** (−15 %) |
+| Pointes (95ᵉ centile) | 83 ms | **67 ms** |
+| Calcul JS par image, immobile | 25,9 ms | **10,8 ms** (−58 %) |
+| Calcul JS par image, en marchant | 27,5 ms | **13,8 ms** (−50 %) |
+
+Ce qui reste entre le calcul et l'image, ici, c'est la composition des calques :
+cette machine de mesure n'a pas de carte graphique et la fait au processeur. Sur
+un téléphone, c'est précisément le travail que la carte graphique fait sans
+qu'on le voie — mais on ne l'a pas mesuré sur un vrai téléphone, et ce chiffre-là
+reste à confirmer.
+
+En passant : le piéton au parapluie de la fin marchait au bord du cône du
+lampadaire, dans le noir ; il est maintenant dessous, en entier dans la
+lumière (`outils/fin-scenes.mjs`).
+
+175 tests verts, `npm run build` sans erreur.

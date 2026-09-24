@@ -6,9 +6,11 @@
  * un rond pour le halo, un cône pour un faisceau. Chaque trou est un polygone
  * de visibilité calculé au rayon, donc la pierre arrête la lumière.
  *
- * C'est l'identité visuelle du jeu, et c'est la raison pour laquelle le projet
- * reste en Canvas 2D : refaire ça en masques WebGL, c'est refaire la seule
- * chose qu'on veut garder à l'identique.
+ * C'est l'identité visuelle du jeu, et c'est la raison pour laquelle les
+ * perçages restent en Canvas 2D : refaire ça en masques WebGL, c'est refaire la
+ * seule chose qu'on veut garder à l'identique. WebGL ne prend que la suite —
+ * adoucir le calque et en déduire la nuit (`obscurite.ts`) — où il n'y a rien
+ * à dessiner, seulement un flou à calculer.
  */
 
 import { CASE } from '../coeur/dimensions.js';
@@ -132,6 +134,11 @@ export const RAYONS_ROND = 64;
  * fois composé, à pleine résolution, coûtait 50 à 80.
  *
  * En pixels du calque, donc deux fois moins qu'à l'écran.
+ *
+ * Et même un seul filtre par image restait trop cher : c'était, avec la copie
+ * du calque sur l'image, la moitié du temps de calcul. Le flou se fait
+ * maintenant sans filtre — sur la carte graphique, ou par réduction : voir
+ * `obscurite.ts`. L'écart type, lui, est resté celui-ci.
  */
 export const PENOMBRE = 2;
 

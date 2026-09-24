@@ -34,7 +34,6 @@ import { type Ecran, QLUM } from './ecran.js';
 import { dessinerFin } from './fin.js';
 import { dessinerFantomeManche, dessinerManche, dessinerVisee } from './gestes.js';
 import {
-  PENOMBRE,
   percerCone,
   percerDisque,
   percerRond,
@@ -46,6 +45,12 @@ import {
   tracerCone,
   tracerRond,
 } from './lumiere.js';
+import {
+  effacer,
+  fermerLesCalques,
+  ouvrirLesCalques,
+  poserLObscurite,
+} from './obscurite.js';
 import { dessinerPuits } from './puits.js';
 import { dessinerSol } from './sol.js';
 import { flecheVers, texteCerne } from './texte.js';
@@ -95,6 +100,20 @@ function preparerRayons(
 }
 
 export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
+  // Ce qui passe par-dessus la nuit se dessine sur ses propres calques (voir
+  // `ecran.ts`) : `ecran.ctx` y est redirigé en cours de route, et rendu au
+  // jeu ici quoi qu'il arrive.
+  const principal = ecran.ctx;
+  ouvrirLesCalques();
+  try {
+    dessinerTout(ecran, partie, temps);
+  } finally {
+    ecran.ctx = principal;
+    fermerLesCalques(ecran);
+  }
+}
+
+function dessinerTout(ecran: Ecran, partie: Partie, temps: number): void {
   // Le bilan : l'étage qu'on vient de finir, vu de haut.
   if (partie.bilan) {
     dessinerBilan(ecran, partie, temps);
@@ -112,7 +131,8 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
     dessinerPuits(ecran, partie, temps);
     return;
   }
-  const { ctx, lctx, cam, W, H } = ecran;
+  let ctx = ecran.ctx;
+  const { cam, W, H } = ecran;
   const { joueur, zone } = partie;
   const eclaires = partie.eclaires;
   const f = forme(joueur);
@@ -515,17 +535,10 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
   }
 
   /* ---- calque d'obscurité ---- */
-  lctx.setTransform(ecran.DPR * QLUM, 0, 0, ecran.DPR * QLUM, 0, 0);
-  lctx.globalCompositeOperation = 'source-over';
-  lctx.fillStyle = 'rgba(8,8,14,0.975)';
-  lctx.fillRect(0, 0, W, H);
-
-  // LES TROUS S'ACCUMULENT À PART, et on les ôtera tous ensemble, floutés.
-  // Voir `PENOMBRE` : un filtre coûte une surface temporaire, et le prix
-  // dépend du NOMBRE de perçages filtrés, pas du rayon du flou — mesuré, un
-  // flou par source coûtait de treize à trente-quatre images perdues sur trois
-  // cents, que le rayon vaille 1,5 ou 2,5 pixels. Un seul filtre par image les
-  // rend toutes.
+  // LES TROUS S'ACCUMULENT À PART, et on les ôtera tous ensemble, adoucis.
+  // Voir `PENOMBRE` et `obscurite.ts` : adoucir source par source coûtait de
+  // treize à trente-quatre images perdues sur trois cents ; une seule passe
+  // par image les rend toutes, et elle ne passe même plus par un filtre.
   const tctx = ecran.tctx;
   tctx.setTransform(1, 0, 0, 1, 0, 0);
   tctx.clearRect(0, 0, ecran.trou.width, ecran.trou.height);
@@ -657,19 +670,13 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
         p.rayonsVue,
       );
   }
-  // LE PERÇAGE, EN UN SEUL COUP ET ADOUCI. Le flou ne s'applique qu'ici, à
-  // demi-résolution, sur le calque des trous déjà complet.
-  lctx.setTransform(1, 0, 0, 1, 0, 0);
-  lctx.globalCompositeOperation = 'destination-out';
-  lctx.filter = `blur(${PENOMBRE}px)`;
-  lctx.drawImage(ecran.trou, 0, 0);
-  lctx.filter = 'none';
-  lctx.globalCompositeOperation = 'source-over';
-
-  ctx.save();
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.drawImage(ecran.lum, 0, 0, ecran.canvas.width, ecran.canvas.height);
-  ctx.restore();
+  // LE PERÇAGE, EN UN SEUL COUP ET ADOUCI : voir `obscurite.ts`, qui choisit
+  // entre la carte graphique et une réduction sans filtre.
+  poserLObscurite(ecran);
+  // Tout ce qui suit passe PAR-DESSUS la nuit : sur le calque `dessus`.
+  effacer(ecran.dctx, ecran.DPR);
+  ctx = ecran.dctx;
+  ecran.ctx = ctx;
 
   /* ---- ce qui reste visible par-dessus l'obscurité ---- */
   // On se souvient des OBJETS, jamais du terrain : le fil qu'on a tracé, les
@@ -825,6 +832,11 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
   }
 
   /* ---- halo chaud ---- */
+  // Sur le calque `lueur`, fondu en `plus-lighter` dans la page : le même
+  // `lighter` qu'avant, mais par-dessus la nuit posée à part.
+  const pardessus = ctx;
+  effacer(ecran.luctx, ecran.DPR);
+  ctx = ecran.luctx;
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
   const couleurLumiere = joueur.bonus ? BONUS[joueur.bonus].couleur : f.couleur;
@@ -966,6 +978,7 @@ export function dessiner(ecran: Ecran, partie: Partie, temps: number): void {
     ctx.fill();
   }
   ctx.restore();
+  ctx = pardessus;
 
   // on se fait fixer : le bord de l'écran rougit
   const alerte = joueur.vu * (1 - joueur.souffle * 0.55);

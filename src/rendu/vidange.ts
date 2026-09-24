@@ -22,13 +22,17 @@ export function dessinerVidange(ecran: Ecran, partie: Partie): void {
   // peint une seule fois, pour les deux.
   const passage = partie.vidange ?? partie.envol;
   if (!passage) return;
-  const { ctx, cam } = ecran;
+  const { cam } = ecran;
   const { joueur } = partie;
   const vidange = passage;
   const k = clamp(vidange.t / vidange.duree, 0, 1);
   const jx = joueur.x - cam.x,
     jy = joueur.y - cam.y;
   const teinte = forme(joueur).couleur;
+  // La lumière, sur le calque des lumières (`ecran.ts`) : additive, elle doit
+  // s'ajouter à l'image entière, nuit comprise. Posée en `lighter` sur le
+  // calque transparent d'au-dessus, elle ne s'ajoutait plus à rien.
+  let ctx = ecran.luctx;
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
 
@@ -66,6 +70,7 @@ export function dessinerVidange(ecran: Ecran, partie: Partie): void {
   ctx.restore();
 
   // le corps s'assombrit : la lumière le quitte pour de bon
+  ctx = ecran.ctx;
   ctx.save();
   ctx.globalAlpha = k * 0.72;
   ctx.fillStyle = 'rgba(8,8,14,1)';
