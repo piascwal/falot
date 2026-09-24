@@ -116,6 +116,8 @@ export interface Ecran {
   figee?: boolean;
   /** Combien de secondes de cadence on a déjà vues. */
   secondes?: number;
+  /** Combien de secondes lentes d'affilée. */
+  lentes?: number;
 }
 
 export function creerEcran(canvas: HTMLCanvasElement): Ecran {
@@ -251,6 +253,13 @@ export function veillerSurLEcran(ecran: Ecran): boolean {
  * Et on ne juge pas la première seconde : c'est celle où tout se prépare (la
  * pierre, les blocs du sol, les images qui arrivent), elle est lente partout
  * et ne dit rien de la suite.
+ *
+ * DEUX SECONDES LENTES D'AFFILÉE, pas une. Même vérifiée, la baisse se faisait
+ * encore piéger : une seule seconde lente (l'entrée dans une zone, le sol qui
+ * se peint), puis la suivante redevenue normale — qui passait pour un gain.
+ * Le même S21 restait ainsi à 1,5 alors qu'imposé à 2 (`?finesse=2`), il
+ * tenait 57 images par seconde, pleinement net. Un à-coup passe ; une lenteur
+ * qui dure, non.
  */
 export function surveillerCadence(ecran: Ecran, dt: number): void {
   if (FINESSE || ecran.figee) return;
@@ -270,7 +279,9 @@ export function surveillerCadence(ecran: Ecran, dt: number): void {
     }
     return;
   }
-  if (median > 0.021 && ecran.palier < PALIERS.length - 1) {
+  ecran.lentes = median > 0.021 ? (ecran.lentes ?? 0) + 1 : 0;
+  if (ecran.lentes >= 2 && ecran.palier < PALIERS.length - 1) {
+    ecran.lentes = 0;
     ecran.essai = median;
     ecran.palier++;
     redimensionner(ecran);

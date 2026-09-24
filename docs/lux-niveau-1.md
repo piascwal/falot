@@ -2426,3 +2426,27 @@ vitesse de défilement d'une image à l'autre pendant la marche :
 | Écran 120 Hz | 16,4 % | **0 %** |
 
 178 tests verts, `npm run build` sans erreur.
+
+## Résultat sur le téléphone, et le dernier piège de la finesse
+
+Après la séance précédente, sur le même Galaxy S21 : **plus de lag**. Ce
+n'était pas une lenteur constante mais des **sauts dans la fluidité** — les
+images qui avançaient de deux pas au lieu d'un, que le dessin entre deux pas a
+fait disparaître.
+
+`?diag` donne maintenant :
+
+| | Temps d'image (95ᵉ centile) | Images/s | Finesse |
+|---|---|---|---|
+| Réglage automatique | 18,1 ms (25) | 55 | 1,50 · 540 × 1077 |
+| Imposée `?finesse=2` | 17,6 ms (25) | 57 | **2,00 · 720 × 1436** |
+
+Le téléphone tient donc la pleine netteté sans rien perdre — et le réglage
+automatique restait quand même un cran en dessous. La vérification de la
+baisse se faisait piéger par un à-coup : une seule seconde lente (l'entrée
+dans une zone, le sol qui se peint), puis la suivante redevenue normale, qui
+passait pour le gain de la baisse. Il faut maintenant **deux secondes lentes
+d'affilée** pour baisser ; un test reproduit le piège (lente, normale, lente,
+normale) et vérifie que la finesse ne bouge pas.
+
+179 tests verts, `npm run build` sans erreur.

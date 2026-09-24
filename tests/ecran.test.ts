@@ -130,6 +130,20 @@ const seconde = (e: Ecran, dt: number) => {
 };
 
 describe('la finesse qui s’adapte', () => {
+  it('laisse passer un à-coup : une seconde lente seule ne baisse rien', () => {
+    // Le piège du S21 : l'entrée dans une zone fait une seconde lente, la
+    // suivante redevient normale — et passait pour le gain d'une baisse.
+    fenetre(390, 700, 3);
+    const e = ecranFactice(390, 700, 2);
+    seconde(e, 0.016);
+    seconde(e, 0.04);
+    seconde(e, 0.016);
+    seconde(e, 0.04);
+    seconde(e, 0.016);
+    expect(e.palier).toBe(0);
+    expect(e.DPR).toBe(2);
+  });
+
   it('ne juge pas la première seconde, celle où tout se prépare', () => {
     fenetre(390, 700, 3);
     const e = ecranFactice(390, 700, 2);
@@ -141,7 +155,8 @@ describe('la finesse qui s’adapte', () => {
     fenetre(390, 700, 3);
     const e = ecranFactice(390, 700, 2);
     seconde(e, 0.04);
-    seconde(e, 0.03); // trop lent : on baisse d'un cran
+    seconde(e, 0.03);
+    seconde(e, 0.03); // trop lent, et ça dure : on baisse d'un cran
     expect(e.palier).toBe(1);
     seconde(e, 0.016); // et c'est nettement mieux
     expect(e.palier).toBe(1);
@@ -155,6 +170,7 @@ describe('la finesse qui s’adapte', () => {
     fenetre(390, 700, 3);
     const e = ecranFactice(390, 700, 2);
     seconde(e, 0.04);
+    seconde(e, 0.025);
     seconde(e, 0.025);
     expect(e.palier).toBe(1);
     seconde(e, 0.025); // pas mieux
