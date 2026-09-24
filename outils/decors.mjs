@@ -7,16 +7,10 @@
  *
  *   node outils/decors.mjs   → public/decors.png (+ planche de contrôle)
  *
- * LA PLANCHE EST UNE GRILLE RÉGULIÈRE de 8 × 4 panneaux de 157 px, relevée au
- * pixel. Chaque panneau porte un objet posé sur une LIGNE DE SOL dessinée, à
- * y = 132 : on coupe au-dessus, sinon le jeu hériterait d'un trait horizontal
- * sous chaque lampe, et son sol à lui est déjà dessiné.
- *
- * DEUX FONDS, contrairement à la planche de la fin : la page est à (39,37,32)
- * et l'intérieur des panneaux à (70,63,55). C'est ce dernier qu'on retire, et
- * on DÉMATTE ensuite le bord — sinon chaque objet garde un liseré brun clair
- * sur la pierre presque noire du jeu, où il se verrait bien plus que sur la
- * planche.
+ * DEUX PLANCHES (voir `PLANCHES`), chacune une grille relevée au pixel, chacune
+ * avec son fond. On retire ce fond, puis on DÉMATTE le bord — sinon chaque
+ * objet garde un liseré clair sur la pierre presque noire du jeu, où il se
+ * verrait bien plus que sur la planche.
  *
  * LA SORTIE IMITE LES GARNITURES PROCÉDURALES (`rendu/tuiles.ts`) : quatre
  * variantes côte à côte, une famille par rangée, chacune dans la case du jeu.
@@ -36,80 +30,117 @@ const VARIANTES = 4;
  *  sinon chaque objet dérive vers la sienne et l'étage ne tient plus ensemble. */
 const COULEURS = 40;
 
-/** La grille des panneaux, relevée au pixel sur la planche. */
-const COLS = [18, 190, 362, 534, 716, 888, 1060, 1233];
-const RANGS = [30, 218, 406, 593];
-const PAN = 156; // côté utile d'un panneau
-const SOL = 129; // la ligne de sol dessinée est à 132 : on coupe DEUX PIXELS
-// au-dessus, sinon son arête supérieure reste collée sous les objets qui la touchent
-
 /**
- * CE QU'ON GARDE, et d'où ça vient.
+ * LES DEUX PLANCHES, chacune avec son fond.
  *
- * La planche a dérivé en cours de route : elle promettait huit familles, elle
- * en a rendu six complètes, une partielle, et un panneau corrompu (L4C8, un
- * artefact en étoile). Les étiquettes imprimées dessus sont fausses à deux
- * endroits — on découpe donc par POSITION, jamais par légende.
- *
- * `mur` distingue ce qui s'accroche de ce qui se pose : une applique pend d'une
- * paroi, tout le reste attend par terre.
+ * La première donnait des lampes DEBOUT et entières, sur une ligne de sol
+ * dessinée : il n'en reste que les appliques murales, qui étaient justes. La
+ * seconde a été demandée avec un prompt corrigé — objets CASSÉS EN MORCEAUX,
+ * couchés, sans ligne de sol, une rangée par objet — et elle l'a respecté.
  */
-const FAMILLES = [
-  { nom: 'lampeHuile', cases: ['L1C1', 'L1C2', 'L1C3', 'L1C4'], mur: false },
-  { nom: 'chandelier', cases: ['L2C1', 'L2C2', 'L2C3', 'L2C4'], mur: false },
-  // La quatrième est la seule lanterne VRAIMENT couchée de la planche : mise
-  // ici, elle donne à la famille le mélange debout/tombé qu'on cherchait.
-  { nom: 'lanterne', cases: ['L3C1', 'L3C2', 'L3C3', 'L1C6'], mur: false },
-  // Il y avait une famille d'ampoules brisées : supprimée. À la taille d'une
-  // case, un verre pâle couché sur la pierre n'a plus de silhouette lisible et
-  // se lit comme un petit animal mort — un contresens franc dans un jeu dont le
-  // sujet est d'avoir peur de ce qu'on devine dans le noir.
-  // Deux modèles seulement, chacun rendu deux fois : on les garde tels quels
-  // plutôt que d'en inventer. À une case sur cent, la répétition ne se voit pas.
-  { nom: 'bougeoir', cases: ['L1C5', 'L1C7', 'L2C5', 'L2C7'], mur: false },
-  // Il y avait une septième famille, des lanternes de table : supprimée. Ses
-  // quatre panneaux n'étaient pas le même objet à quatre états — une grande
-  // lanterne couchée et trois petites debout — et à hauteur normalisée elles
-  // se lisaient comme quatre objets sans rapport.
-  { nom: 'applique', cases: ['L4C1', 'L4C2', 'L4C3', 'L4C4'], mur: true },
-];
-
-/**
- * LA HAUTEUR DE CHAQUE FAMILLE dans la case, en fraction.
- *
- * Elle n'est pas la même pour toutes, et c'est tout l'intérêt : une ampoule
- * tombée est un petit objet, un chandelier en est un grand. À hauteur égale,
- * l'ampoule aurait la taille d'un candélabre et la salle n'aurait plus
- * d'échelle du tout.
- */
-const HAUTEURS = {
-  lampeHuile: 0.4,
-  chandelier: 0.62,
-  lanterne: 0.58,
-  bougeoir: 0.6,
-  applique: 0.54,
+const PLANCHES = {
+  murale: { fichier: 'outils/planche-decors.png', fond: [70, 63, 55] },
+  cassee: { fichier: 'outils/planche-decors-2.png', fond: [123, 116, 108] },
 };
 
-const planche = (await readFile('outils/planche-decors.png')).toString('base64');
+/** La première planche : 8 × 4 panneaux de 157 px, une ligne de sol à y = 132
+ *  qu'on laisse sous la découpe. */
+const ancienne = (cle) => {
+  const COLS = [18, 190, 362, 534, 716, 888, 1060, 1233];
+  const RANGS = [30, 218, 406, 593];
+  const x = COLS[Number(cle[3]) - 1];
+  const y = RANGS[Number(cle[1]) - 1];
+  return [x, y, x + 156, y + 129];
+};
+
+/**
+ * La seconde : une grille de cases séparées par des traits sombres, relevés au
+ * pixel. Quatre colonnes sur les rangées 1 à 4, SIX sur la rangée des ampoules
+ * — le générateur en a donné plus que demandé. On rentre de quatre pixels dans
+ * chaque case pour ne jamais ramasser le trait de la grille avec l'objet.
+ */
+const RANGEES = [
+  [3, 156],
+  [161, 309],
+  [314, 461],
+  [466, 613],
+  [618, 764],
+];
+const QUATRE = [
+  [3, 349],
+  [354, 701],
+  [706, 1053],
+  [1058, 1403],
+];
+const SIX = [
+  [3, 232],
+  [238, 466],
+  [472, 701],
+  [706, 935],
+  [941, 1169],
+  [1175, 1403],
+];
+const casse = (r, c, colonnes = QUATRE) => {
+  const [y0, y1] = RANGEES[r];
+  const [x0, x1] = colonnes[c];
+  return [x0 + 4, y0 + 4, x1 - 4, y1 - 4];
+};
+
+/**
+ * CE QU'ON GARDE.
+ *
+ * `boite` est la place qu'une famille a le droit d'occuper dans sa case, en
+ * fraction : largeur, hauteur. Ce sont maintenant des COMPOSITIONS — l'objet
+ * tombé et ses morceaux éparpillés à côté — bien plus larges que hautes :
+ * caler seulement la hauteur, comme pour la première planche, les faisait
+ * déborder de la case. Et l'échelle est UNE PAR FAMILLE, la plus petite qui
+ * fasse tenir toutes ses variantes : une lanterne ne change pas de taille
+ * selon la façon dont elle s'est brisée.
+ *
+ * L'ordre des familles est celui des rangées de la feuille, et `rendu/decors.ts`
+ * le relit tel quel : si l'un bouge, l'autre suit.
+ */
+/**
+ * TERNIR. La seconde planche est dessinée sur un fond gris clair, et ses objets
+ * sortent 40 à 50 % plus clairs que ceux de la première — les ampoules presque
+ * deux fois : 81 de luminance moyenne là où les lampes de la première planche
+ * tenaient autour de 40, sur une pierre qui vit entre 14 et 51. Posées telles
+ * quelles, elles auraient eu l'air allumées. On les ramène dans la même gamme,
+ * le verre un peu plus fort que le métal.
+ */
+const TERNI = 0.72;
+const TERNI_VERRE = 0.6;
+
+const FAMILLES = [
+  { nom: 'lampeHuile', planche: 'cassee', ternir: TERNI, boite: [0.84, 0.44], mur: false,
+    cases: [casse(0, 0), casse(0, 1), casse(0, 2), casse(0, 3)] },
+  { nom: 'chandelier', planche: 'cassee', ternir: TERNI, boite: [0.9, 0.56], mur: false,
+    cases: [casse(1, 0), casse(1, 1), casse(1, 2), casse(1, 3)] },
+  { nom: 'lanterne', planche: 'cassee', ternir: TERNI, boite: [0.92, 0.56], mur: false,
+    cases: [casse(2, 0), casse(2, 1), casse(2, 2), casse(2, 3)] },
+  { nom: 'bougeoir', planche: 'cassee', ternir: TERNI, boite: [0.88, 0.52], mur: false,
+    cases: [casse(3, 0), casse(3, 1), casse(3, 2), casse(3, 3)] },
+  // LES AMPOULES REVIENNENT. Elles avaient été retirées de la première planche
+  // parce qu'un verre pâle et ovale couché sur la pierre se lisait comme un
+  // petit animal mort. Celles-ci ont le culot à pas de vis bien visible et le
+  // verre éclaté en pointes : la silhouette dit « ampoule » avant tout le reste.
+  // Six variantes données, quatre gardées : la sixième porte l'artefact en
+  // étoile que le générateur laisse parfois dans un coin.
+  { nom: 'ampoule', planche: 'cassee', ternir: TERNI_VERRE, boite: [0.8, 0.5], mur: false,
+    cases: [casse(4, 0, SIX), casse(4, 1, SIX), casse(4, 2, SIX), casse(4, 4, SIX)] },
+  { nom: 'applique', planche: 'murale', boite: [0.8, 0.54], mur: true,
+    cases: ['L4C1', 'L4C2', 'L4C3', 'L4C4'].map(ancienne) },
+];
+
+const sources = {};
+for (const [nom, p] of Object.entries(PLANCHES))
+  sources[nom] = { donnees: (await readFile(p.fichier)).toString('base64'), fond: p.fond };
 
 const navigateur = await chromium.launch();
 const page = await navigateur.newPage();
 
 const { feuille, apercu, lum, couleurs } = await page.evaluate(
-  async ({ planche, FAMILLES, HAUTEURS, COLS, RANGS, PAN, SOL, T, VARIANTES, COULEURS }) => {
-    const FOND = [70, 63, 55]; // l'intérieur d'un panneau
-
-    const img = new Image();
-    await new Promise((ok) => {
-      img.onload = ok;
-      img.src = `data:image/png;base64,${planche}`;
-    });
-    const src = document.createElement('canvas');
-    src.width = img.width;
-    src.height = img.height;
-    const sc = src.getContext('2d');
-    sc.drawImage(img, 0, 0);
-
+  async ({ sources, FAMILLES, T, VARIANTES, COULEURS }) => {
     const toile = (w, h) => {
       const t = document.createElement('canvas');
       t.width = w;
@@ -117,21 +148,32 @@ const { feuille, apercu, lum, couleurs } = await page.evaluate(
       return t;
     };
 
-    /** Un panneau, détouré du brun et resserré sur son objet. */
-    const decouper = (cle) => {
-      const c = Number(cle[3]) - 1;
-      const r = Number(cle[1]) - 1;
-      const x0 = COLS[c];
-      const y0 = RANGS[r];
-      const d = sc.getImageData(x0, y0, PAN, SOL); // au-dessus de la ligne de sol
+    const planches = {};
+    for (const [nom, s] of Object.entries(sources)) {
+      const img = new Image();
+      await new Promise((ok) => {
+        img.onload = ok;
+        img.src = `data:image/png;base64,${s.donnees}`;
+      });
+      const c = toile(img.width, img.height);
+      c.getContext('2d').drawImage(img, 0, 0);
+      planches[nom] = { ctx: c.getContext('2d'), fond: s.fond };
+    }
+
+    /** Une case, détourée de son fond et resserrée sur son contenu. */
+    const decouper = (planche, [x0, y0, x1, y1], ternir = 1) => {
+      const { ctx, fond: FOND } = planches[planche];
+      const W = x1 - x0;
+      const H = y1 - y0;
+      const d = ctx.getImageData(x0, y0, W, H);
       const p = d.data;
-      let gx = PAN;
-      let gy = SOL;
+      let gx = W;
+      let gy = H;
       let dx = -1;
       let dy = -1;
-      for (let y = 0; y < SOL; y++)
-        for (let x = 0; x < PAN; x++) {
-          const i = (y * PAN + x) * 4;
+      for (let y = 0; y < H; y++)
+        for (let x = 0; x < W; x++) {
+          const i = (y * W + x) * 4;
           const ecart =
             Math.abs(p[i] - FOND[0]) + Math.abs(p[i + 1] - FOND[1]) + Math.abs(p[i + 2] - FOND[2]);
           const a = Math.max(0, Math.min(1, (ecart - 10) / 22));
@@ -141,6 +183,9 @@ const { feuille, apercu, lum, couleurs } = await page.evaluate(
             p[i + 1] = Math.max(0, Math.min(255, (p[i + 1] - FOND[1] * (1 - a)) / a));
             p[i + 2] = Math.max(0, Math.min(255, (p[i + 2] - FOND[2] * (1 - a)) / a));
           }
+          p[i] *= ternir;
+          p[i + 1] *= ternir;
+          p[i + 2] *= ternir;
           p[i + 3] = Math.round(a * 255);
           if (a > 0.25) {
             if (x < gx) gx = x;
@@ -149,8 +194,8 @@ const { feuille, apercu, lum, couleurs } = await page.evaluate(
             if (y > dy) dy = y;
           }
         }
-      if (dx < 0) throw new Error(`panneau vide : ${cle}`);
-      const plein = toile(PAN, SOL);
+      if (dx < 0) throw new Error(`case vide : ${planche} ${[x0, y0, x1, y1]}`);
+      const plein = toile(W, H);
       plein.getContext('2d').putImageData(d, 0, 0);
       const t = toile(dx - gx + 1, dy - gy + 1);
       t.getContext('2d').drawImage(plein, -gx, -gy);
@@ -163,15 +208,17 @@ const { feuille, apercu, lum, couleurs } = await page.evaluate(
     fc.imageSmoothingEnabled = true;
     fc.imageSmoothingQuality = 'high';
     FAMILLES.forEach((f, r) => {
-      f.cases.forEach((cle, v) => {
-        const o = decouper(cle);
-        const h = Math.round(T * HAUTEURS[f.nom]);
-        const w = Math.round((h * o.width) / o.height);
+      const objets = f.cases.map((c) => decouper(f.planche, c, f.ternir));
+      const [bl, bh] = f.boite;
+      const ech = Math.min(...objets.map((o) => Math.min((bl * T) / o.width, (bh * T) / o.height)));
+      objets.forEach((o, v) => {
+        const w = Math.round(o.width * ech);
+        const h = Math.round(o.height * ech);
         const x = v * T + Math.round((T - w) / 2);
         // POSÉ EN BAS DE CASE pour ce qui attend par terre, ACCROCHÉ EN HAUT
         // pour ce qui pend d'une paroi — c'est la même convention que le
-        // lierre et la mousse, et c'est `sol.ts` qui compte dessus.
-        const y = f.mur ? r * T + Math.round(T * 0.06) : r * T + (T - h) - Math.round(T * 0.06);
+        // lierre, et c'est `sol.ts` qui compte dessus.
+        const y = f.mur ? r * T + Math.round(T * 0.06) : r * T + (T - h) - Math.round(T * 0.08);
         fc.drawImage(o, x, y, w, h);
       });
     });
@@ -266,7 +313,7 @@ const { feuille, apercu, lum, couleurs } = await page.evaluate(
       couleurs: palette.length,
     };
   },
-  { planche, FAMILLES, HAUTEURS, COLS, RANGS, PAN, SOL, T, VARIANTES, COULEURS },
+  { sources, FAMILLES, T, VARIANTES, COULEURS },
 );
 
 await writeFile('public/decors.png', Buffer.from(feuille.split(',')[1], 'base64'));

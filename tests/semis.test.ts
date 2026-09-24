@@ -72,9 +72,9 @@ describe('le semis du décor', () => {
   });
 
   it('garde les familles réparties sur les cases retenues', () => {
-    // le barème de `sol.ts` : 30 % / 26 % / 24 % / 20 %
-    const bornes = [0.3, 0.56, 0.8, 1];
-    const fam = [0, 0, 0, 0];
+    // le barème de `sol.ts` : 25 % / 21 % / 19 % / 18 % / 17 %
+    const bornes = [0.25, 0.46, 0.65, 0.83, 1];
+    const fam = [0, 0, 0, 0, 0];
     let retenues = 0;
     surLaGrille((cx, cy) => {
       if (hasard(cx, cy, 8) >= 0.13) return;

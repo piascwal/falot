@@ -47,6 +47,22 @@ const TEINTES = 6;
 const MAILLE = 1.45;
 const MAILLE_FINE = 0.55;
 
+/**
+ * LES ZONES HUMIDES. Première version : la mousse suivait TOUS les murs, et au
+ * jeu il y en avait partout — un liseré vert autour de chaque pierre, qui ne
+ * disait plus rien parce qu'il était constant. De la mousse, il y en a là où
+ * l'eau suinte, et pas ailleurs.
+ *
+ * Un troisième bruit, très lent (des taches de `MAILLE_HUMIDE` cases), décide
+ * donc où le sol est humide. Sous `SEC`, rien ne pousse, même contre la pierre ;
+ * au-delà de `SEC + TRANSITION`, elle s'étale pleinement. Ce bruit prend sa
+ * valeur médiane autour de 0,5 : environ la moitié des murs restent nus, un
+ * cinquième sont franchement couverts, le reste entre les deux.
+ */
+const MAILLE_HUMIDE = 4.5;
+const SEC = 0.52;
+const TRANSITION = 0.16;
+
 const lisse = (t: number): number => t * t * (3 - 2 * t);
 
 /** Un bruit de valeur, continu : des nombres tirés aux nœuds d'une grille,
@@ -163,8 +179,12 @@ export function semerMousse(
         const px = cx + u;
         const py = cy + v;
         const n = 0.66 * bruit(px, py, MAILLE, 31) + 0.34 * bruit(px, py, MAILLE_FINE, 37);
-        // forte au pied du mur (f²), rongée par les taches (n)
-        const h = f * f * (0.15 + 1.35 * n);
+        const humide = lisse(
+          Math.max(0, Math.min(1, (bruit(px, py, MAILLE_HUMIDE, 41) - SEC) / TRANSITION)),
+        );
+        if (humide <= 0) continue;
+        // forte au pied du mur (f²), là où c'est humide, rongée par les taches (n)
+        const h = f * f * humide * (0.35 + 1.1 * n);
         const garde = lisse(Math.max(0, Math.min(1, (h - 0.1) / 0.55)));
         if ((b & 0xffff) / 65536 >= garde) continue;
         const r = 0.55 + (((b >>> 16) & 0xff) / 256) * 1.5;

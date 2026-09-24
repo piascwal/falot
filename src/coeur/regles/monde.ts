@@ -33,7 +33,7 @@ import { emettre, onde } from '../particules.js';
 import { ETEINTS, REPLIQUES } from '../textes.js';
 import type { Partie, Perso, Point, Zone } from '../types.js';
 import { montrerToast, murmurer } from '../voix.js';
-import { lancerLaFin } from './fin.js';
+import { lancerLeBilan } from './bilan.js';
 import { aLAbri, estEclaire, prochedUneBraise } from './lumiere.js';
 import { eteindre, gagnerEclat, paniquer, ramasser } from './progression.js';
 import { ouvrirLeSeuil } from './seuil.js';
@@ -562,7 +562,14 @@ export function majRegles(partie: Partie, dt: number): void {
     // fois avant — et cette fois le portail en demande plus. Il ne reste que
     // lui. (Une fois la fin vue, le Puits sans fin recommence à s'ouvrir
     // normalement : on redescend pour jouer, plus pour finir.)
-    if (partie.numeroZone === DERNIER_ETAGE && !partie.finVue) lancerLaFin(partie);
+    //
+    // LE BILAN D'ABORD, la fin ensuite. Le douzième sautait droit à la fin, et
+    // son bilan n'était jamais posé : ni chiffres à l'écran, ni trace gardée,
+    // donc pas d'étoiles pour le seul étage qui en méritait le plus. Le bilan
+    // le montre vu de haut comme les onze autres, et c'est lui qui passe la
+    // main à la fin (`bilan.ts`).
+    if (partie.numeroZone === DERNIER_ETAGE && !partie.finVue)
+      lancerLeBilan(partie, DERNIER_ETAGE + 1);
     else ouvrirLeSeuil(partie);
   }
 }

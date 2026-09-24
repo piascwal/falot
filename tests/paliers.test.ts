@@ -22,7 +22,12 @@ import {
   traitsEtage,
 } from '../src/coeur/monde/paliers.js';
 import { avancer, creerPartie, PAS } from '../src/coeur/partie.js';
-import { lancerLeBilan, partEclairee, sansFaute } from '../src/coeur/regles/bilan.js';
+import {
+  DUREE_BILAN,
+  lancerLeBilan,
+  partEclairee,
+  sansFaute,
+} from '../src/coeur/regles/bilan.js';
 import { DUREE_FIN, tempsFin } from '../src/coeur/regles/fin.js';
 import { SOUFFLE_MAX } from '../src/coeur/regles/joueur.js';
 import { eclaireParAutrui } from '../src/coeur/regles/lumiere.js';
@@ -327,8 +332,29 @@ describe('la fin (étage 12)', () => {
     p.joueur.x = p.zone.sortie.x;
     p.joueur.y = p.zone.sortie.y;
     avancer(p, PAS);
-    expect(p.fin, 'il reste').not.toBe(null);
     expect(p.vidange, 'il ne franchit pas').toBe(null);
+    // le bilan d'abord, comme aux onze autres — puis la fin, et pas la cage
+    expect(p.bilan?.etage).toBe(DERNIER_ETAGE);
+    for (let i = 0; i < Math.round((DUREE_BILAN + 0.5) / PAS); i++) avancer(p, PAS);
+    expect(p.bilan).toBe(null);
+    expect(p.fin, 'il reste').not.toBe(null);
+    expect(p.puits, 'aucune montée').toBe(null);
+  });
+
+  it('pose le bilan du douzième : ses chiffres, et l’étage d’après pour la progression', () => {
+    // Le bug : la fin court-circuitait le bilan, et l'étage 12 restait sans
+    // chiffres ni étoiles dans l'Histoire.
+    const p = creerPartie({ grain: 'FIN', etage: DERNIER_ETAGE });
+    p.zone.sortie.lumieres = p.zone.requis;
+    p.joueur.x = p.zone.sortie.x;
+    p.joueur.y = p.zone.sortie.y;
+    avancer(p, PAS);
+    expect(p.bilan).toMatchObject({
+      etage: DERNIER_ETAGE,
+      lumieres: p.zone.requis,
+      suivante: DERNIER_ETAGE + 1,
+    });
+    expect(p.bilan?.lumieresTotal).toBeGreaterThan(0);
   });
 
   it('passe par ses cinq temps, dans l’ordre, sans en sauter un', () => {
@@ -351,7 +377,8 @@ describe('la fin (étage 12)', () => {
     p.joueur.x = p.zone.sortie.x;
     p.joueur.y = p.zone.sortie.y;
     avancer(p, PAS);
-    for (let i = 0; i < Math.round((DUREE_FIN + 1) / PAS); i++) avancer(p, PAS);
+    for (let i = 0; i < Math.round((DUREE_BILAN + DUREE_FIN + 1) / PAS); i++)
+      avancer(p, PAS);
     expect(p.fin).toBe(null);
     expect(p.finVue).toBe(true);
     expect(p.numeroZone).toBe(1);

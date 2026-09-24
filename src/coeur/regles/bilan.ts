@@ -12,7 +12,9 @@
 
 import { CASE } from '../dimensions.js';
 import { EMOTIONS } from '../formes.js';
+import { DERNIER_ETAGE } from '../monde/paliers.js';
 import type { Partie, Zone } from '../types.js';
+import { lancerLaFin } from './fin.js';
 import { lancerLePuits } from './puits.js';
 
 /** Le temps que le bilan s'installe avant qu'on puisse le passer. */
@@ -103,7 +105,9 @@ export function majBilan(partie: Partie, dt: number): void {
   if (bilan.t < DUREE_BILAN && !presse) return;
   const suivante = bilan.suivante;
   partie.bilan = null;
-  lancerLePuits(partie, suivante);
+  // Au bout du douzième, pas de cage d'escalier : la fin, la première fois.
+  if (bilan.etage === DERNIER_ETAGE && !partie.finVue) lancerLaFin(partie);
+  else lancerLePuits(partie, suivante);
 }
 
 /** Un étage parfait : tout éclairé, toutes les lumières, jamais pris. */

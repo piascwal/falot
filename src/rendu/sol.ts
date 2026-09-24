@@ -168,13 +168,15 @@ function poserGarnitures(
           // premières familles du barème.
           const f = HASARD(cx, cy, 12);
           const famille =
-            f < 0.3
+            f < 0.25
               ? d.lanterne
-              : f < 0.56
+              : f < 0.46
                 ? d.lampeHuile
-                : f < 0.8
+                : f < 0.65
                   ? d.bougeoir
-                  : d.chandelier;
+                  : f < 0.83
+                    ? d.chandelier
+                    : d.ampoule;
           poser(famille, variantePosee(cx, cy, 9), cx, cy);
         }
       }

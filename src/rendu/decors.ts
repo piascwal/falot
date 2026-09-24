@@ -33,7 +33,14 @@ const FEUILLE = 'decors.png';
 
 /** Les familles, dans l'ordre des rangées de la feuille. `outils/decors.mjs`
  *  écrit exactement cet ordre — si l'un bouge, l'autre suit. */
-const FAMILLES = ['lampeHuile', 'chandelier', 'lanterne', 'bougeoir', 'applique'] as const;
+const FAMILLES = [
+  'lampeHuile',
+  'chandelier',
+  'lanterne',
+  'bougeoir',
+  'ampoule',
+  'applique',
+] as const;
 
 export type Famille = (typeof FAMILLES)[number];
 

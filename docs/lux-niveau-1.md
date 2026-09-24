@@ -2181,3 +2181,50 @@ l'éclairage fabrique **58 dégradés radiaux et 120 remplissages par image** �
 c'est le prochain levier, et il n'a rien à voir avec le sol.
 
 172 tests verts, `npm run build` sans erreur.
+
+## Des lampes vraiment cassées, la mousse par taches, et le bilan du douzième
+
+**Une nouvelle planche, des objets au sol et en morceaux.** La première planche
+d'objets montrait des lampes debout, entières : rien ne disait qu'elles étaient
+mortes. La planche refaite (`outils/planche-decors-2.png`, prompt réécrit pour
+préciser la vue de trois quarts plongeante, l'objet couché au sol et brisé en
+deux ou trois morceaux) donne quatre familles au sol — lampe à huile,
+chandelier, lanterne, bougeoir — et **l'ampoule revient**, cassée, culot d'un
+côté, éclats de verre de l'autre. L'applique murale, elle, reste celle de
+l'ancienne planche : la nouvelle n'en avait pas.
+
+`outils/decors.mjs` lit maintenant les deux planches, chacune détourée sur sa
+propre couleur de fond. La nouvelle était beaucoup plus claire que la première
+(ampoule à 81 de luminance moyenne, quand la pierre du jeu vit entre 14 et 51) :
+elle serait sortie du noir comme si elle éclairait, ce qui est exactement ce
+qu'une lampe morte ne doit pas faire. Elle est **ternie** à la découpe (×0,72,
+×0,6 pour le verre) : toutes les variantes finissent entre 36 et 48. Une case
+de l'ampoule portait un filigrane : elle est écartée, on en garde quatre.
+
+Au sol, le barème des familles est de 25 / 21 / 19 / 18 / 17 %, et le test de
+`semis.test.ts` vérifie que les cinq familles restent réparties même sur les
+seules cases retenues.
+
+**La mousse était partout.** Le champ de la version précédente suivait tous les
+murs : un liseré vert autour de chaque pierre, constant, qui ne disait plus
+rien. Un troisième bruit, très lent (taches de 4,5 cases), décide maintenant
+**où le sol est humide** ; sous un seuil, rien ne pousse, même au pied du mur.
+Mesuré sur 640 000 points : **53 % du sol est sec**, 23 % franchement humide,
+24 % en transition. Des murs nus, des coins tapissés, et une lisière douce
+entre les deux. Rien ne change pour le coût : c'est un tirage de plus par grain,
+dans un bloc peint une seule fois.
+
+**Le bug du douzième.** En entrant dans le dernier Seuil, le jeu lançait la fin
+directement — et c'était le seul étage à sauter son bilan. Or c'est le bilan qui
+porte les chiffres, et c'est lui que `main.ts` range dans la progression : le
+douzième restait sans chiffres à l'écran et sans étoiles dans l'Histoire.
+
+Le dernier Seuil pose maintenant le bilan comme les onze autres
+(`regles/monde.ts`), et c'est la fin du bilan qui décide de la suite
+(`regles/bilan.ts`) : la fin la première fois, la cage d'escalier ensuite.
+Vérifié dans le navigateur : bilan « ÉTAGE 12 » affiché, puis « Il les a toutes
+remontées. », et la sauvegarde contient `etages[12]` avec `atteint = 13`. Un
+test nouveau dans `paliers.test.ts` vérifie les chiffres du bilan ; les trois
+tests de la fin passent désormais par lui.
+
+173 tests verts, `npm run build` sans erreur.
