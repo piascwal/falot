@@ -6,7 +6,9 @@
  * avancer la simulation d'un pas fixe, dessiner l'état obtenu.
  */
 
+import { CASE } from './coeur/dimensions.js';
 import { avancer, creerPartie, PAS, PAS_MAX_PAR_IMAGE } from './coeur/partie.js';
+import type { Point } from './coeur/types.js';
 import { montrerToast } from './coeur/voix.js';
 import { brancherClavier } from './entrees/clavier.js';
 import { brancherPointeur, brancherSouffle, brancherTorche } from './entrees/pointeur.js';
@@ -60,6 +62,14 @@ if (reglages.has('diag')) brancherDiagnostic(ecran);
 // retard à rattraper d'un coup.
 let dernier = performance.now();
 let reste = 0;
+/** Où était chacun avant le dernier pas : de quoi le dessiner entre les deux.
+ *  Clé par objet : ceux d'un étage quitté disparaissent avec lui. */
+let precedents = new WeakMap<Point, [number, number]>();
+const mobiles = (): Point[] => [partie.joueur, ...partie.zone.persos];
+function noterPrecedents(): void {
+  precedents = new WeakMap();
+  for (const m of mobiles()) precedents.set(m, [m.x, m.y]);
+}
 
 function replanter(): void {
   redimensionner(ecran);
@@ -123,6 +133,7 @@ function corpsBoucle(maintenant: number): void {
   reste += ecart;
   let pas = 0;
   while (reste >= PAS && pas < PAS_MAX_PAR_IMAGE) {
+    noterPrecedents();
     avancer(partie, PAS);
     reste -= PAS;
     pas++;
@@ -158,10 +169,38 @@ function corpsBoucle(maintenant: number): void {
   // L'écran a-t-il bougé sans nous le dire ? (téléphone mis de côté, barre
   // d'adresse qui se replie, rotation faite ailleurs.)
   if (veillerSurLEcran(ecran)) partie.recadrer = true;
-  cadrer(ecran, partie, partie.recadrer);
-  partie.recadrer = false;
   hud.maj(partie);
-  dessiner(ecran, partie, maintenant / 1000);
+
+  // ENTRE DEUX PAS. Le monde avance par pas de 1/60 ; l'écran, lui, tourne à
+  // 52, 60 ou 120 images par seconde selon l'appareil. Sans rien faire, une
+  // image sur quelques-unes avançait de deux pas et les autres d'un seul — ou,
+  // à 120 Hz, une sur deux n'avançait pas du tout : Falot et toute la salle
+  // avançaient par saccades, même à bonne cadence, et c'était ÇA qu'on
+  // ressentait comme du « lag ». On le dessine donc là où il EST entre les
+  // deux derniers pas, au prorata du temps déjà écoulé vers le suivant. Le
+  // monde n'en sait rien : on lui rend sa vraie position juste après.
+  const vrais: [Point, number, number][] = [];
+  if (!partie.recadrer) {
+    const a = reste / PAS;
+    for (const m of mobiles()) {
+      const avant = precedents.get(m);
+      // un saut (mort, étage suivant) ne s'interpole pas : il se voit
+      if (!avant || Math.hypot(m.x - avant[0], m.y - avant[1]) > CASE) continue;
+      vrais.push([m, m.x, m.y]);
+      m.x = avant[0] + (m.x - avant[0]) * a;
+      m.y = avant[1] + (m.y - avant[1]) * a;
+    }
+  }
+  try {
+    cadrer(ecran, partie, partie.recadrer, ecart);
+    partie.recadrer = false;
+    dessiner(ecran, partie, maintenant / 1000);
+  } finally {
+    for (const [m, x, y] of vrais) {
+      m.x = x;
+      m.y = y;
+    }
+  }
 }
 
 // LA PIERRE, fabriquée avant la première image. Quarante millisecondes une

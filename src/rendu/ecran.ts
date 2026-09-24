@@ -48,6 +48,17 @@ const PALIERS = [2, 1.5, 1, 0.8];
  */
 const BUDGET_PIXELS = 2.1e6;
 
+/** `?finesse=2` : la densité imposée, sans adaptation. Pour mesurer sur un
+ *  appareil si le coût d'une image dépend vraiment du nombre de pixels. */
+const FINESSE = (() => {
+  try {
+    const v = Number.parseFloat(new URLSearchParams(location.search).get('finesse') ?? '');
+    return v > 0 ? Math.min(3, Math.max(0.5, v)) : 0;
+  } catch {
+    return 0;
+  }
+})();
+
 export interface Ecran {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
@@ -98,6 +109,13 @@ export interface Ecran {
   /** Coût réel du corps de la boucle, sur les 240 dernières images. L'écart
    *  entre deux images ne dit rien tant qu'on est calé sur les 60 Hz. */
   coutsImage: number[];
+  /** La cadence médiane juste avant la dernière baisse de finesse, le temps
+   *  de vérifier qu'elle a servi à quelque chose (voir `surveillerCadence`). */
+  essai?: number | null;
+  /** Plus d'adaptation : une baisse n'a rien fait gagner. */
+  figee?: boolean;
+  /** Combien de secondes de cadence on a déjà vues. */
+  secondes?: number;
 }
 
 export function creerEcran(canvas: HTMLCanvasElement): Ecran {
@@ -167,11 +185,9 @@ export function redimensionner(ecran: Ecran): void {
   ecran.W = v.W;
   ecran.H = v.H;
   const tenable = Math.sqrt(BUDGET_PIXELS / Math.max(1, ecran.W * ecran.H));
-  ecran.DPR = clamp(
-    Math.min(window.devicePixelRatio || 1, PALIERS[ecran.palier], tenable),
-    0.75,
-    3,
-  );
+  ecran.DPR =
+    FINESSE ||
+    clamp(Math.min(window.devicePixelRatio || 1, PALIERS[ecran.palier], tenable), 0.75, 3);
   ecran.canvas.width = Math.round(ecran.W * ecran.DPR);
   ecran.canvas.height = Math.round(ecran.H * ecran.DPR);
   ecran.lum.width = Math.ceil(ecran.canvas.width * QLUM);
@@ -223,21 +239,54 @@ export function veillerSurLEcran(ecran: Ecran): boolean {
  * La cadence se surveille TOUT LE TEMPS. Elle ne l'était qu'avec le doigt sur
  * le joystick : au clavier, ou pendant qu'on vise, une machine qui peine ne se
  * rattrapait jamais.
+ *
+ * CHAQUE BAISSE EST VÉRIFIÉE. Mesuré sur un Galaxy S21 (`?diag`) : le jeu était
+ * descendu jusqu'au dernier palier, 288 × 574 pixels pour un écran qui en a
+ * 1080 de large, et prenait TOUJOURS 19 ms par image — pour 4 ms de calcul. Ce
+ * qui coûtait là-bas ne dépendait pas du nombre de pixels : chaque baisse ne
+ * faisait que rendre le jeu flou, et on ne remontait jamais. Maintenant, après
+ * une baisse, on regarde la seconde suivante ; si elle n'est pas nettement plus
+ * rapide, on remonte d'un cran et on n'y touche plus.
+ *
+ * Et on ne juge pas la première seconde : c'est celle où tout se prépare (la
+ * pierre, les blocs du sol, les images qui arrivent), elle est lente partout
+ * et ne dit rien de la suite.
  */
 export function surveillerCadence(ecran: Ecran, dt: number): void {
-  if (ecran.palier >= PALIERS.length - 1) return;
+  if (FINESSE || ecran.figee) return;
   ecran.fenetre.push(dt);
   if (ecran.fenetre.length < 60) return; // une seconde, pas une et demie
   const median = [...ecran.fenetre].sort((a, b) => a - b)[30];
   ecran.fenetre = [];
-  if (median > 0.021) {
+  ecran.secondes = (ecran.secondes ?? 0) + 1;
+  if (ecran.secondes < 2) return;
+  if (ecran.essai) {
+    const avant = ecran.essai;
+    ecran.essai = null;
+    if (median > avant * 0.85) {
+      ecran.palier--;
+      ecran.figee = true;
+      redimensionner(ecran);
+    }
+    return;
+  }
+  if (median > 0.021 && ecran.palier < PALIERS.length - 1) {
+    ecran.essai = median;
     ecran.palier++;
     redimensionner(ecran);
   }
 }
 
 /** La caméra suit Falot et s'arrête aux bords de la zone. */
-export function cadrer(ecran: Ecran, partie: Partie, immediat: boolean): void {
+export function cadrer(
+  ecran: Ecran,
+  partie: Partie,
+  immediat: boolean,
+  /** Le temps écoulé depuis l'image précédente. La caméra rattrapait 14 % de
+   *  son retard PAR IMAGE : à 120 images par seconde elle suivait deux fois
+   *  plus vite qu'à 60, et à cadence irrégulière elle avançait par à-coups. */
+  dt = 1 / 60,
+): void {
   const { joueur, zone } = partie;
   const cx = clamp(joueur.x - ecran.W / 2, 0, Math.max(0, zone.largeur - ecran.W));
   const cy = clamp(joueur.y - ecran.H / 2, 0, Math.max(0, zone.hauteur - ecran.H));
@@ -246,6 +295,7 @@ export function cadrer(ecran: Ecran, partie: Partie, immediat: boolean): void {
     ecran.cam.y = cy;
     return;
   }
-  ecran.cam.x += (cx - ecran.cam.x) * 0.14;
-  ecran.cam.y += (cy - ecran.cam.y) * 0.14;
+  const k = 1 - (1 - 0.14) ** (dt * 60);
+  ecran.cam.x += (cx - ecran.cam.x) * k;
+  ecran.cam.y += (cy - ecran.cam.y) * k;
 }

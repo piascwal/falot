@@ -69,6 +69,28 @@ function poserLaPierre(): void {
   r.setProperty('--pierre-sol', decouper(t.sol, 4));
 }
 
+/** Montre ou cache, sans rien écrire si c'est déjà le cas. */
+function cacher(e: HTMLElement, cache: boolean): void {
+  if (e.hidden !== cache) e.hidden = cache;
+}
+
+/**
+ * Remplit une barre de `k` (0 à 1) en la faisant glisser, au demi-pour-cent
+ * près : une jauge qui fond pendant dix secondes change ainsi deux cents fois,
+ * et non six cents.
+ */
+function glisser<C extends string>(
+  e: HTMLElement,
+  k: number,
+  vu: Record<C, number>,
+  cle: C,
+): void {
+  const q = Math.round(k * 200) / 200;
+  if (vu[cle] === q) return;
+  vu[cle] = q;
+  e.style.transform = `translateX(${((q - 1) * 100).toFixed(1)}%)`;
+}
+
 export function creerHud(): Hud {
   poserLaPierre();
   const elZone = el('zone');
@@ -97,6 +119,13 @@ export function creerHud(): Hud {
 
   // Ce que l'interface a déjà montré : on ne touche au DOM que si ça a bougé.
   const vu = {
+    niveau: -1,
+    barre: -1,
+    couleur: '',
+    zone: -1,
+    bonus: '',
+    bonusJauge: -1,
+    enMontee: false,
     pierre: 0,
     jauge: 0,
     forme: 0,
@@ -122,16 +151,30 @@ export function creerHud(): Hud {
       // losange de plus, et le dernier allumé brille plus fort que le premier :
       // c'est ce qu'on ressent en jouant — pas un autre personnage, le même en
       // plus fort.
-      for (let i = 0; i < rangs.length; i++) {
-        const pleine = i <= joueur.niveau;
-        rangs[i].classList.toggle('pleine', pleine);
-        rangs[i].style.boxShadow = pleine
-          ? `0 0 ${4 + i * 2.5}px rgba(143,208,255,${0.5 + i * 0.12})`
-          : 'none';
+      //
+      // RIEN N'EST ÉCRIT DANS LA PAGE S'IL N'A PAS CHANGÉ. Chaque écriture —
+      // même d'un texte identique — fait remettre en page et repeindre le
+      // bandeau, et ce travail-là ne se voit pas dans le temps de calcul : il
+      // vient après. Sur un téléphone il coûtait plus que tout le jeu.
+      if (vu.niveau !== joueur.niveau) {
+        vu.niveau = joueur.niveau;
+        for (let i = 0; i < rangs.length; i++) {
+          const pleine = i <= joueur.niveau;
+          rangs[i].classList.toggle('pleine', pleine);
+          rangs[i].style.boxShadow = pleine
+            ? `0 0 ${4 + i * 2.5}px rgba(143,208,255,${0.5 + i * 0.12})`
+            : 'none';
+        }
       }
-      elBarre.style.width = `${clamp((joueur.eclat - bas) / (haut - bas), 0, 1) * 100}%`;
-      elBarre.style.background = f.couleur;
-      elZone.textContent = `ZONE ${zone.numero}`;
+      glisser(elBarre, clamp((joueur.eclat - bas) / (haut - bas), 0, 1), vu, 'barre');
+      if (vu.couleur !== f.couleur) {
+        vu.couleur = f.couleur;
+        elBarre.style.background = f.couleur;
+      }
+      if (vu.zone !== zone.numero) {
+        vu.zone = zone.numero;
+        elZone.textContent = `ZONE ${zone.numero}`;
+      }
 
       // Pendant la montée, il n'y a rien à lancer ni à souffler, et la jauge
       // d'un étage qu'on vient de quitter ne veut plus rien dire : l'écran se
@@ -139,16 +182,19 @@ export function creerHud(): Hud {
       // modale — on ne montre pas un bilan, on monte.
       const enMontee =
         partie.puits !== null || partie.fin !== null || partie.bilan !== null;
-      elActions.hidden = enMontee;
-      elHud.hidden = enMontee;
-      // Le bandeau vit hors du HUD : sans cette ligne, la phrase de l'étage
-      // qu'on vient de quitter se posait en travers du récit de la montée.
-      elToast.hidden = enMontee;
+      if (vu.enMontee !== enMontee) {
+        vu.enMontee = enMontee;
+        elActions.hidden = enMontee;
+        elHud.hidden = enMontee;
+        // Le bandeau vit hors du HUD : sans cette ligne, la phrase de l'étage
+        // qu'on vient de quitter se posait en travers du récit de la montée.
+        elToast.hidden = enMontee;
+      }
       if (enMontee) return;
 
       // Le souffle n'existe que depuis que Falot s'en est souvenu. Un bouton
       // grisé aurait promis quelque chose sans le donner : il n'est pas là.
-      elSouffle.hidden = !partie.pouvoirs.souffle;
+      cacher(elSouffle, !partie.pouvoirs.souffle);
       elSouffle.classList.toggle('tenu', joueur.eteint);
       // Trois secondes, pas une de plus : l'anneau les montre fondre, et se
       // refaire. Sans lui on souffle jusqu'à la panne sans comprendre.
@@ -163,7 +209,7 @@ export function creerHud(): Hud {
 
       // Le bouton n'apparaît que s'il y a quelque chose à décrocher, ou qu'on
       // tient déjà une torche.
-      elTorche.hidden = !joueur.torche && !torcheSousLaMain(partie);
+      cacher(elTorche, !joueur.torche && !torcheSousLaMain(partie));
       elTorche.classList.toggle('tenu', joueur.torche !== null);
 
       // --- les pastilles de lumières : on ne les reconstruit que si le compte bouge ---
@@ -181,12 +227,16 @@ export function creerHud(): Hud {
       // --- le bonus en cours ---
       if (joueur.bonus && joueur.bonusT > 0) {
         const b = BONUS[joueur.bonus];
-        elBonus.classList.add('on');
-        elBonusNom.style.color = b.couleur;
-        elBonusJauge.style.background = b.couleur;
-        elBonusNom.textContent = b.nom;
-        elBonusJauge.style.width = `${clamp(joueur.bonusT / b.duree, 0, 1) * 100}%`;
-      } else {
+        if (vu.bonus !== joueur.bonus) {
+          vu.bonus = joueur.bonus;
+          elBonus.classList.add('on');
+          elBonusNom.style.color = b.couleur;
+          elBonusJauge.style.background = b.couleur;
+          elBonusNom.textContent = b.nom;
+        }
+        glisser(elBonusJauge, clamp(joueur.bonusT / b.duree, 0, 1), vu, 'bonusJauge');
+      } else if (vu.bonus !== '') {
+        vu.bonus = '';
         elBonus.classList.remove('on');
       }
 

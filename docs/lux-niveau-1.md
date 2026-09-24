@@ -2369,3 +2369,60 @@ quatre coins plutôt qu'à chaque grain). Mesuré : 0,7 à 1 ms par bloc avant
 comme après, dans le bruit de la mesure — ce n'est pas là que ça coûte.
 
 175 tests verts, `npm run build` sans erreur.
+
+## Les chiffres du téléphone : ce qui ramait vraiment
+
+`?diag` sur un Galaxy S21 (Mali-G78, Chrome), en jeu :
+
+| | une toile | calques (`?calques=1`) |
+|---|---|---|
+| Images par seconde | 52 | 43 |
+| Temps d'image moyen (95ᵉ centile) | 19,2 ms (25) | 23,1 ms (33) |
+| Calcul du jeu | 4,4 ms | 5,2 ms |
+| Finesse | **0,80 — 288 × 574** | 0,80 |
+
+Trois choses s'y lisent.
+
+**Les calques étaient bien pires sur téléphone** : le retour à une seule toile
+était le bon choix.
+
+**Le calcul n'est pas le problème** : 4 ms sur 19. Le reste se passe après,
+dans le navigateur. Le premier suspect était sous nos yeux : le HUD. À chaque
+image, `hud.ts` réécrivait le texte de la zone (même identique : c'est un nœud
+neuf à chaque fois), la visibilité du bouton torche, la classe et le nom du
+bonus, et la LARGEUR des deux barres — avec une transition CSS sur la largeur,
+relancée à chaque image. Chaque écriture refait la mise en page et le repeint
+du bandeau, qui est la chose la plus chère à peindre de la page : pierre en
+fond, ombre intérieure de mille pixels, masque en dégradé. Mesuré dans
+Chromium avec un bonus actif, comme sur la capture : **75 mises en page par
+seconde avant, 2,3 après** (12,5 ms par seconde → 0,7). Rien n'est plus écrit
+qui n'ait changé, et les barres **glissent** (`translateX`) au lieu de
+s'allonger : un déplacement, la carte graphique le fait seule, sans rien
+repeindre.
+
+**La finesse était tombée au plancher pour rien.** L'adaptation avait baissé
+trois fois — jusqu'à 288 × 574 pour un écran de 1080 de large — et l'image
+coûtait toujours 19 ms : ce qui coûtait ne dépendait pas du nombre de pixels.
+Le jeu devenait flou, pas plus rapide, et on ne remontait jamais. Chaque
+baisse est maintenant **vérifiée** : si la seconde suivante n'est pas au moins
+15 % plus rapide, on remonte d'un cran et on fige. Et la première seconde,
+lente partout, n'est plus jugée. `?finesse=2` impose une densité, pour mesurer.
+Trois tests couvrent ces règles.
+
+**Et ce qu'on ressentait comme du lag, même à 52 images par seconde : les
+saccades.** Le monde avance par pas fixes de 1/60 ; à 52 images par seconde,
+certaines images avançaient de deux pas et les autres d'un ; sur un écran
+120 Hz, une image sur deux n'avançait pas du tout. Falot et tous les
+personnages sont maintenant dessinés **entre les deux derniers pas**, au
+prorata du temps écoulé (le monde, lui, n'en sait rien : on lui rend leur
+vraie position juste après), et la caméra suit au temps, plus à l'image — elle
+rattrapait 14 % de son retard *par image*, donc deux fois plus vite à 120 Hz.
+Mesuré en rejouant la cadence avec une horloge synthétique, à-coups de la
+vitesse de défilement d'une image à l'autre pendant la marche :
+
+| | Avant | Après |
+|---|---|---|
+| 52 i/s irrégulières (16,7 / 25 ms) | 23,1 % | **2,4 %** |
+| Écran 120 Hz | 16,4 % | **0 %** |
+
+178 tests verts, `npm run build` sans erreur.

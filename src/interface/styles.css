@@ -228,11 +228,17 @@ canvas {
 .barre i {
   display: block;
   height: 100%;
-  width: 0;
+  width: 100%;
   border-radius: 999px;
   box-shadow: inset 0 0 7px rgba(255, 255, 255, 0.45);
+  /* ELLE GLISSE, elle ne s'allonge pas. Changer sa largeur relançait à chaque
+     image une mise en page et un repeint de tout le bandeau — pierre en fond,
+     ombre, masque en dégradé —, ce que `?diag` ne voyait même pas : ça se
+     passe après le calcul. Un déplacement, la carte graphique le fait seule. */
+  transform: translateX(-100%);
+  will-change: transform;
   transition:
-    width 0.18s linear,
+    transform 0.18s linear,
     background 0.4s ease;
 }
 
