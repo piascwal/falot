@@ -2110,3 +2110,74 @@ un tirage, les quatre variantes doivent toutes peser près d'un quart. Avec
 l'ancienne formule, trois d'entre elles valaient zéro.
 
 172 tests verts, `npm run build` sans erreur.
+
+## Le sol se peint une fois, et la mousse gagne du terrain
+
+Deux demandes : corriger le ralenti, et laisser la mousse s'étendre au-delà
+d'une case. Elles se sont révélées être la même.
+
+**Ce qui coûtait.** Compté par source, image par image, avant ce changement :
+**379 `drawImage`** dont **191 tuiles de pierre, 102 images d'ombre de contact
+et 52 garnitures** — 345 appels pour une matière qui ne bouge jamais. On la
+repeignait soixante fois par seconde.
+
+**Le plancher** (`rendu/plancher.ts`) la peint une fois, par blocs de 4 × 4
+cases, dans des canevas hors écran ; chaque image ne fait plus que recopier les
+blocs visibles. Après : **50 `drawImage` par image** (le sol n'en fait plus que
+16, un par bloc) et **16 `stroke` au lieu de 94**. Ce qui bouge — dalles,
+fissures, battants — reste dessiné en direct par-dessus.
+
+Pourquoi des blocs et pas la zone entière : sur téléphone la densité de pixels
+monte à 2,5, et une zone de 21 × 28 cases ferait un canevas de 58 Mo. On ne
+garde que les blocs visibles, plus une marge.
+
+Trois règles rendent le résultat identique au dessin direct :
+
+- chaque bloc est peint **avec sa couronne** de cases voisines, pour qu'une
+  ombre de contact ou un grain de mousse à cheval sur deux blocs soit peint
+  dans les deux au même endroit du monde ;
+- chaque bloc est recopié **calé sur les pixels de l'écran** — la caméra glisse
+  en douceur, et un bloc posé à une position fractionnaire laisserait un fil
+  de pixels à moitié transparents à chaque joint ;
+- chaque bloc porte une **empreinte des murs** qu'il lit : quand une fissure
+  cède, l'empreinte change et le bloc se repeint seul, sans que la simulation
+  ait à prévenir le rendu.
+
+**La mousse** n'est plus un tampon dessiné « en bas de case » : c'est un champ
+(`rendu/mousse.ts`). Chaque point du sol a une humidité, forte contre la pierre
+et nulle à 2,7 cases, rongée par un bruit à grandes taches pour que chaque mur
+n'ait pas la même bordure tirée au cordeau. Les grains sont semés case par case
+mais leur densité se lit en coordonnées du monde : une tache commencée dans une
+case continue dans la suivante. Elle évite le sol brûlé de l'étage 4.
+
+Elle coûte plusieurs milliers de grains par salle — et c'est justement ce que
+le plancher rend gratuit : peinte une fois, recopiée ensuite.
+
+**Deux faux pas, mesurés avant d'être corrigés.** La première version était
+*plus lente* sous frein processeur, avec des images à 230 ms. Deux causes :
+
+- un bloc pas encore peint était dessiné en direct *avec sa mousse*, à chaque
+  image, jusqu'à son tour — une quinzaine à l'entrée d'une zone. Il est
+  maintenant dessiné en direct sans elle, et elle apparaît avec le bloc une
+  image plus tard ; la mousse elle-même coûte 1,5 ms par bloc au lieu de 3,9,
+  grâce à un champ de distances aux murs calculé une fois par zone, aux coins
+  des cases, que chaque grain interpole ;
+- quand le jeu rame, `ecran.ts` baisse la densité de pixels d'un cran, et le
+  cache se vidait entièrement à ce moment-là — tout se repeignait d'un coup,
+  pile quand la machine peinait déjà. Les blocs de l'ancienne densité restent
+  maintenant affichés, mis à l'échelle, et se repeignent au fil des images.
+
+**Le résultat, en A/B** — l'ancienne version construite à côté, le même
+script, les deux en alternance, processeur bridé ×4 (l'ordre d'un téléphone) :
+
+| | Avant | Après |
+|---|---|---|
+| Immobile, moyenne | ~107 ms (9 i/s) | **~57 ms (17,5 i/s)** |
+| En marchant, moyenne | ~110 ms | **~63 ms** |
+| Pointes (95ᵉ centile) | 133 à 150 ms | **67 à 83 ms** |
+
+Presque deux fois plus rapide, et plus régulier. Ce qui reste est ailleurs :
+l'éclairage fabrique **58 dégradés radiaux et 120 remplissages par image** —
+c'est le prochain levier, et il n'a rien à voir avec le sol.
+
+172 tests verts, `npm run build` sans erreur.

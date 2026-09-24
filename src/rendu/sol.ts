@@ -11,6 +11,8 @@ import { TAU } from '../coeur/geometrie.js';
 import type { Partie } from '../coeur/types.js';
 import { decors } from './decors.js';
 import type { Ecran } from './ecran.js';
+import { semerMousse } from './mousse.js';
+import { type Pinceau, poserLePlancher } from './plancher.js';
 import { hasard, varianteDe } from './semis.js';
 import { ornements, tuiles, VARIANTES_GARNITURE, variante } from './tuiles.js';
 import { carreArrondi } from './visages.js';
@@ -24,7 +26,7 @@ import { carreArrondi } from './visages.js';
  * sur le même plan et la salle est plate.
  */
 function ombreDeContact(
-  ecran: Ecran,
+  ecran: Pinceau,
   partie: Partie,
   c0x: number,
   c1x: number,
@@ -93,7 +95,8 @@ function ombreDeContact(
  *   — le LIERRE et le SUINTEMENT descendent d'un mur qu'on voit de face,
  *     c'est-à-dire un mur qui a du sol en dessous de lui ;
  *   — les RACINES traversent n'importe quelle pierre exposée ;
- *   — la MOUSSE se tient sur le sol, contre une pierre, du côté de la pierre.
+ *   — la MOUSSE, elle, n'est plus une garniture : c'est un champ qui descend
+ *     des murs sur plusieurs cases (voir `mousse.ts`).
  */
 const HASARD = hasard;
 
@@ -101,7 +104,7 @@ const variantePosee = (cx: number, cy: number, sel: number): number =>
   varianteDe(cx, cy, sel + 17, VARIANTES_GARNITURE);
 
 function poserGarnitures(
-  ecran: Ecran,
+  ecran: Pinceau,
   partie: Partie,
   c0x: number,
   c1x: number,
@@ -117,36 +120,10 @@ function poserGarnitures(
   const t = tuiles();
   const pierre = (cx: number, cy: number) =>
     cx < 0 || cy < 0 || cx >= zone.cols || cy >= zone.lignes || zone.mur[cy][cx] === 1;
-  const poser = (
-    planche: HTMLCanvasElement,
-    v: number,
-    cx: number,
-    cy: number,
-    quart = 0,
-  ): void => {
+  const poser = (planche: HTMLCanvasElement, v: number, cx: number, cy: number): void => {
     const x = cx * CASE - cam.x;
     const y = cy * CASE - cam.y;
-    if (!quart) {
-      ctx.drawImage(planche, v * t.taille, 0, t.taille, t.taille, x, y, CASE + 1, CASE + 1);
-      return;
-    }
-    // La mousse est dessinée « en bas de case » : on tourne le repère pour la
-    // coller du côté où la pierre se trouve vraiment.
-    ctx.save();
-    ctx.translate(x + CASE / 2, y + CASE / 2);
-    ctx.rotate((quart * Math.PI) / 2);
-    ctx.drawImage(
-      planche,
-      v * t.taille,
-      0,
-      t.taille,
-      t.taille,
-      -CASE / 2,
-      -CASE / 2,
-      CASE + 1,
-      CASE + 1,
-    );
-    ctx.restore();
+    ctx.drawImage(planche, v * t.taille, 0, t.taille, t.taille, x, y, CASE + 1, CASE + 1);
   };
 
   for (let cy = c0y; cy <= c1y; cy++)
@@ -168,10 +145,7 @@ function poserGarnitures(
           poser(d.applique, variantePosee(cx, cy, 7), cx, cy);
         continue;
       }
-      // SUR LE SOL : de la mousse au pied d'une pierre, et du côté de la
-      // pierre. Au milieu d'une salle il n'y a rien à faire pousser.
-      //
-      // LES LAMPES MORTES, elles, vont PARTOUT. Le premier jet ne les posait
+      // LES LAMPES MORTES vont PARTOUT. Le premier jet ne les posait
       // que contre le mur du bas, en se disant qu'une lampe au milieu d'une
       // salle n'aurait pas de raison d'y être — c'était deux fois faux. On n'en
       // croisait presque jamais, et surtout : quelqu'un qui traverse une pièce
@@ -202,30 +176,25 @@ function poserGarnitures(
                   ? d.bougeoir
                   : d.chandelier;
           poser(famille, variantePosee(cx, cy, 9), cx, cy);
-          continue;
         }
       }
-      const cotes: number[] = [];
-      if (pierre(cx, cy + 1)) cotes.push(0); // la pierre est en bas
-      if (pierre(cx - 1, cy)) cotes.push(1); // à gauche
-      if (pierre(cx, cy - 1)) cotes.push(2); // en haut
-      if (pierre(cx + 1, cy)) cotes.push(3); // à droite
-      if (!cotes.length) continue;
-      if (HASARD(cx, cy, 4) > 0.22) continue;
-      const quart = cotes[Math.floor(HASARD(cx, cy, 5) * cotes.length) % cotes.length];
-      poser(g.mousse, variantePosee(cx, cy, 6), cx, cy, quart);
     }
 }
 
-// Le sol de TOUTES les cases à l'écran : le voile se charge de ne montrer que
-// ce qui est éclairé. Pas de brouillard de guerre — seule la lumière révèle.
-export function dessinerSol(
-  ecran: Ecran,
+/**
+ * LA MATIÈRE DU SOL — tout ce qui ne bouge pas : la pierre, la mousse, les
+ * garnitures, les lampes mortes, les ombres de contact, la cendre, les traits
+ * d'architecture. Elle ne se dessine plus à chaque image : `plancher.ts` la
+ * peint une fois par bloc de cases et la recopie ensuite.
+ */
+function dessinerMatiere(
+  ecran: Pinceau,
   partie: Partie,
   c0x: number,
   c1x: number,
   c0y: number,
   c1y: number,
+  presse = false,
 ): void {
   const { ctx, cam } = ecran;
   const zone = partie.zone;
@@ -277,7 +246,9 @@ export function dessinerSol(
 
   // CE QUI A POUSSÉ DESSUS. Avant l'ombre de contact : la mousse est dans
   // l'angle, donc l'angle doit s'assombrir PAR-DESSUS elle, sinon elle flotte
-  // devant la pierre au lieu d'être coincée dedans.
+  // devant la pierre au lieu d'être coincée dedans. Et avant les lampes : une
+  // lampe tombée dans la mousse est posée dessus, pas dessous.
+  if (!presse) semerMousse(ctx, cam, zone, c0x, c1x, c0y, c1y);
   poserGarnitures(ecran, partie, c0x, c1x, c0y, c1y);
 
   // LE CONTACT. Là où un sol touche une pierre, le sol s'assombrit. Ça ne
@@ -343,6 +314,25 @@ export function dessinerSol(
     }
   }
   ctx.stroke();
+}
+
+// Le sol de TOUTES les cases à l'écran : le voile se charge de ne montrer que
+// ce qui est éclairé. Pas de brouillard de guerre — seule la lumière révèle.
+export function dessinerSol(
+  ecran: Ecran,
+  partie: Partie,
+  c0x: number,
+  c1x: number,
+  c0y: number,
+  c1y: number,
+): void {
+  // L'immobile, recopié depuis ses blocs. La feuille des lampes compte dans
+  // son état : quand elle arrive, les blocs déjà peints sans elle se repeignent.
+  poserLePlancher(ecran, partie, c0x, c1x, c0y, c1y, dessinerMatiere, decors() ? 1 : 0);
+
+  // Et ce qui bouge, en direct, par-dessus.
+  const { ctx, cam } = ecran;
+  const zone = partie.zone;
 
   // --- les dalles de pesée ---
   // Un carré creusé dans le sol, et son cadre qui s'allume quand quelque chose

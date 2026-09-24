@@ -399,7 +399,8 @@ const GARNITURES = 4;
  * donc deux à trois fois plus claire que la pierre — ce n'est pas de la
  * lumière, c'est son albédo : une feuille renvoie plus qu'un caillou.
  */
-const VERT = (g: number) => `rgb(${Math.round(g * 0.66)},${g},${Math.round(g * 0.74)})`;
+export const VERT = (g: number) =>
+  `rgb(${Math.round(g * 0.66)},${g},${Math.round(g * 0.74)})`;
 
 /** Une planche de garnitures : `GARNITURES` variantes côte à côte, sur fond
  *  TRANSPARENT — c'est ce qui les distingue d'une tuile. */
@@ -503,7 +504,6 @@ function racine(
 interface Garnitures {
   lierre: HTMLCanvasElement;
   racines: HTMLCanvasElement;
-  mousse: HTMLCanvasElement;
   suintement: HTMLCanvasElement;
 }
 
@@ -519,20 +519,6 @@ function fabriquerGarnitures(): Garnitures {
     racines: garniture((c, d) => {
       for (let i = 0; i < 2; i++) racine(c, d, d() * T, -T * 0.05);
     }, 0x7a11),
-    // LA MOUSSE se tient EN BAS de la case, là où l'humidité s'arrête. Elle est
-    // tournée par `sol.ts` selon le côté où la pierre se trouve.
-    mousse: garniture((c, d) => {
-      for (let i = 0; i < 120; i++) {
-        const x = d() * T;
-        // beaucoup près du bord, presque rien au-delà d'un tiers de case
-        const y = T - Math.abs(d() * d() * T * 0.42);
-        const r = T * (0.009 + d() * 0.024);
-        c.fillStyle = VERT(40 + Math.round(d() * 46));
-        c.beginPath();
-        c.ellipse(x, y, r, r * 0.75, 0, 0, TAU);
-        c.fill();
-      }
-    }, 0x33c1),
     // LE SUINTEMENT : une coulée sombre et humide, du haut vers le bas.
     suintement: garniture((c, d) => {
       for (let i = 0; i < 3; i++) {
